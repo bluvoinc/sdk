@@ -1,129 +1,134 @@
-# @squirrel-scheduler/core
+# Bluvo TypeScript SDK
 
-A lightweight scheduling library for Node.js. @squirrel-scheduler/core lets you queue tasks to be executed in the future, store them in any database, and poll for pending tasks at your own pace.
+[![npm version](https://img.shields.io/npm/v/@bluvo/sdk-ts.svg)](https://www.npmjs.com/package/@bluvo/sdk-ts)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
+Official TypeScript SDK for the [Bluvo API](https://docs.bluvo.co) - a unified cryptocurrency exchange (CEX) API aggregator infrastructure.
 
 ## Features
 
-- **Database-Agnostic**: Implement a simple `SDBAdapter` interface for your preferred DB (MySQL, PostgreSQL, MongoDB, etc.)
-- **Pluggable**: Already includes a `DrizzleAdapter` for SQLite databases
-- **Retry Logic**: Handle transient failures by incrementing `retryCount` and rescheduling tasks if needed
-- **Simple Polling**: Call `.sync()` on your own schedule (e.g., via setInterval, cron, or an external trigger)
+-  **Unified API**: Interact with multiple exchanges through a single, consistent interface
+-  **Simple Authentication**: Connect to Binance, Coinbase, Kraken, KuCoin, OKX and more with just a few lines of code
+-  **Market Data**: Access real-time and historical price information across exchanges
+-  **Wallet Management**: Easily connect, list, and manage exchange wallets
+-  **Type Safety**: Full TypeScript support with proper types for all API responses
 
 ## Installation
 
 ```bash
-npm install @squirrel-scheduler/core
+# Using npm
+npm install @bluvo/sdk-ts
+
+# Using yarn
+yarn add @bluvo/sdk-ts
+
+# Using pnpm
+pnpm add @bluvo/sdk-ts
 ```
 
-Or with pnpm:
+## Quick Start
 
-```bash
-pnpm add @squirrel-scheduler/core
-```
-
-## Quick Usage Example
-
+### Initialize the SDK
 ```typescript
-import { SScheduler } from "@squirrel-scheduler/core";
+import { createClient } from '@bluvo/sdk-ts';
 
-// Import your custom DB adapter that implements SDBAdapter
-// e.g., the Drizzle Adapter:
-import { SQLiteDrizzleAdapter } from "@squirrel-scheduler/drizzle-adapter";
-
-// Suppose we have a drizzle-orm instance configured for SQLite
-import { drizzle } from "drizzle-orm/libsql";
-import { createClient } from "@libsql/client";
-
+// Get yours at https://docs.bluvo.co/introduction
 const client = createClient({
-  url: process.env.TURSO_DB_URL, 
-  authToken: process.env.TURSO_DB_TOKEN
+  apiKey: 'your-api-key',
+  orgId: 'your-org-id',
+  projectId: 'your-project-id',
 });
-const db = drizzle(client);
-
-(async () => {
-  // 1. Create an adapter
-  const dbAdapter = SQLiteDrizzleAdapter(db);
-
-  // 2. Create a scheduler instance
-  const scheduler = new SScheduler(dbAdapter);
-
-  // 3. Add tasks
-  scheduler
-    .add({
-      payload: { event: "sendEmail", to: "user@example.com" },
-      scheduledAt: new Date(Date.now() + 5000), // 5 seconds in the future
-    })
-    .add({
-      payload: { event: "generateReport", reportId: "abc123" },
-      scheduledAt: new Date(Date.now() + 15000), // 15 seconds in the future
-    });
-
-  // 4. Persist tasks in the DB
-  await scheduler.schedule();
-
-  // 5. Later or periodically, call sync() to claim & execute due tasks
-  await scheduler.sync();
-})();
 ```
 
-## Conceptual Overview
+### Usage
+```typescript
+// Example: Get OHLCV data for BTC/USDT
+const candlesticks = await client.prices.candlesticks('BTC', 'USDT');
 
-### Add Tasks
+// Example: List connected wallets
+const wallets = await client.wallet.list();
+```
 
-You enqueue tasks by calling `.add()` on the `SScheduler` instance, specifying a payload and a `scheduledAt` timestamp.
+## Wallets
 
-### Store Tasks
-
-Invoke `.schedule()` to persist them in your database via the adapter.
-
-### Sync & Execute
-
-Periodically (or on-demand), call `.sync()`:
-
-1. Fetches pending tasks that are due (`scheduledAt <= now`)
-2. Claims them (sets `status = in_progress`)
-3. Executes each task (the default example logs or simulates your action)
-4. On success, updates status to `completed`. On failure, increments `retryCount` and reschedules or fails based on `maxRetries`
-
-## SDBAdapter
-
-The `SDBAdapter` interface defines how to store, update, and fetch tasks. This core package is database-agnostic. If you need a ready-made solution for SQLite with Drizzle ORM, check out `@squirrel-scheduler/drizzle-adapter`.
-
-### SDBAdapter Interface
-
-Implement these methods to integrate with any DB:
+### Connect a Wallet
 
 ```typescript
-export interface SDBAdapter {
-  createTask(data: Omit<STask, "id" | "status" | "retryCount" | "createdAt" | "updatedAt">): Promise<STask>;
-  createTasks(data: Array<Omit<STask, "id" | "status" | "retryCount" | "createdAt" | "updatedAt">>): Promise<STask[]>;
-  getTask(id: string): Promise<STask | null>;
-  listTasks(params: ListTasksParams): Promise<STask[]>;
-  updateTask(taskId: string, update: Partial<Omit<STask, "id">>): Promise<STask>;
-  claimTasks(tasks: STask[]): Promise<STask[]>;
-  setLastSync(at?: Date, args?: { totalTasks: number }): Promise<void>;
-  recordTaskAttempt(taskId: string, result: TaskAttemptResult): Promise<void>;
-  pruneTasks(params: PruneTasksParams): Promise<number>;
-  getLastSync(): Promise<{ timestamp: number | Date; totalTasks: number }>;
-}
+// See full list here -> https://docs.bluvo.co/supported-exchanges
+const {workflowRunId} = await client
+    .wallet
+    .connect(
+        'binance',
+        'i decide my own wallet id',
+        '<your-binance-account-api-key>',
+        '<your-binance-account-api-secret>'
+    );
+```
+### Get Wallet Details
+
+```typescript
+// Get details of a specific wallet
+const wallet = await client.wallet.get('wallet-id');
 ```
 
-Implementing these methods for your DB of choice allows SquirrelScheduler to store and update tasks seamlessly.
+### Delete a Wallet
 
-## Roadmap
+```typescript
+// Delete a wallet connection
+const deleteResult = await client.wallet.delete('wallet-id');
+```
 
-- Official Adapters for MySQL, PostgreSQL, MongoDB, etc.
-- Concurrency: Parallel execution of tasks (optional)
-- Retry Strategies: Exponential backoff, custom scheduling for failed tasks
-- UI / Dashboard: Possibly track scheduled tasks visually
+## Market Data
 
-## Contributing
+### Get OHLCV Candlesticks
 
-We love contributions! Feel free to open PRs for new adapters, additional features, or bug fixes.
-See CONTRIBUTING.md (if you have one) for guidelines.
+```typescript
+// Get historical price data
+const candlesticks = await client.prices.candlesticks(
+  'ETH',           // Base asset
+  'USDT',          // Quote asset
+  1649619000000,   // Start time (optional, Unix timestamp in ms)
+  1649629000000,   // End time (optional, Unix timestamp in ms)
+  'binance',       // Exchange (optional)
+  '1h'             // Granularity (optional: 1m, 15m, 30m, 1h, 4h, 1d)
+);
 
+console.log('ETH/USDT candlesticks:', candlesticks);
+```
+
+## Workflow Management
+
+Track the status of asynchronous operations:
+
+```typescript
+// Check status of a workflow run (e.g., after connecting a wallet)
+const workflow = await client.workflow.getWorkflow('workflow-run-id');
+console.log('Workflow status:', workflow.status);
+console.log('Workflow steps:', workflow.steps);
+```
+
+## Supported Exchanges
+
+- Binance
+- Coinbase
+- Kraken
+- KuCoin
+- OKX
+- More coming soon!
+
+## More Examples
+
+For more examples and inspiration, check out the [Bluvo Awesome List](https://github.com/bluvoinc/awesome).
+
+## Documentation
+
+For comprehensive documentation, visit the [Bluvo API Documentation](https://docs.bluvo.co).
+
+## Related Projects
+
+- [Home Page](https://bluvo.co) - Bluvo Home Page
+- [Playground](https://playground.bluvo.co) - NextJs UI widget for Bluvo
+- [Admin Dashboard](https://portal.bluvo.co) - Bluvo Admin Dashboard
 ## License
 
-MIT
-
-Happy Scheduling! If you have questions or feedback, open an issue on GitHub.
+[MIT](LICENSE) Bluvo Inc.

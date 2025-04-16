@@ -1,0 +1,32 @@
+{
+  "name": "@bluvo/sdk-ts",
+  "main": "index.ts",
+  "version": "1.0.7",
+  "description": "Bluvo SDK for TypeScript",
+  "author": "Bluvo Inc.",
+  "license": "MIT",
+  "homepage": "https://github.com/bluvoinc/sdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bluvoinc/sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bluvoinc/sdk/issues"
+  },
+  "scripts": {
+    "test": "vitest"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "bluvo",
+    "sdk",
+    "typescript",
+    "nodejs",
+    "api"
+  ],
+  "devDependencies": {
+    "vitest": "^3.1.1"
+  }
+}

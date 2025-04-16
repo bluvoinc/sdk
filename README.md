@@ -1,84 +1,134 @@
-# Turborepo starter
+# Bluvo TypeScript SDK
 
-This Turborepo starter is maintained by the Turborepo core team.
+[![npm version](https://img.shields.io/npm/v/@bluvo/sdk-ts.svg)](https://www.npmjs.com/package/@bluvo/sdk-ts)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-## Using this example
+Official TypeScript SDK for the [Bluvo API](https://docs.bluvo.co) - a unified cryptocurrency exchange (CEX) API aggregator infrastructure.
 
-Run the following command:
+## Features
 
-```sh
-npx create-turbo@latest
+-  **Unified API**: Interact with multiple exchanges through a single, consistent interface
+-  **Simple Authentication**: Connect to Binance, Coinbase, Kraken, KuCoin, OKX and more with just a few lines of code
+-  **Market Data**: Access real-time and historical price information across exchanges
+-  **Wallet Management**: Easily connect, list, and manage exchange wallets
+-  **Type Safety**: Full TypeScript support with proper types for all API responses
+
+## Installation
+
+```bash
+# Using npm
+npm install @bluvo/sdk-ts
+
+# Using yarn
+yarn add @bluvo/sdk-ts
+
+# Using pnpm
+pnpm add @bluvo/sdk-ts
 ```
 
-## What's inside?
+## Quick Start
 
-This Turborepo includes the following packages/apps:
+### Initialize the SDK
+```typescript
+import { createClient } from '@bluvo/sdk-ts';
 
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
+// Get yours at https://docs.bluvo.co/introduction
+const client = createClient({
+  apiKey: 'your-api-key',
+  orgId: 'your-org-id',
+  projectId: 'your-project-id',
+});
 ```
 
-### Develop
+### Usage
+```typescript
+// Example: Get OHLCV data for BTC/USDT
+const candlesticks = await client.prices.candlesticks('BTC', 'USDT');
 
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm dev
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
+// Example: List connected wallets
+const wallets = await client.wallet.list();
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## Wallets
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+### Connect a Wallet
 
+```typescript
+// See full list here -> https://docs.bluvo.co/supported-exchanges
+const {workflowRunId} = await client
+    .wallet
+    .connect(
+        'binance',
+        'i decide my own wallet id',
+        '<your-binance-account-api-key>',
+        '<your-binance-account-api-secret>'
+    );
 ```
-npx turbo link
+### Get Wallet Details
+
+```typescript
+// Get details of a specific wallet
+const wallet = await client.wallet.get('wallet-id');
 ```
 
-## Useful Links
+### Delete a Wallet
 
-Learn more about the power of Turborepo:
+```typescript
+// Delete a wallet connection
+const deleteResult = await client.wallet.delete('wallet-id');
+```
 
-- [Tasks](https://turbo.build/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/docs/reference/command-line-reference)
+## Market Data
+
+### Get OHLCV Candlesticks
+
+```typescript
+// Get historical price data
+const candlesticks = await client.prices.candlesticks(
+  'ETH',           // Base asset
+  'USDT',          // Quote asset
+  1649619000000,   // Start time (optional, Unix timestamp in ms)
+  1649629000000,   // End time (optional, Unix timestamp in ms)
+  'binance',       // Exchange (optional)
+  '1h'             // Granularity (optional: 1m, 15m, 30m, 1h, 4h, 1d)
+);
+
+console.log('ETH/USDT candlesticks:', candlesticks);
+```
+
+## Workflow Management
+
+Track the status of asynchronous operations:
+
+```typescript
+// Check status of a workflow run (e.g., after connecting a wallet)
+const workflow = await client.workflow.getWorkflow('workflow-run-id');
+console.log('Workflow status:', workflow.status);
+console.log('Workflow steps:', workflow.steps);
+```
+
+## Supported Exchanges
+
+- Binance
+- Coinbase
+- Kraken 
+- KuCoin
+- OKX
+- More coming soon!
+
+## More Examples
+
+For more examples and inspiration, check out the [Bluvo Awesome List](https://github.com/bluvoinc/awesome).
+
+## Documentation
+
+For comprehensive documentation, visit the [Bluvo API Documentation](https://docs.bluvo.co).
+
+## Related Projects
+
+- [Home Page](https://bluvo.co) - Bluvo Home Page
+- [Playground](https://playground.bluvo.co) - NextJs UI widget for Bluvo
+- [Admin Dashboard](https://portal.bluvo.co) - Bluvo Admin Dashboard
+## License
+
+[MIT](LICENSE) Bluvo Inc.

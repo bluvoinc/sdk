@@ -1,18 +1,18 @@
 // TODO: better import syntax?
-import {BaseAPIRequestFactory, RequiredError} from './baseapi';
+import {BaseAPIRequestFactory, RequiredError, COLLECTION_FORMATS} from './baseapi';
 import {Configuration} from '../configuration';
-import {HttpInfo, HttpMethod, RequestContext, ResponseContext} from '../http/http';
+import {RequestContext, HttpMethod, ResponseContext, HttpFile, HttpInfo} from '../http/http';
 import {ObjectSerializer} from '../models/ObjectSerializer';
 import {ApiException} from './exception';
-import {isCodeInRange} from '../util';
+import {canConsumeForm, isCodeInRange} from '../util';
 import {SecurityAuthentication} from '../auth/auth';
 
 
-import {ConnectWallet200Response} from '../models/ConnectWallet200Response';
-import {ConnectWalletRequest} from '../models/ConnectWalletRequest';
-import {DeleteWallet200Response} from '../models/DeleteWallet200Response';
-import {GetWallet200Response} from '../models/GetWallet200Response';
-import {ListWallets200Response} from '../models/ListWallets200Response';
+import { ConnectWallet200Response } from '../models/ConnectWallet200Response';
+import { ConnectWalletRequest } from '../models/ConnectWalletRequest';
+import { DeleteWallet200Response } from '../models/DeleteWallet200Response';
+import { GetWallet200Response } from '../models/GetWallet200Response';
+import { ListWallets200Response } from '../models/ListWallets200Response';
 
 /**
  * no description

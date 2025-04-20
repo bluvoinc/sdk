@@ -1,4 +1,4 @@
-import {HttpMethod, RequestContext} from "./http/http";
+import { RequestContext, HttpMethod } from "./http/http";
 
 export interface BaseServerConfiguration {
     makeRequestContext(endpoint: string, httpMethod: HttpMethod): RequestContext;
@@ -31,11 +31,7 @@ export class ServerConfiguration<T extends { [key: string]: string }> implements
     private getUrl() {
         let replacedUrl = this.url;
         for (const [key, value] of Object.entries(this.variableConfiguration)) {
-            replacedUrl = replacedUrl.replace(
-                new RegExp(`{${key}}`, 'g'), // Use global flag to replace all occurrences
-                value
-            )
-                // .replaceAll(`{${key}}`, value);
+            replacedUrl = replacedUrl.replaceAll(`{${key}}`, value);
         }
         return replacedUrl
     }

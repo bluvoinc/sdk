@@ -10,7 +10,8 @@
  * Do not edit the class manually.
  */
 
-import {GetWorkflow200ResponseStepsInner} from '../models/GetWorkflow200ResponseStepsInner';
+import { GetWorkflow200ResponseStepsInner } from '../models/GetWorkflow200ResponseStepsInner';
+import { HttpFile } from '../http/http';
 
 export class GetWorkflow200Response {
     /**

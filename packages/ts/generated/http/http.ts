@@ -1,4 +1,4 @@
-import {from, Observable} from '../rxjsStub';
+import { Observable, from } from '../rxjsStub';
 
 export * from './isomorphic-fetch';
 
@@ -39,7 +39,7 @@ function ensureAbsoluteUrl(url: string) {
     if (url.startsWith("http://") || url.startsWith("https://")) {
         return url;
     }
-    return url;
+    return window.location.origin + url;
 }
 
 /**
@@ -130,6 +130,33 @@ export class RequestContext {
 export interface ResponseBody {
     text(): Promise<string>;
     binary(): Promise<Blob>;
+}
+
+/**
+ * Helper class to generate a `ResponseBody` from binary data
+ */
+export class SelfDecodingBody implements ResponseBody {
+    constructor(private dataSource: Promise<Blob>) {}
+
+    binary(): Promise<Blob> {
+        return this.dataSource;
+    }
+
+    async text(): Promise<string> {
+        const data: Blob = await this.dataSource;
+        // @ts-ignore
+        if (data.text) {
+            // @ts-ignore
+            return data.text();
+        }
+
+        return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.addEventListener("load", () => resolve(reader.result as string));
+            reader.addEventListener("error", () => reject(reader.error));
+            reader.readAsText(data);
+        });
+    }
 }
 
 export class ResponseContext {

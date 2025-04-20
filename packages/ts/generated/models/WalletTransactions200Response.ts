@@ -10,16 +10,16 @@
  * Do not edit the class manually.
  */
 
-import { ListWallets200ResponsePagination } from '../models/ListWallets200ResponsePagination';
-import { ListWallets200ResponseWalletsInner } from '../models/ListWallets200ResponseWalletsInner';
+import { WalletTransactions200ResponsePagination } from '../models/WalletTransactions200ResponsePagination';
+import { WalletTransactions200ResponseTransactionsInner } from '../models/WalletTransactions200ResponseTransactionsInner';
 import { HttpFile } from '../http/http';
 
-export class ListWallets200Response {
+export class WalletTransactions200Response {
     /**
-    * List of wallets matching the filter criteria
+    * List of transactions matching the filter criteria
     */
-    'wallets': Array<ListWallets200ResponseWalletsInner>;
-    'pagination': ListWallets200ResponsePagination;
+    'transactions': Array<WalletTransactions200ResponseTransactionsInner>;
+    'pagination': WalletTransactions200ResponsePagination;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -27,20 +27,20 @@ export class ListWallets200Response {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "wallets",
-            "baseName": "wallets",
-            "type": "Array<ListWallets200ResponseWalletsInner>",
+            "name": "transactions",
+            "baseName": "transactions",
+            "type": "Array<WalletTransactions200ResponseTransactionsInner>",
             "format": ""
         },
         {
             "name": "pagination",
             "baseName": "pagination",
-            "type": "ListWallets200ResponsePagination",
+            "type": "WalletTransactions200ResponsePagination",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ListWallets200Response.attributeTypeMap;
+        return WalletTransactions200Response.attributeTypeMap;
     }
 
     public constructor() {

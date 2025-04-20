@@ -12,39 +12,49 @@ export * from '../models/ListPairs200Response';
 export * from '../models/ListWallets200Response';
 export * from '../models/ListWallets200ResponsePagination';
 export * from '../models/ListWallets200ResponseWalletsInner';
+export * from '../models/WalletTransactions200Response';
+export * from '../models/WalletTransactions200ResponsePagination';
+export * from '../models/WalletTransactions200ResponseTransactionsInner';
+export * from '../models/WithdrawFunds200Response';
+export * from '../models/WithdrawFundsRequest';
 
-import {Asset200Response} from '../models/Asset200Response';
-import {Asset200ResponseAssetsInner} from '../models/Asset200ResponseAssetsInner';
-import {ConnectWallet200Response} from '../models/ConnectWallet200Response';
-import {ConnectWalletRequest} from '../models/ConnectWalletRequest';
-import {DeleteWallet200Response} from '../models/DeleteWallet200Response';
-import {GetWallet200Response} from '../models/GetWallet200Response';
-import {GetWorkflow200Response} from './GetWorkflow200Response';
-import {GetWorkflow200ResponseStepsInner,} from './GetWorkflow200ResponseStepsInner';
-import {ListAssets200Response} from '../models/ListAssets200Response';
-import {ListAssets200ResponseAssetsInner} from '../models/ListAssets200ResponseAssetsInner';
-import {ListPairs200Response} from '../models/ListPairs200Response';
-import {ListWallets200Response} from '../models/ListWallets200Response';
-import {ListWallets200ResponsePagination} from './ListWallets200ResponsePagination';
-import {ListWallets200ResponseWalletsInner} from './ListWallets200ResponseWalletsInner';
+import { Asset200Response } from '../models/Asset200Response';
+import { Asset200ResponseAssetsInner } from '../models/Asset200ResponseAssetsInner';
+import { ConnectWallet200Response } from '../models/ConnectWallet200Response';
+import { ConnectWalletRequest } from '../models/ConnectWalletRequest';
+import { DeleteWallet200Response } from '../models/DeleteWallet200Response';
+import { GetWallet200Response } from '../models/GetWallet200Response';
+import { GetWorkflow200Response } from '../models/GetWorkflow200Response';
+import { GetWorkflow200ResponseStepsInner   , GetWorkflow200ResponseStepsInnerStateEnum   } from '../models/GetWorkflow200ResponseStepsInner';
+import { ListAssets200Response } from '../models/ListAssets200Response';
+import { ListAssets200ResponseAssetsInner } from '../models/ListAssets200ResponseAssetsInner';
+import { ListPairs200Response } from '../models/ListPairs200Response';
+import { ListWallets200Response } from '../models/ListWallets200Response';
+import { ListWallets200ResponsePagination } from '../models/ListWallets200ResponsePagination';
+import { ListWallets200ResponseWalletsInner } from '../models/ListWallets200ResponseWalletsInner';
+import { WalletTransactions200Response } from '../models/WalletTransactions200Response';
+import { WalletTransactions200ResponsePagination } from '../models/WalletTransactions200ResponsePagination';
+import { WalletTransactions200ResponseTransactionsInner } from '../models/WalletTransactions200ResponseTransactionsInner';
+import { WithdrawFunds200Response } from '../models/WithdrawFunds200Response';
+import { WithdrawFundsRequest } from '../models/WithdrawFundsRequest';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
-    "string",
-    "boolean",
-    "double",
-    "integer",
-    "long",
-    "float",
-    "number",
-    "any"
-];
+                    "string",
+                    "boolean",
+                    "double",
+                    "integer",
+                    "long",
+                    "float",
+                    "number",
+                    "any"
+                 ];
 
 let enumsMap: Set<string> = new Set<string>([
     "GetWorkflow200ResponseStepsInnerStateEnum",
 ]);
 
-let typeMap: { [index: string]: any } = {
+let typeMap: {[index: string]: any} = {
     "Asset200Response": Asset200Response,
     "Asset200ResponseAssetsInner": Asset200ResponseAssetsInner,
     "ConnectWallet200Response": ConnectWallet200Response,
@@ -59,6 +69,11 @@ let typeMap: { [index: string]: any } = {
     "ListWallets200Response": ListWallets200Response,
     "ListWallets200ResponsePagination": ListWallets200ResponsePagination,
     "ListWallets200ResponseWalletsInner": ListWallets200ResponseWalletsInner,
+    "WalletTransactions200Response": WalletTransactions200Response,
+    "WalletTransactions200ResponsePagination": WalletTransactions200ResponsePagination,
+    "WalletTransactions200ResponseTransactionsInner": WalletTransactions200ResponseTransactionsInner,
+    "WithdrawFunds200Response": WithdrawFunds200Response,
+    "WithdrawFundsRequest": WithdrawFundsRequest,
 }
 
 type MimeTypeDescriptor = {
@@ -147,7 +162,7 @@ export class ObjectSerializer {
                     let mapping = typeMap[expectedType].mapping;
                     if (mapping != undefined && mapping[discriminatorType]) {
                         return mapping[discriminatorType]; // use the type given in the discriminator
-                    } else if (typeMap[discriminatorType]) {
+                    } else if(typeMap[discriminatorType]) {
                         return discriminatorType;
                     } else {
                         return expectedType; // discriminator did not map to a type
@@ -190,7 +205,7 @@ export class ObjectSerializer {
             return transformedData;
         } else if (type === "Date") {
             if (format == "date") {
-                let month = data.getMonth() + 1
+                let month = data.getMonth()+1
                 month = month < 10 ? "0" + month.toString() : month.toString()
                 let day = data.getDate();
                 day = day < 10 ? "0" + day.toString() : day.toString();
@@ -212,7 +227,7 @@ export class ObjectSerializer {
 
             // get the map for the correct type.
             let attributeTypes = typeMap[type].getAttributeTypeMap();
-            let instance: { [index: string]: any } = {};
+            let instance: {[index: string]: any} = {};
             for (let attributeType of attributeTypes) {
                 instance[attributeType.baseName] = ObjectSerializer.serialize(data[attributeType.name], attributeType.type, attributeType.format);
             }

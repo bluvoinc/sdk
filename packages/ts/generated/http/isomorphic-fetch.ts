@@ -1,5 +1,6 @@
 import {HttpLibrary, RequestContext, ResponseContext} from './http';
-import {from, Observable} from '../rxjsStub';
+import { from, Observable } from '../rxjsStub';
+import "whatwg-fetch";
 
 export class IsomorphicFetchHttpLibrary implements HttpLibrary {
 
@@ -25,7 +26,7 @@ export class IsomorphicFetchHttpLibrary implements HttpLibrary {
             return new ResponseContext(resp.status, headers, body);
         });
 
-        return from(resultPromise);
+        return from<Promise<ResponseContext>>(resultPromise);
 
     }
 }

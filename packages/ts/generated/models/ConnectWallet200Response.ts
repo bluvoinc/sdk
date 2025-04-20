@@ -10,6 +10,8 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
+
 export class ConnectWallet200Response {
     /**
     * The unique identifier of the workflow run initiated to connect the wallet

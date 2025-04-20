@@ -12,11 +12,11 @@
 
 import { HttpFile } from '../http/http';
 
-export class ListPairs200Response {
+export class WithdrawFunds200Response {
     /**
-    * List of trading pair symbols (e.g. \'BTC/USDT\')
+    * The unique identifier of the withdrawal workflow run
     */
-    'pairs': Array<string>;
+    'workflowRunId': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,14 +24,14 @@ export class ListPairs200Response {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "pairs",
-            "baseName": "pairs",
-            "type": "Array<string>",
+            "name": "workflowRunId",
+            "baseName": "workflowRunId",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ListPairs200Response.attributeTypeMap;
+        return WithdrawFunds200Response.attributeTypeMap;
     }
 
     public constructor() {

@@ -12,19 +12,24 @@
 
 import { HttpFile } from '../http/http';
 
-export class Asset200ResponseAssetsInner {
+export class WithdrawFundsRequest {
     /**
-    * The asset
+    * The asset symbol to withdraw (e.g., \'BTC\', \'ETH\')
     */
     'asset': string;
     /**
-    * The asset\'s full name
+    * The amount to withdraw
     */
-    'name': string;
+    'amount': number;
     /**
-    * URL of the asset image (if available)
+    * The blockchain address to send funds to
     */
-    'img'?: string;
+    'address': string;
+    /**
+    * Optional memo/tag for cryptocurrencies that require it (e.g., XRP, XLM)
+    */
+    'tag'?: string;
+    'params'?: any | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -38,20 +43,32 @@ export class Asset200ResponseAssetsInner {
             "format": ""
         },
         {
-            "name": "name",
-            "baseName": "name",
+            "name": "amount",
+            "baseName": "amount",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "address",
+            "baseName": "address",
             "type": "string",
             "format": ""
         },
         {
-            "name": "img",
-            "baseName": "img",
+            "name": "tag",
+            "baseName": "tag",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "params",
+            "baseName": "params",
+            "type": "any",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return Asset200ResponseAssetsInner.attributeTypeMap;
+        return WithdrawFundsRequest.attributeTypeMap;
     }
 
     public constructor() {

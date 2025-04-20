@@ -10,6 +10,8 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
+
 export class ConnectWalletRequest {
     /**
     * Project ID where the exchange account will be connected

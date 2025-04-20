@@ -10,6 +10,8 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
+
 export class ListAssets200ResponseAssetsInner {
     /**
     * The asset symbol

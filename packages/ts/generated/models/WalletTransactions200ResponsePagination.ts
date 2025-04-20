@@ -12,19 +12,26 @@
 
 import { HttpFile } from '../http/http';
 
-export class Asset200ResponseAssetsInner {
+/**
+* Pagination information
+*/
+export class WalletTransactions200ResponsePagination {
     /**
-    * The asset
+    * Total number of transactions matching the filter criteria
     */
-    'asset': string;
+    'totalCount': number;
     /**
-    * The asset\'s full name
+    * Current page number
     */
-    'name': string;
+    'page': number;
     /**
-    * URL of the asset image (if available)
+    * Maximum number of transactions per page
     */
-    'img'?: string;
+    'limit': number;
+    /**
+    * Total number of pages
+    */
+    'pageCount': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -32,26 +39,32 @@ export class Asset200ResponseAssetsInner {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "asset",
-            "baseName": "asset",
-            "type": "string",
+            "name": "totalCount",
+            "baseName": "totalCount",
+            "type": "number",
             "format": ""
         },
         {
-            "name": "name",
-            "baseName": "name",
-            "type": "string",
+            "name": "page",
+            "baseName": "page",
+            "type": "number",
             "format": ""
         },
         {
-            "name": "img",
-            "baseName": "img",
-            "type": "string",
+            "name": "limit",
+            "baseName": "limit",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "pageCount",
+            "baseName": "pageCount",
+            "type": "number",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return Asset200ResponseAssetsInner.attributeTypeMap;
+        return WalletTransactions200ResponsePagination.attributeTypeMap;
     }
 
     public constructor() {

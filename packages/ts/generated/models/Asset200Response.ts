@@ -10,7 +10,8 @@
  * Do not edit the class manually.
  */
 
-import {Asset200ResponseAssetsInner} from '../models/Asset200ResponseAssetsInner';
+import { Asset200ResponseAssetsInner } from '../models/Asset200ResponseAssetsInner';
+import { HttpFile } from '../http/http';
 
 export class Asset200Response {
     'assets': Array<Asset200ResponseAssetsInner>;

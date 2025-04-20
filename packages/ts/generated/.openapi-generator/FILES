@@ -1,13 +1,14 @@
 .gitattributes
 .gitignore
-.openapi-generator-ignore
 BasicApi.md
 PricesApi.md
 README.md
+TransactionsApi.md
 WalletsApi.md
 WorkflowApi.md
 apis/BasicApi.ts
 apis/PricesApi.ts
+apis/TransactionsApi.ts
 apis/WalletsApi.ts
 apis/WorkflowApi.ts
 apis/baseapi.ts
@@ -34,6 +35,11 @@ models/ListWallets200Response.ts
 models/ListWallets200ResponsePagination.ts
 models/ListWallets200ResponseWalletsInner.ts
 models/ObjectSerializer.ts
+models/WalletTransactions200Response.ts
+models/WalletTransactions200ResponsePagination.ts
+models/WalletTransactions200ResponseTransactionsInner.ts
+models/WithdrawFunds200Response.ts
+models/WithdrawFundsRequest.ts
 models/all.ts
 package.json
 rxjsStub.ts

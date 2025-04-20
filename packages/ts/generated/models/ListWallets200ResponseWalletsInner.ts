@@ -10,6 +10,8 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
+
 export class ListWallets200ResponseWalletsInner {
     /**
     * The unique identifier of the wallet

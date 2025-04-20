@@ -1,21 +1,29 @@
-import {HttpInfo} from '../http/http';
-import {Configuration, ConfigurationOptions} from '../configuration'
+import { ResponseContext, RequestContext, HttpFile, HttpInfo } from '../http/http';
+import { Configuration, ConfigurationOptions } from '../configuration'
+import type { Middleware } from '../middleware';
 
-import {Asset200Response} from '../models/Asset200Response';
-import {ConnectWallet200Response} from '../models/ConnectWallet200Response';
-import {ConnectWalletRequest} from '../models/ConnectWalletRequest';
-import {DeleteWallet200Response} from '../models/DeleteWallet200Response';
-import {GetWallet200Response} from '../models/GetWallet200Response';
-import {GetWorkflow200Response} from '../models/GetWorkflow200Response';
-import {ListAssets200Response} from '../models/ListAssets200Response';
-import {ListPairs200Response} from '../models/ListPairs200Response';
-import {ListWallets200Response} from '../models/ListWallets200Response';
+import { Asset200Response } from '../models/Asset200Response';
+import { Asset200ResponseAssetsInner } from '../models/Asset200ResponseAssetsInner';
+import { ConnectWallet200Response } from '../models/ConnectWallet200Response';
+import { ConnectWalletRequest } from '../models/ConnectWalletRequest';
+import { DeleteWallet200Response } from '../models/DeleteWallet200Response';
+import { GetWallet200Response } from '../models/GetWallet200Response';
+import { GetWorkflow200Response } from '../models/GetWorkflow200Response';
+import { GetWorkflow200ResponseStepsInner } from '../models/GetWorkflow200ResponseStepsInner';
+import { ListAssets200Response } from '../models/ListAssets200Response';
+import { ListAssets200ResponseAssetsInner } from '../models/ListAssets200ResponseAssetsInner';
+import { ListPairs200Response } from '../models/ListPairs200Response';
+import { ListWallets200Response } from '../models/ListWallets200Response';
+import { ListWallets200ResponsePagination } from '../models/ListWallets200ResponsePagination';
+import { ListWallets200ResponseWalletsInner } from '../models/ListWallets200ResponseWalletsInner';
+import { WalletTransactions200Response } from '../models/WalletTransactions200Response';
+import { WalletTransactions200ResponsePagination } from '../models/WalletTransactions200ResponsePagination';
+import { WalletTransactions200ResponseTransactionsInner } from '../models/WalletTransactions200ResponseTransactionsInner';
+import { WithdrawFunds200Response } from '../models/WithdrawFunds200Response';
+import { WithdrawFundsRequest } from '../models/WithdrawFundsRequest';
 
-import {ObservableBasicApi, ObservablePricesApi, ObservableWalletsApi, ObservableWorkflowApi} from "./ObservableAPI";
-import {BasicApiRequestFactory, BasicApiResponseProcessor} from "../apis/BasicApi";
-import {PricesApiRequestFactory, PricesApiResponseProcessor} from "../apis/PricesApi";
-import {WalletsApiRequestFactory, WalletsApiResponseProcessor} from "../apis/WalletsApi";
-import {WorkflowApiRequestFactory, WorkflowApiResponseProcessor} from "../apis/WorkflowApi";
+import { ObservableBasicApi } from "./ObservableAPI";
+import { BasicApiRequestFactory, BasicApiResponseProcessor} from "../apis/BasicApi";
 
 export interface BasicApiAssetRequest {
     /**
@@ -135,6 +143,9 @@ export class ObjectBasicApi {
 
 }
 
+import { ObservablePricesApi } from "./ObservableAPI";
+import { PricesApiRequestFactory, PricesApiResponseProcessor} from "../apis/PricesApi";
+
 export interface PricesApiCandlesticksRequest {
     /**
      * The asset symbol to retrieve candlestick data for (e.g. BTC, ETH).
@@ -208,6 +219,143 @@ export class ObjectPricesApi {
     }
 
 }
+
+import { ObservableTransactionsApi } from "./ObservableAPI";
+import { TransactionsApiRequestFactory, TransactionsApiResponseProcessor} from "../apis/TransactionsApi";
+
+export interface TransactionsApiWalletTransactionsRequest {
+    /**
+     * The unique identifier of the connected wallet to query transactions for.
+     * Defaults to: undefined
+     * @type string
+     * @memberof TransactionsApiwalletTransactions
+     */
+    walletId: string
+    /**
+     * Optional. Page number for pagination (0-indexed). Defaults to 0.
+     * Minimum: 0
+     * Maximum: 1000
+     * Defaults to: undefined
+     * @type number
+     * @memberof TransactionsApiwalletTransactions
+     */
+    page?: number
+    /**
+     * Optional. Maximum number of transactions to return per page. Defaults to 10. Maximum value is 1000.
+     * Minimum: 1
+     * Maximum: 1000
+     * Defaults to: undefined
+     * @type number
+     * @memberof TransactionsApiwalletTransactions
+     */
+    limit?: number
+    /**
+     * Optional. Filter transactions by asset symbol.
+     * Defaults to: undefined
+     * @type string
+     * @memberof TransactionsApiwalletTransactions
+     */
+    asset?: string
+    /**
+     * Optional. Filter transactions by type (e.g., \&#39;deposit\&#39;, \&#39;withdrawal\&#39;).
+     * Defaults to: undefined
+     * @type string
+     * @memberof TransactionsApiwalletTransactions
+     */
+    type?: string
+    /**
+     * Optional. Filter transactions created on or after this date (ISO format).
+     * Defaults to: undefined
+     * @type string
+     * @memberof TransactionsApiwalletTransactions
+     */
+    since?: string
+    /**
+     * Optional. Filter transactions created before this date (ISO format).
+     * Defaults to: undefined
+     * @type string
+     * @memberof TransactionsApiwalletTransactions
+     */
+    before?: string
+    /**
+     * Optional. Filter transactions by status (e.g., \&#39;completed\&#39;, \&#39;pending\&#39;).
+     * Defaults to: undefined
+     * @type string
+     * @memberof TransactionsApiwalletTransactions
+     */
+    status?: string
+    /**
+     * Optional. Comma-separated list of fields to include in the response. If not specified, all fields are included.
+     * Defaults to: undefined
+     * @type string
+     * @memberof TransactionsApiwalletTransactions
+     */
+    fields?: string
+}
+
+export interface TransactionsApiWithdrawFundsRequest {
+    /**
+     * The unique identifier of the wallet to withdraw funds from.
+     * Defaults to: undefined
+     * @type string
+     * @memberof TransactionsApiwithdrawFunds
+     */
+    walletId: string
+    /**
+     * 
+     * @type WithdrawFundsRequest
+     * @memberof TransactionsApiwithdrawFunds
+     */
+    withdrawFundsRequest: WithdrawFundsRequest
+}
+
+export class ObjectTransactionsApi {
+    private api: ObservableTransactionsApi
+
+    public constructor(configuration: Configuration, requestFactory?: TransactionsApiRequestFactory, responseProcessor?: TransactionsApiResponseProcessor) {
+        this.api = new ObservableTransactionsApi(configuration, requestFactory, responseProcessor);
+    }
+
+    /**
+     * Retrieve a paginated list of transactions for a specific wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers. Supports pagination, filtering by asset, type, date range, and status, as well as field selection to control which properties are returned in the response.
+     * Wallet Transactions
+     * @param param the request object
+     */
+    public walletTransactionsWithHttpInfo(param: TransactionsApiWalletTransactionsRequest, options?: ConfigurationOptions): Promise<HttpInfo<WalletTransactions200Response>> {
+        return this.api.walletTransactionsWithHttpInfo(param.walletId, param.page, param.limit, param.asset, param.type, param.since, param.before, param.status, param.fields,  options).toPromise();
+    }
+
+    /**
+     * Retrieve a paginated list of transactions for a specific wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers. Supports pagination, filtering by asset, type, date range, and status, as well as field selection to control which properties are returned in the response.
+     * Wallet Transactions
+     * @param param the request object
+     */
+    public walletTransactions(param: TransactionsApiWalletTransactionsRequest, options?: ConfigurationOptions): Promise<WalletTransactions200Response> {
+        return this.api.walletTransactions(param.walletId, param.page, param.limit, param.asset, param.type, param.since, param.before, param.status, param.fields,  options).toPromise();
+    }
+
+    /**
+     * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint requires authentication via a valid Bluvo API Key. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
+     * Withdraw Funds
+     * @param param the request object
+     */
+    public withdrawFundsWithHttpInfo(param: TransactionsApiWithdrawFundsRequest, options?: ConfigurationOptions): Promise<HttpInfo<WithdrawFunds200Response>> {
+        return this.api.withdrawFundsWithHttpInfo(param.walletId, param.withdrawFundsRequest,  options).toPromise();
+    }
+
+    /**
+     * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint requires authentication via a valid Bluvo API Key. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
+     * Withdraw Funds
+     * @param param the request object
+     */
+    public withdrawFunds(param: TransactionsApiWithdrawFundsRequest, options?: ConfigurationOptions): Promise<WithdrawFunds200Response> {
+        return this.api.withdrawFunds(param.walletId, param.withdrawFundsRequest,  options).toPromise();
+    }
+
+}
+
+import { ObservableWalletsApi } from "./ObservableAPI";
+import { WalletsApiRequestFactory, WalletsApiResponseProcessor} from "../apis/WalletsApi";
 
 export interface WalletsApiConnectWalletRequest {
     /**
@@ -395,6 +543,9 @@ export class ObjectWalletsApi {
     }
 
 }
+
+import { ObservableWorkflowApi } from "./ObservableAPI";
+import { WorkflowApiRequestFactory, WorkflowApiResponseProcessor} from "../apis/WorkflowApi";
 
 export interface WorkflowApiGetWorkflowRequest {
     /**

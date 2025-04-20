@@ -1,16 +1,16 @@
 // TODO: better import syntax?
-import {BaseAPIRequestFactory, RequiredError} from './baseapi';
+import {BaseAPIRequestFactory, RequiredError, COLLECTION_FORMATS} from './baseapi';
 import {Configuration} from '../configuration';
-import {HttpInfo, HttpMethod, RequestContext, ResponseContext} from '../http/http';
+import {RequestContext, HttpMethod, ResponseContext, HttpFile, HttpInfo} from '../http/http';
 import {ObjectSerializer} from '../models/ObjectSerializer';
 import {ApiException} from './exception';
-import {isCodeInRange} from '../util';
+import {canConsumeForm, isCodeInRange} from '../util';
 import {SecurityAuthentication} from '../auth/auth';
 
 
-import {Asset200Response} from '../models/Asset200Response';
-import {ListAssets200Response} from '../models/ListAssets200Response';
-import {ListPairs200Response} from '../models/ListPairs200Response';
+import { Asset200Response } from '../models/Asset200Response';
+import { ListAssets200Response } from '../models/ListAssets200Response';
+import { ListPairs200Response } from '../models/ListPairs200Response';
 
 /**
  * no description

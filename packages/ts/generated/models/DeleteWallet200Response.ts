@@ -10,6 +10,8 @@
  * Do not edit the class manually.
  */
 
+import { HttpFile } from '../http/http';
+
 export class DeleteWallet200Response {
     /**
     * Indicates whether the wallet was successfully deleted

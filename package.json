@@ -8,7 +8,11 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
 
-    "sync-sdk-from-openapi": "docker run --rm \\\n    -v $PWD:/local openapitools/openapi-generator-cli generate \\\n    -i https://api-bluvo.com/api/v0/openapi \\\n    -g typescript \\\n    -o /local/packages/ts/generated"
+    "sync-sdk-from-openapi": "docker run --rm \\\n    -v $PWD:/local openapitools/openapi-generator-cli generate \\\n    -i https://api-bluvo.com/api/v0/openapi \\\n    -g typescript \\\n    -o /local/packages/ts/generated",
+    "sync-sdk-from-openapi-cleanup": "find ./packages/ts/generated -type f -name \"isomorphic-fetch.ts\" -exec sed -i '' '/import \"whatwg-fetch\";/d' {} \\;",
+    "sync-sdk-from-openapi-inc-version": "jq '.version |= (split(\".\")|map(tonumber)|.[2] |= .+1|map(tostring)|join(\".\"))' packages/ts/package.json > packages/ts/package.json.tmp && mv packages/ts/package.json.tmp packages/ts/package.json",
+
+    "sync-sdk": "pnpm sync-sdk-from-openapi && pnpm sync-sdk-from-openapi-cleanup && pnpm sync-sdk-from-openapi-inc-version"
   },
   "devDependencies": {
     "prettier": "^3.5.3",

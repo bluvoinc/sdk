@@ -24,6 +24,46 @@ export interface TokenProvider {
 /**
  * Applies apiKey authentication to the request context.
  */
+export class BluvoOrgIdAuthentication implements SecurityAuthentication {
+    /**
+     * Configures this api key authentication with the necessary properties
+     *
+     * @param apiKey: The api key to be used for every request
+     */
+    public constructor(private apiKey: string) {}
+
+    public getName(): string {
+        return "bluvoOrgId";
+    }
+
+    public applySecurityAuthentication(context: RequestContext) {
+        context.setHeaderParam("x-bluvo-org-id", this.apiKey);
+    }
+}
+
+/**
+ * Applies apiKey authentication to the request context.
+ */
+export class BluvoProjectIdAuthentication implements SecurityAuthentication {
+    /**
+     * Configures this api key authentication with the necessary properties
+     *
+     * @param apiKey: The api key to be used for every request
+     */
+    public constructor(private apiKey: string) {}
+
+    public getName(): string {
+        return "bluvoProjectId";
+    }
+
+    public applySecurityAuthentication(context: RequestContext) {
+        context.setHeaderParam("x-bluvo-project-id", this.apiKey);
+    }
+}
+
+/**
+ * Applies apiKey authentication to the request context.
+ */
 export class BluvoApiKeyAuthentication implements SecurityAuthentication {
     /**
      * Configures this api key authentication with the necessary properties
@@ -44,7 +84,7 @@ export class BluvoApiKeyAuthentication implements SecurityAuthentication {
 /**
  * Applies apiKey authentication to the request context.
  */
-export class BluvoOrgIdAuthentication implements SecurityAuthentication {
+export class BluvoWalletIdAuthentication implements SecurityAuthentication {
     /**
      * Configures this api key authentication with the necessary properties
      *
@@ -53,19 +93,21 @@ export class BluvoOrgIdAuthentication implements SecurityAuthentication {
     public constructor(private apiKey: string) {}
 
     public getName(): string {
-        return "bluvoOrgId";
+        return "bluvoWalletId";
     }
 
     public applySecurityAuthentication(context: RequestContext) {
-        context.setHeaderParam("x-bluvo-org-id", this.apiKey);
+        context.setHeaderParam("x-bluvo-wallet-id", this.apiKey);
     }
 }
 
 
 export type AuthMethods = {
     "default"?: SecurityAuthentication,
+    "bluvoOrgId"?: SecurityAuthentication,
+    "bluvoProjectId"?: SecurityAuthentication,
     "bluvoApiKey"?: SecurityAuthentication,
-    "bluvoOrgId"?: SecurityAuthentication
+    "bluvoWalletId"?: SecurityAuthentication
 }
 
 export type ApiKeyConfiguration = string;
@@ -76,8 +118,10 @@ export type HttpSignatureConfiguration = unknown; // TODO: Implement
 
 export type AuthMethodsConfiguration = {
     "default"?: SecurityAuthentication,
+    "bluvoOrgId"?: ApiKeyConfiguration,
+    "bluvoProjectId"?: ApiKeyConfiguration,
     "bluvoApiKey"?: ApiKeyConfiguration,
-    "bluvoOrgId"?: ApiKeyConfiguration
+    "bluvoWalletId"?: ApiKeyConfiguration
 }
 
 /**
@@ -92,15 +136,27 @@ export function configureAuthMethods(config: AuthMethodsConfiguration | undefine
     }
     authMethods["default"] = config["default"]
 
+    if (config["bluvoOrgId"]) {
+        authMethods["bluvoOrgId"] = new BluvoOrgIdAuthentication(
+            config["bluvoOrgId"]
+        );
+    }
+
+    if (config["bluvoProjectId"]) {
+        authMethods["bluvoProjectId"] = new BluvoProjectIdAuthentication(
+            config["bluvoProjectId"]
+        );
+    }
+
     if (config["bluvoApiKey"]) {
         authMethods["bluvoApiKey"] = new BluvoApiKeyAuthentication(
             config["bluvoApiKey"]
         );
     }
 
-    if (config["bluvoOrgId"]) {
-        authMethods["bluvoOrgId"] = new BluvoOrgIdAuthentication(
-            config["bluvoOrgId"]
+    if (config["bluvoWalletId"]) {
+        authMethods["bluvoWalletId"] = new BluvoWalletIdAuthentication(
+            config["bluvoWalletId"]
         );
     }
 

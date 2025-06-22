@@ -15,7 +15,7 @@ import { HttpFile } from '../http/http';
 /**
 * Pagination information
 */
-export class WalletTransactions200ResponsePagination {
+export class ListTransactions200ResponsePagination {
     /**
     * Total number of transactions matching the filter criteria
     */
@@ -64,7 +64,7 @@ export class WalletTransactions200ResponsePagination {
         }    ];
 
     static getAttributeTypeMap() {
-        return WalletTransactions200ResponsePagination.attributeTypeMap;
+        return ListTransactions200ResponsePagination.attributeTypeMap;
     }
 
     public constructor() {

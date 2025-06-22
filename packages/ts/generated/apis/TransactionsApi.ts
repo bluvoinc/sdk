@@ -8,7 +8,7 @@ import {canConsumeForm, isCodeInRange} from '../util';
 import {SecurityAuthentication} from '../auth/auth';
 
 
-import { WalletTransactions200Response } from '../models/WalletTransactions200Response';
+import { ListTransactions200Response } from '../models/ListTransactions200Response';
 import { WithdrawFunds200Response } from '../models/WithdrawFunds200Response';
 import { WithdrawFundsRequest } from '../models/WithdrawFundsRequest';
 
@@ -19,8 +19,8 @@ export class TransactionsApiRequestFactory extends BaseAPIRequestFactory {
 
     /**
      * Retrieve a paginated list of transactions for a specific wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers. Supports pagination, filtering by asset, type, date range, and status, as well as field selection to control which properties are returned in the response.
-     * Wallet Transactions
-     * @param walletId The unique identifier of the connected wallet to query transactions for.
+     * List Transactions
+     * @param walletId 
      * @param page Optional. Page number for pagination (0-indexed). Defaults to 0.
      * @param limit Optional. Maximum number of transactions to return per page. Defaults to 10. Maximum value is 1000.
      * @param asset Optional. Filter transactions by asset symbol.
@@ -30,12 +30,12 @@ export class TransactionsApiRequestFactory extends BaseAPIRequestFactory {
      * @param status Optional. Filter transactions by status (e.g., \&#39;completed\&#39;, \&#39;pending\&#39;).
      * @param fields Optional. Comma-separated list of fields to include in the response. If not specified, all fields are included.
      */
-    public async walletTransactions(walletId: string, page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: Configuration): Promise<RequestContext> {
+    public async listTransactions(walletId: string, page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: Configuration): Promise<RequestContext> {
         let _config = _options || this.configuration;
 
         // verify required parameter 'walletId' is not null or undefined
         if (walletId === null || walletId === undefined) {
-            throw new RequiredError("TransactionsApi", "walletTransactions", "walletId");
+            throw new RequiredError("TransactionsApi", "listTransactions", "walletId");
         }
 
 
@@ -48,7 +48,7 @@ export class TransactionsApiRequestFactory extends BaseAPIRequestFactory {
 
 
         // Path Params
-        const localVarPath = '/v0/cex/cex/wallet/{walletId}/transactions'
+        const localVarPath = '/v0/cex/wallet/{walletId}/transactions'
             .replace('{' + 'walletId' + '}', encodeURIComponent(String(walletId)));
 
         // Make Request Context
@@ -107,6 +107,16 @@ export class TransactionsApiRequestFactory extends BaseAPIRequestFactory {
         if (authMethod?.applySecurityAuthentication) {
             await authMethod?.applySecurityAuthentication(requestContext);
         }
+        // Apply auth methods
+        authMethod = _config.authMethods["bluvoProjectId"]
+        if (authMethod?.applySecurityAuthentication) {
+            await authMethod?.applySecurityAuthentication(requestContext);
+        }
+        // Apply auth methods
+        authMethod = _config.authMethods["bluvoWalletId"]
+        if (authMethod?.applySecurityAuthentication) {
+            await authMethod?.applySecurityAuthentication(requestContext);
+        }
         
         const defaultAuth: SecurityAuthentication | undefined = _config?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
@@ -119,17 +129,10 @@ export class TransactionsApiRequestFactory extends BaseAPIRequestFactory {
     /**
      * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint requires authentication via a valid Bluvo API Key. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
      * Withdraw Funds
-     * @param walletId The unique identifier of the wallet to withdraw funds from.
      * @param withdrawFundsRequest 
      */
-    public async withdrawFunds(walletId: string, withdrawFundsRequest: WithdrawFundsRequest, _options?: Configuration): Promise<RequestContext> {
+    public async withdrawFunds(withdrawFundsRequest: WithdrawFundsRequest, _options?: Configuration): Promise<RequestContext> {
         let _config = _options || this.configuration;
-
-        // verify required parameter 'walletId' is not null or undefined
-        if (walletId === null || walletId === undefined) {
-            throw new RequiredError("TransactionsApi", "withdrawFunds", "walletId");
-        }
-
 
         // verify required parameter 'withdrawFundsRequest' is not null or undefined
         if (withdrawFundsRequest === null || withdrawFundsRequest === undefined) {
@@ -138,8 +141,7 @@ export class TransactionsApiRequestFactory extends BaseAPIRequestFactory {
 
 
         // Path Params
-        const localVarPath = '/v0/cex/cex/wallet/{walletId}/transact/out'
-            .replace('{' + 'walletId' + '}', encodeURIComponent(String(walletId)));
+        const localVarPath = '/v0/cex/wallet/withdraw';
 
         // Make Request Context
         const requestContext = _config.baseServer.makeRequestContext(localVarPath, HttpMethod.PUT);
@@ -168,6 +170,16 @@ export class TransactionsApiRequestFactory extends BaseAPIRequestFactory {
         if (authMethod?.applySecurityAuthentication) {
             await authMethod?.applySecurityAuthentication(requestContext);
         }
+        // Apply auth methods
+        authMethod = _config.authMethods["bluvoProjectId"]
+        if (authMethod?.applySecurityAuthentication) {
+            await authMethod?.applySecurityAuthentication(requestContext);
+        }
+        // Apply auth methods
+        authMethod = _config.authMethods["bluvoWalletId"]
+        if (authMethod?.applySecurityAuthentication) {
+            await authMethod?.applySecurityAuthentication(requestContext);
+        }
         
         const defaultAuth: SecurityAuthentication | undefined = _config?.authMethods?.default
         if (defaultAuth?.applySecurityAuthentication) {
@@ -185,25 +197,25 @@ export class TransactionsApiResponseProcessor {
      * Unwraps the actual response sent by the server from the response context and deserializes the response content
      * to the expected objects
      *
-     * @params response Response returned by the server for a request to walletTransactions
+     * @params response Response returned by the server for a request to listTransactions
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async walletTransactionsWithHttpInfo(response: ResponseContext): Promise<HttpInfo<WalletTransactions200Response >> {
+     public async listTransactionsWithHttpInfo(response: ResponseContext): Promise<HttpInfo<ListTransactions200Response >> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
-            const body: WalletTransactions200Response = ObjectSerializer.deserialize(
+            const body: ListTransactions200Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "WalletTransactions200Response", ""
-            ) as WalletTransactions200Response;
+                "ListTransactions200Response", ""
+            ) as ListTransactions200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml
         if (response.httpStatusCode >= 200 && response.httpStatusCode <= 299) {
-            const body: WalletTransactions200Response = ObjectSerializer.deserialize(
+            const body: ListTransactions200Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "WalletTransactions200Response", ""
-            ) as WalletTransactions200Response;
+                "ListTransactions200Response", ""
+            ) as ListTransactions200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
 

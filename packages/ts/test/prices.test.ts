@@ -97,6 +97,19 @@ describe('live HTTP calls tests', ()=>{
             expect(res).toBeDefined();
         });
 
+        it('GET /v0/cex/wallet/:walletId/transactions', async () => {
+            const walletId = '99a01408-4ef4-47da-935a-848618c11aro';
+
+            const res = await client
+                .wallet
+                .transaction
+                .list(walletId);
+
+            console.log(res);
+
+            expect(res).toBeDefined();
+        });
+
     });
 
 });

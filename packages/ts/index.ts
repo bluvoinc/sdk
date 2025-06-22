@@ -139,7 +139,7 @@ export class BluvoClient {
          * const dailyCandles = await client.prices.candlesticks('ETH', 'USDT', startDate, endDate, 'coinbase', '1d');
          */
         candlesticks: (asset: string, quote: 'USDT', since?: number, until?: number, exchange?: 'binance' | 'bitget' | 'bitmart' | 'bybit' | 'coinbase' | 'cryptocom' | 'gateio' | 'kraken' | 'kucoin' | 'okx', granularity?: '1h', _options?: PromiseConfigurationOptions) => {
-            return new PricesApi(this.configuration)
+            return new PricesApi(this.configuration())
                 .candlesticks(asset, quote, since, until, exchange, granularity, _options);
         }
     }
@@ -187,14 +187,12 @@ export class BluvoClient {
             _options?: PromiseConfigurationOptions
         ) => {
             const request: ConnectWalletRequest = {
-                projectId: this.projectId,
-                walletId,
                 apiKey,
                 apiSecret,
                 apiPassphrase,
                 apiUid
             };
-            return new WalletsApi(this.configuration)
+            return new WalletsApi(this.configuration(walletId))
                 .connectWallet(exchange as any, request, _options);
         },
 
@@ -226,7 +224,7 @@ export class BluvoClient {
          */
 
         get: (walletId: string, _options?: PromiseConfigurationOptions) => {
-            return new WalletsApi(this.configuration)
+            return new WalletsApi(this.configuration(walletId))
                 .getWallet(walletId, _options);
         },
 
@@ -257,7 +255,7 @@ export class BluvoClient {
          */
 
         delete: (walletId: string, _options?: PromiseConfigurationOptions) => {
-            return new WalletsApi(this.configuration)
+            return new WalletsApi(this.configuration(walletId))
                 .deleteWallet(walletId, _options);
         },
 
@@ -307,7 +305,7 @@ export class BluvoClient {
             exchange?: 'binance' | 'coinbase' | 'kraken' | 'kucoin' | 'okx' | string,
             _options?: PromiseConfigurationOptions
         ) => {
-            return new WalletsApi(this.configuration)
+            return new WalletsApi(this.configuration())
                 .listWallets(page, limit, exchange as any, undefined, undefined, undefined, undefined, undefined, undefined, _options);
         },
 
@@ -382,8 +380,8 @@ export class BluvoClient {
              */
 
             list: (walletId: string, page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: PromiseConfigurationOptions) => {
-                return new TransactionsApi(this.configuration)
-                    .walletTransactions(walletId, page, limit, asset, type, since, before, status, fields, _options);
+                return new TransactionsApi(this.configuration(walletId))
+                    .listTransactions(walletId, page, limit, asset, type, since, before, status, fields, _options);
             },
 
             /**
@@ -443,16 +441,15 @@ export class BluvoClient {
              */
 
             withdraw: ({
-                           sourceWalletId,
+                           walletId,
                            destinationAddress,
                            amount,
                            asset,
                            network,
                            tag
                        }, _options?: PromiseConfigurationOptions) => {
-                return new TransactionsApi(this.configuration)
+                return new TransactionsApi(this.configuration(walletId))
                     .withdrawFunds(
-                        sourceWalletId,
                         {
                             asset,
                             amount,
@@ -486,11 +483,13 @@ export class BluvoClient {
      * @private
      * @returns A fully configured API configuration object ready for use with API clients
      */
-    private get configuration() {
+    private configuration(walletId?:string) {
         return createConfiguration({
             authMethods: {
                 bluvoApiKey: this.apiKey,
                 bluvoOrgId: this.orgId,
+                bluvoProjectId: this.projectId,
+                bluvoWalletId: walletId
             }
         });
     }

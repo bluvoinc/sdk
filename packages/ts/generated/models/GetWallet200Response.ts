@@ -18,10 +18,6 @@ export class GetWallet200Response {
     */
     'exchange': string;
     /**
-    * The unique identifier of the wallet
-    */
-    'walletId': string;
-    /**
     * Dictionary of asset balances where keys are asset symbols and values are total amounts
     */
     'balances': { [key: string]: number; };
@@ -54,12 +50,6 @@ export class GetWallet200Response {
         {
             "name": "exchange",
             "baseName": "exchange",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "walletId",
-            "baseName": "walletId",
             "type": "string",
             "format": ""
         },

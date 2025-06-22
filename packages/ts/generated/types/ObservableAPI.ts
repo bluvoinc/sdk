@@ -8,18 +8,19 @@ import { Asset200ResponseAssetsInner } from '../models/Asset200ResponseAssetsInn
 import { ConnectWallet200Response } from '../models/ConnectWallet200Response';
 import { ConnectWalletRequest } from '../models/ConnectWalletRequest';
 import { DeleteWallet200Response } from '../models/DeleteWallet200Response';
+import { GetOTTToken200Response } from '../models/GetOTTToken200Response';
 import { GetWallet200Response } from '../models/GetWallet200Response';
 import { GetWorkflow200Response } from '../models/GetWorkflow200Response';
 import { GetWorkflow200ResponseStepsInner } from '../models/GetWorkflow200ResponseStepsInner';
 import { ListAssets200Response } from '../models/ListAssets200Response';
 import { ListAssets200ResponseAssetsInner } from '../models/ListAssets200ResponseAssetsInner';
 import { ListPairs200Response } from '../models/ListPairs200Response';
+import { ListTransactions200Response } from '../models/ListTransactions200Response';
+import { ListTransactions200ResponsePagination } from '../models/ListTransactions200ResponsePagination';
+import { ListTransactions200ResponseTransactionsInner } from '../models/ListTransactions200ResponseTransactionsInner';
 import { ListWallets200Response } from '../models/ListWallets200Response';
 import { ListWallets200ResponsePagination } from '../models/ListWallets200ResponsePagination';
 import { ListWallets200ResponseWalletsInner } from '../models/ListWallets200ResponseWalletsInner';
-import { WalletTransactions200Response } from '../models/WalletTransactions200Response';
-import { WalletTransactions200ResponsePagination } from '../models/WalletTransactions200ResponsePagination';
-import { WalletTransactions200ResponseTransactionsInner } from '../models/WalletTransactions200ResponseTransactionsInner';
 import { WithdrawFunds200Response } from '../models/WithdrawFunds200Response';
 import { WithdrawFundsRequest } from '../models/WithdrawFundsRequest';
 
@@ -149,6 +150,56 @@ export class ObservableBasicApi {
 
 }
 
+import { OTTApiRequestFactory, OTTApiResponseProcessor} from "../apis/OTTApi";
+export class ObservableOTTApi {
+    private requestFactory: OTTApiRequestFactory;
+    private responseProcessor: OTTApiResponseProcessor;
+    private configuration: Configuration;
+
+    public constructor(
+        configuration: Configuration,
+        requestFactory?: OTTApiRequestFactory,
+        responseProcessor?: OTTApiResponseProcessor
+    ) {
+        this.configuration = configuration;
+        this.requestFactory = requestFactory || new OTTApiRequestFactory(configuration);
+        this.responseProcessor = responseProcessor || new OTTApiResponseProcessor();
+    }
+
+    /**
+     * Retrieve an OTT (One-Time Token) for accessing private endpoints. This endpoint does not require authentication and is used to obtain a temporary token that can be used for subsequent requests to private endpoints.
+     * Get OTT Token
+     */
+    public getOTTTokenWithHttpInfo(_options?: ConfigurationOptions): Observable<HttpInfo<GetOTTToken200Response>> {
+        const _config = mergeConfiguration(this.configuration, _options);
+
+        const requestContextPromise = this.requestFactory.getOTTToken(_config);
+        // build promise chain
+        let middlewarePreObservable = from<RequestContext>(requestContextPromise);
+        for (const middleware of _config.middleware) {
+            middlewarePreObservable = middlewarePreObservable.pipe(mergeMap((ctx: RequestContext) => middleware.pre(ctx)));
+        }
+
+        return middlewarePreObservable.pipe(mergeMap((ctx: RequestContext) => _config.httpApi.send(ctx))).
+            pipe(mergeMap((response: ResponseContext) => {
+                let middlewarePostObservable = of(response);
+                for (const middleware of _config.middleware.reverse()) {
+                    middlewarePostObservable = middlewarePostObservable.pipe(mergeMap((rsp: ResponseContext) => middleware.post(rsp)));
+                }
+                return middlewarePostObservable.pipe(map((rsp: ResponseContext) => this.responseProcessor.getOTTTokenWithHttpInfo(rsp)));
+            }));
+    }
+
+    /**
+     * Retrieve an OTT (One-Time Token) for accessing private endpoints. This endpoint does not require authentication and is used to obtain a temporary token that can be used for subsequent requests to private endpoints.
+     * Get OTT Token
+     */
+    public getOTTToken(_options?: ConfigurationOptions): Observable<GetOTTToken200Response> {
+        return this.getOTTTokenWithHttpInfo(_options).pipe(map((apiResponse: HttpInfo<GetOTTToken200Response>) => apiResponse.data));
+    }
+
+}
+
 import { PricesApiRequestFactory, PricesApiResponseProcessor} from "../apis/PricesApi";
 export class ObservablePricesApi {
     private requestFactory: PricesApiRequestFactory;
@@ -229,8 +280,8 @@ export class ObservableTransactionsApi {
 
     /**
      * Retrieve a paginated list of transactions for a specific wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers. Supports pagination, filtering by asset, type, date range, and status, as well as field selection to control which properties are returned in the response.
-     * Wallet Transactions
-     * @param walletId The unique identifier of the connected wallet to query transactions for.
+     * List Transactions
+     * @param walletId
      * @param [page] Optional. Page number for pagination (0-indexed). Defaults to 0.
      * @param [limit] Optional. Maximum number of transactions to return per page. Defaults to 10. Maximum value is 1000.
      * @param [asset] Optional. Filter transactions by asset symbol.
@@ -240,10 +291,10 @@ export class ObservableTransactionsApi {
      * @param [status] Optional. Filter transactions by status (e.g., \&#39;completed\&#39;, \&#39;pending\&#39;).
      * @param [fields] Optional. Comma-separated list of fields to include in the response. If not specified, all fields are included.
      */
-    public walletTransactionsWithHttpInfo(walletId: string, page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: ConfigurationOptions): Observable<HttpInfo<WalletTransactions200Response>> {
+    public listTransactionsWithHttpInfo(walletId: string, page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: ConfigurationOptions): Observable<HttpInfo<ListTransactions200Response>> {
         const _config = mergeConfiguration(this.configuration, _options);
 
-        const requestContextPromise = this.requestFactory.walletTransactions(walletId, page, limit, asset, type, since, before, status, fields, _config);
+        const requestContextPromise = this.requestFactory.listTransactions(walletId, page, limit, asset, type, since, before, status, fields, _config);
         // build promise chain
         let middlewarePreObservable = from<RequestContext>(requestContextPromise);
         for (const middleware of _config.middleware) {
@@ -256,14 +307,14 @@ export class ObservableTransactionsApi {
                 for (const middleware of _config.middleware.reverse()) {
                     middlewarePostObservable = middlewarePostObservable.pipe(mergeMap((rsp: ResponseContext) => middleware.post(rsp)));
                 }
-                return middlewarePostObservable.pipe(map((rsp: ResponseContext) => this.responseProcessor.walletTransactionsWithHttpInfo(rsp)));
+                return middlewarePostObservable.pipe(map((rsp: ResponseContext) => this.responseProcessor.listTransactionsWithHttpInfo(rsp)));
             }));
     }
 
     /**
      * Retrieve a paginated list of transactions for a specific wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers. Supports pagination, filtering by asset, type, date range, and status, as well as field selection to control which properties are returned in the response.
-     * Wallet Transactions
-     * @param walletId The unique identifier of the connected wallet to query transactions for.
+     * List Transactions
+     * @param walletId
      * @param [page] Optional. Page number for pagination (0-indexed). Defaults to 0.
      * @param [limit] Optional. Maximum number of transactions to return per page. Defaults to 10. Maximum value is 1000.
      * @param [asset] Optional. Filter transactions by asset symbol.
@@ -273,20 +324,19 @@ export class ObservableTransactionsApi {
      * @param [status] Optional. Filter transactions by status (e.g., \&#39;completed\&#39;, \&#39;pending\&#39;).
      * @param [fields] Optional. Comma-separated list of fields to include in the response. If not specified, all fields are included.
      */
-    public walletTransactions(walletId: string, page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: ConfigurationOptions): Observable<WalletTransactions200Response> {
-        return this.walletTransactionsWithHttpInfo(walletId, page, limit, asset, type, since, before, status, fields, _options).pipe(map((apiResponse: HttpInfo<WalletTransactions200Response>) => apiResponse.data));
+    public listTransactions(walletId: string, page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: ConfigurationOptions): Observable<ListTransactions200Response> {
+        return this.listTransactionsWithHttpInfo(walletId, page, limit, asset, type, since, before, status, fields, _options).pipe(map((apiResponse: HttpInfo<ListTransactions200Response>) => apiResponse.data));
     }
 
     /**
      * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint requires authentication via a valid Bluvo API Key. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
      * Withdraw Funds
-     * @param walletId The unique identifier of the wallet to withdraw funds from.
      * @param withdrawFundsRequest
      */
-    public withdrawFundsWithHttpInfo(walletId: string, withdrawFundsRequest: WithdrawFundsRequest, _options?: ConfigurationOptions): Observable<HttpInfo<WithdrawFunds200Response>> {
+    public withdrawFundsWithHttpInfo(withdrawFundsRequest: WithdrawFundsRequest, _options?: ConfigurationOptions): Observable<HttpInfo<WithdrawFunds200Response>> {
         const _config = mergeConfiguration(this.configuration, _options);
 
-        const requestContextPromise = this.requestFactory.withdrawFunds(walletId, withdrawFundsRequest, _config);
+        const requestContextPromise = this.requestFactory.withdrawFunds(withdrawFundsRequest, _config);
         // build promise chain
         let middlewarePreObservable = from<RequestContext>(requestContextPromise);
         for (const middleware of _config.middleware) {
@@ -306,11 +356,10 @@ export class ObservableTransactionsApi {
     /**
      * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint requires authentication via a valid Bluvo API Key. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
      * Withdraw Funds
-     * @param walletId The unique identifier of the wallet to withdraw funds from.
      * @param withdrawFundsRequest
      */
-    public withdrawFunds(walletId: string, withdrawFundsRequest: WithdrawFundsRequest, _options?: ConfigurationOptions): Observable<WithdrawFunds200Response> {
-        return this.withdrawFundsWithHttpInfo(walletId, withdrawFundsRequest, _options).pipe(map((apiResponse: HttpInfo<WithdrawFunds200Response>) => apiResponse.data));
+    public withdrawFunds(withdrawFundsRequest: WithdrawFundsRequest, _options?: ConfigurationOptions): Observable<WithdrawFunds200Response> {
+        return this.withdrawFundsWithHttpInfo(withdrawFundsRequest, _options).pipe(map((apiResponse: HttpInfo<WithdrawFunds200Response>) => apiResponse.data));
     }
 
 }
@@ -370,7 +419,7 @@ export class ObservableWalletsApi {
     /**
      * Delete a connected exchange wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
      * Delete Wallet
-     * @param walletId The unique identifier of the connected wallet to delete.
+     * @param walletId
      */
     public deleteWalletWithHttpInfo(walletId: string, _options?: ConfigurationOptions): Observable<HttpInfo<DeleteWallet200Response>> {
         const _config = mergeConfiguration(this.configuration, _options);
@@ -395,7 +444,7 @@ export class ObservableWalletsApi {
     /**
      * Delete a connected exchange wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
      * Delete Wallet
-     * @param walletId The unique identifier of the connected wallet to delete.
+     * @param walletId
      */
     public deleteWallet(walletId: string, _options?: ConfigurationOptions): Observable<DeleteWallet200Response> {
         return this.deleteWalletWithHttpInfo(walletId, _options).pipe(map((apiResponse: HttpInfo<DeleteWallet200Response>) => apiResponse.data));
@@ -404,7 +453,7 @@ export class ObservableWalletsApi {
     /**
      * Retrieve basic information about a connected exchange wallet, including a simple dictionary of balances. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
      * Get Wallet
-     * @param walletId The unique identifier of the connected wallet to query.
+     * @param walletId
      */
     public getWalletWithHttpInfo(walletId: string, _options?: ConfigurationOptions): Observable<HttpInfo<GetWallet200Response>> {
         const _config = mergeConfiguration(this.configuration, _options);
@@ -429,7 +478,7 @@ export class ObservableWalletsApi {
     /**
      * Retrieve basic information about a connected exchange wallet, including a simple dictionary of balances. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
      * Get Wallet
-     * @param walletId The unique identifier of the connected wallet to query.
+     * @param walletId
      */
     public getWallet(walletId: string, _options?: ConfigurationOptions): Observable<GetWallet200Response> {
         return this.getWalletWithHttpInfo(walletId, _options).pipe(map((apiResponse: HttpInfo<GetWallet200Response>) => apiResponse.data));

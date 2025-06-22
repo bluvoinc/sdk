@@ -12,23 +12,15 @@
 
 import { HttpFile } from '../http/http';
 
-export class ConnectWalletRequest {
+export class GetOTTToken200Response {
     /**
-    * API key for the exchange account
+    * The generated OTT token for accessing private endpoints
     */
-    'apiKey': string;
+    'token': string;
     /**
-    * API secret for the exchange account
+    * The date and time when the token expires
     */
-    'apiSecret': string;
-    /**
-    * API passphrase (required for some exchanges like Kuasset)
-    */
-    'apiPassphrase'?: string;
-    /**
-    * API user ID (required for some exchanges)
-    */
-    'apiUid'?: string;
+    'expiresAt': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -36,32 +28,20 @@ export class ConnectWalletRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "apiKey",
-            "baseName": "apiKey",
+            "name": "token",
+            "baseName": "token",
             "type": "string",
             "format": ""
         },
         {
-            "name": "apiSecret",
-            "baseName": "apiSecret",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "apiPassphrase",
-            "baseName": "apiPassphrase",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "apiUid",
-            "baseName": "apiUid",
+            "name": "expiresAt",
+            "baseName": "expiresAt",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ConnectWalletRequest.attributeTypeMap;
+        return GetOTTToken200Response.attributeTypeMap;
     }
 
     public constructor() {

@@ -4,12 +4,12 @@ All URIs are relative to *https://api-bluvo.com*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**walletTransactions**](TransactionsApi.md#walletTransactions) | **GET** /v0/cex/cex/wallet/{walletId}/transactions | Wallet Transactions
-[**withdrawFunds**](TransactionsApi.md#withdrawFunds) | **PUT** /v0/cex/cex/wallet/{walletId}/transact/out | Withdraw Funds
+[**listTransactions**](TransactionsApi.md#listTransactions) | **GET** /v0/cex/wallet/{walletId}/transactions | List Transactions
+[**withdrawFunds**](TransactionsApi.md#withdrawFunds) | **PUT** /v0/cex/wallet/withdraw | Withdraw Funds
 
 
-# **walletTransactions**
-> WalletTransactions200Response walletTransactions()
+# **listTransactions**
+> ListTransactions200Response listTransactions()
 
 Retrieve a paginated list of transactions for a specific wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers. Supports pagination, filtering by asset, type, date range, and status, as well as field selection to control which properties are returned in the response.
 
@@ -18,13 +18,13 @@ Retrieve a paginated list of transactions for a specific wallet. This endpoint r
 
 ```typescript
 import { createConfiguration, TransactionsApi } from '';
-import type { TransactionsApiWalletTransactionsRequest } from '';
+import type { TransactionsApiListTransactionsRequest } from '';
 
 const configuration = createConfiguration();
 const apiInstance = new TransactionsApi(configuration);
 
-const request: TransactionsApiWalletTransactionsRequest = {
-    // The unique identifier of the connected wallet to query transactions for.
+const request: TransactionsApiListTransactionsRequest = {
+  
   walletId: "walletId_example",
     // Optional. Page number for pagination (0-indexed). Defaults to 0. (optional)
   page: 0,
@@ -44,7 +44,7 @@ const request: TransactionsApiWalletTransactionsRequest = {
   fields: "fields_example",
 };
 
-const data = await apiInstance.walletTransactions(request);
+const data = await apiInstance.listTransactions(request);
 console.log('API called successfully. Returned data:', data);
 ```
 
@@ -53,7 +53,7 @@ console.log('API called successfully. Returned data:', data);
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **walletId** | [**string**] | The unique identifier of the connected wallet to query transactions for. | defaults to undefined
+ **walletId** | [**string**] |  | defaults to undefined
  **page** | [**number**] | Optional. Page number for pagination (0-indexed). Defaults to 0. | (optional) defaults to undefined
  **limit** | [**number**] | Optional. Maximum number of transactions to return per page. Defaults to 10. Maximum value is 1000. | (optional) defaults to undefined
  **asset** | [**string**] | Optional. Filter transactions by asset symbol. | (optional) defaults to undefined
@@ -66,11 +66,11 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**WalletTransactions200Response**
+**ListTransactions200Response**
 
 ### Authorization
 
-[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey)
+[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey), [bluvoProjectId](README.md#bluvoProjectId), [bluvoWalletId](README.md#bluvoWalletId)
 
 ### HTTP request headers
 
@@ -101,8 +101,6 @@ const configuration = createConfiguration();
 const apiInstance = new TransactionsApi(configuration);
 
 const request: TransactionsApiWithdrawFundsRequest = {
-    // The unique identifier of the wallet to withdraw funds from.
-  walletId: "walletId_example",
   
   withdrawFundsRequest: {
     asset: "asset_example",
@@ -123,7 +121,6 @@ console.log('API called successfully. Returned data:', data);
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **withdrawFundsRequest** | **WithdrawFundsRequest**|  |
- **walletId** | [**string**] | The unique identifier of the wallet to withdraw funds from. | defaults to undefined
 
 
 ### Return type
@@ -132,7 +129,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey)
+[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey), [bluvoProjectId](README.md#bluvoProjectId), [bluvoWalletId](README.md#bluvoWalletId)
 
 ### HTTP request headers
 

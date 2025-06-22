@@ -12,7 +12,7 @@
 
 import { HttpFile } from '../http/http';
 
-export class WalletTransactions200ResponseTransactionsInner {
+export class ListTransactions200ResponseTransactionsInner {
     /**
     * The unique identifier of the transaction
     */
@@ -131,7 +131,7 @@ export class WalletTransactions200ResponseTransactionsInner {
         }    ];
 
     static getAttributeTypeMap() {
-        return WalletTransactions200ResponseTransactionsInner.attributeTypeMap;
+        return ListTransactions200ResponseTransactionsInner.attributeTypeMap;
     }
 
     public constructor() {

@@ -30,8 +30,6 @@ const request: WalletsApiConnectWalletRequest = {
   exchange: "ace",
   
   connectWalletRequest: {
-    projectId: "projectId_example",
-    walletId: "walletId_example",
     apiKey: "apiKey_example",
     apiSecret: "apiSecret_example",
     apiPassphrase: "apiPassphrase_example",
@@ -58,7 +56,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey)
+[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey), [bluvoProjectId](README.md#bluvoProjectId), [bluvoWalletId](README.md#bluvoWalletId)
 
 ### HTTP request headers
 
@@ -89,7 +87,7 @@ const configuration = createConfiguration();
 const apiInstance = new WalletsApi(configuration);
 
 const request: WalletsApiDeleteWalletRequest = {
-    // The unique identifier of the connected wallet to delete.
+  
   walletId: "walletId_example",
 };
 
@@ -102,7 +100,7 @@ console.log('API called successfully. Returned data:', data);
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **walletId** | [**string**] | The unique identifier of the connected wallet to delete. | defaults to undefined
+ **walletId** | [**string**] |  | defaults to undefined
 
 
 ### Return type
@@ -111,7 +109,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey)
+[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey), [bluvoProjectId](README.md#bluvoProjectId), [bluvoWalletId](README.md#bluvoWalletId)
 
 ### HTTP request headers
 
@@ -142,7 +140,7 @@ const configuration = createConfiguration();
 const apiInstance = new WalletsApi(configuration);
 
 const request: WalletsApiGetWalletRequest = {
-    // The unique identifier of the connected wallet to query.
+  
   walletId: "walletId_example",
 };
 
@@ -155,7 +153,7 @@ console.log('API called successfully. Returned data:', data);
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **walletId** | [**string**] | The unique identifier of the connected wallet to query. | defaults to undefined
+ **walletId** | [**string**] |  | defaults to undefined
 
 
 ### Return type
@@ -164,7 +162,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey)
+[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey), [bluvoProjectId](README.md#bluvoProjectId), [bluvoWalletId](README.md#bluvoWalletId)
 
 ### HTTP request headers
 
@@ -241,7 +239,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey)
+[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey), [bluvoProjectId](README.md#bluvoProjectId)
 
 ### HTTP request headers
 

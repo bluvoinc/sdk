@@ -3,18 +3,19 @@ export * from '../models/Asset200ResponseAssetsInner';
 export * from '../models/ConnectWallet200Response';
 export * from '../models/ConnectWalletRequest';
 export * from '../models/DeleteWallet200Response';
+export * from '../models/GetOTTToken200Response';
 export * from '../models/GetWallet200Response';
 export * from '../models/GetWorkflow200Response';
 export * from '../models/GetWorkflow200ResponseStepsInner';
 export * from '../models/ListAssets200Response';
 export * from '../models/ListAssets200ResponseAssetsInner';
 export * from '../models/ListPairs200Response';
+export * from '../models/ListTransactions200Response';
+export * from '../models/ListTransactions200ResponsePagination';
+export * from '../models/ListTransactions200ResponseTransactionsInner';
 export * from '../models/ListWallets200Response';
 export * from '../models/ListWallets200ResponsePagination';
 export * from '../models/ListWallets200ResponseWalletsInner';
-export * from '../models/WalletTransactions200Response';
-export * from '../models/WalletTransactions200ResponsePagination';
-export * from '../models/WalletTransactions200ResponseTransactionsInner';
 export * from '../models/WithdrawFunds200Response';
 export * from '../models/WithdrawFundsRequest';
 
@@ -23,18 +24,19 @@ import { Asset200ResponseAssetsInner } from '../models/Asset200ResponseAssetsInn
 import { ConnectWallet200Response } from '../models/ConnectWallet200Response';
 import { ConnectWalletRequest } from '../models/ConnectWalletRequest';
 import { DeleteWallet200Response } from '../models/DeleteWallet200Response';
+import { GetOTTToken200Response } from '../models/GetOTTToken200Response';
 import { GetWallet200Response } from '../models/GetWallet200Response';
 import { GetWorkflow200Response } from '../models/GetWorkflow200Response';
 import { GetWorkflow200ResponseStepsInner   , GetWorkflow200ResponseStepsInnerStateEnum   } from '../models/GetWorkflow200ResponseStepsInner';
 import { ListAssets200Response } from '../models/ListAssets200Response';
 import { ListAssets200ResponseAssetsInner } from '../models/ListAssets200ResponseAssetsInner';
 import { ListPairs200Response } from '../models/ListPairs200Response';
+import { ListTransactions200Response } from '../models/ListTransactions200Response';
+import { ListTransactions200ResponsePagination } from '../models/ListTransactions200ResponsePagination';
+import { ListTransactions200ResponseTransactionsInner } from '../models/ListTransactions200ResponseTransactionsInner';
 import { ListWallets200Response } from '../models/ListWallets200Response';
 import { ListWallets200ResponsePagination } from '../models/ListWallets200ResponsePagination';
 import { ListWallets200ResponseWalletsInner } from '../models/ListWallets200ResponseWalletsInner';
-import { WalletTransactions200Response } from '../models/WalletTransactions200Response';
-import { WalletTransactions200ResponsePagination } from '../models/WalletTransactions200ResponsePagination';
-import { WalletTransactions200ResponseTransactionsInner } from '../models/WalletTransactions200ResponseTransactionsInner';
 import { WithdrawFunds200Response } from '../models/WithdrawFunds200Response';
 import { WithdrawFundsRequest } from '../models/WithdrawFundsRequest';
 
@@ -60,18 +62,19 @@ let typeMap: {[index: string]: any} = {
     "ConnectWallet200Response": ConnectWallet200Response,
     "ConnectWalletRequest": ConnectWalletRequest,
     "DeleteWallet200Response": DeleteWallet200Response,
+    "GetOTTToken200Response": GetOTTToken200Response,
     "GetWallet200Response": GetWallet200Response,
     "GetWorkflow200Response": GetWorkflow200Response,
     "GetWorkflow200ResponseStepsInner": GetWorkflow200ResponseStepsInner,
     "ListAssets200Response": ListAssets200Response,
     "ListAssets200ResponseAssetsInner": ListAssets200ResponseAssetsInner,
     "ListPairs200Response": ListPairs200Response,
+    "ListTransactions200Response": ListTransactions200Response,
+    "ListTransactions200ResponsePagination": ListTransactions200ResponsePagination,
+    "ListTransactions200ResponseTransactionsInner": ListTransactions200ResponseTransactionsInner,
     "ListWallets200Response": ListWallets200Response,
     "ListWallets200ResponsePagination": ListWallets200ResponsePagination,
     "ListWallets200ResponseWalletsInner": ListWallets200ResponseWalletsInner,
-    "WalletTransactions200Response": WalletTransactions200Response,
-    "WalletTransactions200ResponsePagination": WalletTransactions200ResponsePagination,
-    "WalletTransactions200ResponseTransactionsInner": WalletTransactions200ResponseTransactionsInner,
     "WithdrawFunds200Response": WithdrawFunds200Response,
     "WithdrawFundsRequest": WithdrawFundsRequest,
 }

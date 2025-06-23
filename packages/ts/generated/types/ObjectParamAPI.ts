@@ -11,6 +11,7 @@ import { GetOTTToken200Response } from '../models/GetOTTToken200Response';
 import { GetWallet200Response } from '../models/GetWallet200Response';
 import { GetWorkflow200Response } from '../models/GetWorkflow200Response';
 import { GetWorkflow200ResponseStepsInner } from '../models/GetWorkflow200ResponseStepsInner';
+import { GetWorkflow200ResponseStepsInnerErrorsInner } from '../models/GetWorkflow200ResponseStepsInnerErrorsInner';
 import { ListAssets200Response } from '../models/ListAssets200Response';
 import { ListAssets200ResponseAssetsInner } from '../models/ListAssets200ResponseAssetsInner';
 import { ListPairs200Response } from '../models/ListPairs200Response';
@@ -144,17 +145,17 @@ export class ObjectBasicApi {
 
 }
 
-import { ObservableOTTApi } from "./ObservableAPI";
-import { OTTApiRequestFactory, OTTApiResponseProcessor} from "../apis/OTTApi";
+import { ObservableOneTimeTokenApi } from "./ObservableAPI";
+import { OneTimeTokenApiRequestFactory, OneTimeTokenApiResponseProcessor} from "../apis/OneTimeTokenApi";
 
-export interface OTTApiGetOTTTokenRequest {
+export interface OneTimeTokenApiGetOTTTokenRequest {
 }
 
-export class ObjectOTTApi {
-    private api: ObservableOTTApi
+export class ObjectOneTimeTokenApi {
+    private api: ObservableOneTimeTokenApi
 
-    public constructor(configuration: Configuration, requestFactory?: OTTApiRequestFactory, responseProcessor?: OTTApiResponseProcessor) {
-        this.api = new ObservableOTTApi(configuration, requestFactory, responseProcessor);
+    public constructor(configuration: Configuration, requestFactory?: OneTimeTokenApiRequestFactory, responseProcessor?: OneTimeTokenApiResponseProcessor) {
+        this.api = new ObservableOneTimeTokenApi(configuration, requestFactory, responseProcessor);
     }
 
     /**
@@ -162,7 +163,7 @@ export class ObjectOTTApi {
      * Get OTT Token
      * @param param the request object
      */
-    public getOTTTokenWithHttpInfo(param: OTTApiGetOTTTokenRequest = {}, options?: ConfigurationOptions): Promise<HttpInfo<GetOTTToken200Response>> {
+    public getOTTTokenWithHttpInfo(param: OneTimeTokenApiGetOTTTokenRequest = {}, options?: ConfigurationOptions): Promise<HttpInfo<GetOTTToken200Response>> {
         return this.api.getOTTTokenWithHttpInfo( options).toPromise();
     }
 
@@ -171,7 +172,7 @@ export class ObjectOTTApi {
      * Get OTT Token
      * @param param the request object
      */
-    public getOTTToken(param: OTTApiGetOTTTokenRequest = {}, options?: ConfigurationOptions): Promise<GetOTTToken200Response> {
+    public getOTTToken(param: OneTimeTokenApiGetOTTTokenRequest = {}, options?: ConfigurationOptions): Promise<GetOTTToken200Response> {
         return this.api.getOTTToken( options).toPromise();
     }
 

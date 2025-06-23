@@ -1,15 +1,14 @@
 .gitattributes
 .gitignore
-.openapi-generator-ignore
 BasicApi.md
-OTTApi.md
+OneTimeTokenApi.md
 PricesApi.md
 README.md
 TransactionsApi.md
 WalletsApi.md
 WorkflowApi.md
 apis/BasicApi.ts
-apis/OTTApi.ts
+apis/OneTimeTokenApi.ts
 apis/PricesApi.ts
 apis/TransactionsApi.ts
 apis/WalletsApi.ts
@@ -32,6 +31,7 @@ models/GetOTTToken200Response.ts
 models/GetWallet200Response.ts
 models/GetWorkflow200Response.ts
 models/GetWorkflow200ResponseStepsInner.ts
+models/GetWorkflow200ResponseStepsInnerErrorsInner.ts
 models/ListAssets200Response.ts
 models/ListAssets200ResponseAssetsInner.ts
 models/ListPairs200Response.ts

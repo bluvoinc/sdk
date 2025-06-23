@@ -12,6 +12,7 @@ import { GetOTTToken200Response } from '../models/GetOTTToken200Response';
 import { GetWallet200Response } from '../models/GetWallet200Response';
 import { GetWorkflow200Response } from '../models/GetWorkflow200Response';
 import { GetWorkflow200ResponseStepsInner } from '../models/GetWorkflow200ResponseStepsInner';
+import { GetWorkflow200ResponseStepsInnerErrorsInner } from '../models/GetWorkflow200ResponseStepsInnerErrorsInner';
 import { ListAssets200Response } from '../models/ListAssets200Response';
 import { ListAssets200ResponseAssetsInner } from '../models/ListAssets200ResponseAssetsInner';
 import { ListPairs200Response } from '../models/ListPairs200Response';
@@ -150,20 +151,20 @@ export class ObservableBasicApi {
 
 }
 
-import { OTTApiRequestFactory, OTTApiResponseProcessor} from "../apis/OTTApi";
-export class ObservableOTTApi {
-    private requestFactory: OTTApiRequestFactory;
-    private responseProcessor: OTTApiResponseProcessor;
+import { OneTimeTokenApiRequestFactory, OneTimeTokenApiResponseProcessor} from "../apis/OneTimeTokenApi";
+export class ObservableOneTimeTokenApi {
+    private requestFactory: OneTimeTokenApiRequestFactory;
+    private responseProcessor: OneTimeTokenApiResponseProcessor;
     private configuration: Configuration;
 
     public constructor(
         configuration: Configuration,
-        requestFactory?: OTTApiRequestFactory,
-        responseProcessor?: OTTApiResponseProcessor
+        requestFactory?: OneTimeTokenApiRequestFactory,
+        responseProcessor?: OneTimeTokenApiResponseProcessor
     ) {
         this.configuration = configuration;
-        this.requestFactory = requestFactory || new OTTApiRequestFactory(configuration);
-        this.responseProcessor = responseProcessor || new OTTApiResponseProcessor();
+        this.requestFactory = requestFactory || new OneTimeTokenApiRequestFactory(configuration);
+        this.responseProcessor = responseProcessor || new OneTimeTokenApiResponseProcessor();
     }
 
     /**

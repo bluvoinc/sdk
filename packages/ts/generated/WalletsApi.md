@@ -34,6 +34,9 @@ const request: WalletsApiConnectWalletRequest = {
     apiSecret: "apiSecret_example",
     apiPassphrase: "apiPassphrase_example",
     apiUid: "apiUid_example",
+    ips: [
+      "ips_example",
+    ],
   },
 };
 

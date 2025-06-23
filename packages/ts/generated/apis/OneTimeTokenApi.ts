@@ -8,30 +8,22 @@ import {canConsumeForm, isCodeInRange} from '../util';
 import {SecurityAuthentication} from '../auth/auth';
 
 
-import { GetWorkflow200Response } from '../models/GetWorkflow200Response';
+import { GetOTTToken200Response } from '../models/GetOTTToken200Response';
 
 /**
  * no description
  */
-export class WorkflowApiRequestFactory extends BaseAPIRequestFactory {
+export class OneTimeTokenApiRequestFactory extends BaseAPIRequestFactory {
 
     /**
-     * Retrieve the status of a specific workflow run. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
-     * Get Workflow
-     * @param workflowRunId The unique identifier of the workflow run to query.
+     * Retrieve an OTT (One-Time Token) for accessing private endpoints. This endpoint does not require authentication and is used to obtain a temporary token that can be used for subsequent requests to private endpoints.
+     * Get OTT Token
      */
-    public async getWorkflow(workflowRunId: string, _options?: Configuration): Promise<RequestContext> {
+    public async getOTTToken(_options?: Configuration): Promise<RequestContext> {
         let _config = _options || this.configuration;
 
-        // verify required parameter 'workflowRunId' is not null or undefined
-        if (workflowRunId === null || workflowRunId === undefined) {
-            throw new RequiredError("WorkflowApi", "getWorkflow", "workflowRunId");
-        }
-
-
         // Path Params
-        const localVarPath = '/v0/workflow/runs/{workflowRunId}'
-            .replace('{' + 'workflowRunId' + '}', encodeURIComponent(String(workflowRunId)));
+        const localVarPath = '/v0/ott/token';
 
         // Make Request Context
         const requestContext = _config.baseServer.makeRequestContext(localVarPath, HttpMethod.GET);
@@ -65,31 +57,31 @@ export class WorkflowApiRequestFactory extends BaseAPIRequestFactory {
 
 }
 
-export class WorkflowApiResponseProcessor {
+export class OneTimeTokenApiResponseProcessor {
 
     /**
      * Unwraps the actual response sent by the server from the response context and deserializes the response content
      * to the expected objects
      *
-     * @params response Response returned by the server for a request to getWorkflow
+     * @params response Response returned by the server for a request to getOTTToken
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async getWorkflowWithHttpInfo(response: ResponseContext): Promise<HttpInfo<GetWorkflow200Response >> {
+     public async getOTTTokenWithHttpInfo(response: ResponseContext): Promise<HttpInfo<GetOTTToken200Response >> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
-            const body: GetWorkflow200Response = ObjectSerializer.deserialize(
+            const body: GetOTTToken200Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "GetWorkflow200Response", ""
-            ) as GetWorkflow200Response;
+                "GetOTTToken200Response", ""
+            ) as GetOTTToken200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml
         if (response.httpStatusCode >= 200 && response.httpStatusCode <= 299) {
-            const body: GetWorkflow200Response = ObjectSerializer.deserialize(
+            const body: GetOTTToken200Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "GetWorkflow200Response", ""
-            ) as GetWorkflow200Response;
+                "GetOTTToken200Response", ""
+            ) as GetOTTToken200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
 

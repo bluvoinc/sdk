@@ -12,19 +12,19 @@
 
 import { HttpFile } from '../http/http';
 
-export class Asset200ResponseAssetsInner {
+export class GetWorkflow200ResponseStepsInnerErrorsInner {
     /**
-    * The asset
+    * HTTP status code of the error
     */
-    'asset': string;
+    'status': number;
     /**
-    * The asset\'s full name
+    * Error message
     */
-    'name': string;
+    'error': string;
     /**
-    * URL of the asset image (if available)
+    * The date and time when the error occurred
     */
-    'img'?: string;
+    'time': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -32,26 +32,26 @@ export class Asset200ResponseAssetsInner {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "asset",
-            "baseName": "asset",
+            "name": "status",
+            "baseName": "status",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "error",
+            "baseName": "error",
             "type": "string",
             "format": ""
         },
         {
-            "name": "name",
-            "baseName": "name",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "img",
-            "baseName": "img",
+            "name": "time",
+            "baseName": "time",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return Asset200ResponseAssetsInner.attributeTypeMap;
+        return GetWorkflow200ResponseStepsInnerErrorsInner.attributeTypeMap;
     }
 
     public constructor() {

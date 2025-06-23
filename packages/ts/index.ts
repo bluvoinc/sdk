@@ -3,7 +3,7 @@ import {
     createConfiguration,
     PricesApi,
     PromiseConfigurationOptions, TransactionsApi,
-    WalletsApi, WithdrawFundsRequest
+    WalletsApi, WithdrawFundsRequest, WorkflowApi
 } from "./generated";
 
 /**
@@ -148,26 +148,24 @@ export class BluvoClient {
         /**
          * Seamlessly connect an external cryptocurrency exchange account to your Bluvo project, enabling secure API-level
          * access for automated trading, portfolio tracking, and exchange integrations.
-         * 
+         *
          * This method securely stores your exchange credentials and establishes a persistent connection that maintains
          * synchronization between your Bluvo project and the exchange account. All credentials are encrypted at rest
          * and in transit using industry-standard encryption protocols.
-         * 
-         * @param exchange The identifier of the exchange to connect (e.g. 'binance', 'kraken'). Supports major exchanges 
+         *
+         * @param exchange The identifier of the exchange to connect (e.g. 'binance', 'kraken'). Supports major exchanges
          *                 including Binance, Coinbase, Kraken, Kucoin, and OKX with consistent API interfaces across all platforms.
          * @param walletId A unique identifier for this wallet connection within your project. Use a descriptive ID that helps
          *                 you easily identify this particular connection in your application logic.
-         * @param apiKey The API key generated from your exchange account settings. Must have appropriate permissions for
+         * @param request
+         * @param _options
          *               the operations you intend to perform (e.g., read-only for portfolio tracking, trading permissions for order execution).
-         * @param apiSecret The API secret that pairs with your API key. Never shared in plaintext and securely stored using
          *                  encryption on Bluvo servers.
-         * @param apiPassphrase Optional. Additional authentication factor required by some exchanges (e.g., KuCoin).
          *                      Consult your specific exchange's API documentation for requirements.
-         * @param apiUid Optional. User ID or account identifier required by certain exchanges for API authentication.
          *               Refer to the exchange-specific documentation to determine if this is needed.
-         * 
+         *
          * @returns A promise that resolves to a confirmation object with connection status and wallet details.
-         * 
+         *
          * @example
          * // Connect a Binance account
          * const connection = await client.wallet.connect(
@@ -180,18 +178,9 @@ export class BluvoClient {
         connect: (
             exchange: 'binance' | 'coinbase' | 'kraken' | 'kucoin' | 'okx' | string,
             walletId: string,
-            apiKey: string,
-            apiSecret: string,
-            apiPassphrase?: string,
-            apiUid?: string,
+            request: ConnectWalletRequest,
             _options?: PromiseConfigurationOptions
         ) => {
-            const request: ConnectWalletRequest = {
-                apiKey,
-                apiSecret,
-                apiPassphrase,
-                apiUid
-            };
             return new WalletsApi(this.configuration(walletId))
                 .connectWallet(exchange as any, request, _options);
         },
@@ -463,6 +452,13 @@ export class BluvoClient {
                     );
             }
 
+        }
+    }
+
+    workflow = {
+        get: (workflowRunId: string, _options?: PromiseConfigurationOptions) => {
+            return new WorkflowApi(this.configuration())
+                .getWorkflow(workflowRunId)
         }
     }
 

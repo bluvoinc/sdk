@@ -7,6 +7,7 @@ export * from '../models/GetOTTToken200Response';
 export * from '../models/GetWallet200Response';
 export * from '../models/GetWorkflow200Response';
 export * from '../models/GetWorkflow200ResponseStepsInner';
+export * from '../models/GetWorkflow200ResponseStepsInnerErrorsInner';
 export * from '../models/ListAssets200Response';
 export * from '../models/ListAssets200ResponseAssetsInner';
 export * from '../models/ListPairs200Response';
@@ -27,7 +28,8 @@ import { DeleteWallet200Response } from '../models/DeleteWallet200Response';
 import { GetOTTToken200Response } from '../models/GetOTTToken200Response';
 import { GetWallet200Response } from '../models/GetWallet200Response';
 import { GetWorkflow200Response } from '../models/GetWorkflow200Response';
-import { GetWorkflow200ResponseStepsInner   , GetWorkflow200ResponseStepsInnerStateEnum   } from '../models/GetWorkflow200ResponseStepsInner';
+import { GetWorkflow200ResponseStepsInner   , GetWorkflow200ResponseStepsInnerStateEnum     } from '../models/GetWorkflow200ResponseStepsInner';
+import { GetWorkflow200ResponseStepsInnerErrorsInner } from '../models/GetWorkflow200ResponseStepsInnerErrorsInner';
 import { ListAssets200Response } from '../models/ListAssets200Response';
 import { ListAssets200ResponseAssetsInner } from '../models/ListAssets200ResponseAssetsInner';
 import { ListPairs200Response } from '../models/ListPairs200Response';
@@ -66,6 +68,7 @@ let typeMap: {[index: string]: any} = {
     "GetWallet200Response": GetWallet200Response,
     "GetWorkflow200Response": GetWorkflow200Response,
     "GetWorkflow200ResponseStepsInner": GetWorkflow200ResponseStepsInner,
+    "GetWorkflow200ResponseStepsInnerErrorsInner": GetWorkflow200ResponseStepsInnerErrorsInner,
     "ListAssets200Response": ListAssets200Response,
     "ListAssets200ResponseAssetsInner": ListAssets200ResponseAssetsInner,
     "ListPairs200Response": ListPairs200Response,

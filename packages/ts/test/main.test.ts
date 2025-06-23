@@ -62,8 +62,10 @@ describe('live HTTP calls tests', ()=>{
                 .connect(
                     'binance',
                     newWalletId,
-                    sec.binance.apiKey,
-                    sec.binance.apiSecret
+                    {
+                        apiKey:         sec.binance.apiKey,
+                        apiSecret:      sec.binance.secret,
+                    }
                 );
 
             console.log(res); // 'wfr_${newWalletId}_connect';

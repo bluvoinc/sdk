@@ -61,7 +61,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bluvoOtt](README.md#bluvoOtt), [bluvoOttActionId](README.md#bluvoOttActionId), [bluvoWalletId](README.md#bluvoWalletId)
+[bluvoOrgId](README.md#bluvoOrgId), [bluvoOtt](README.md#bluvoOtt), [bluvoOttActionId](README.md#bluvoOttActionId), [bluvoProjectId](README.md#bluvoProjectId), [bluvoWalletId](README.md#bluvoWalletId)
 
 ### HTTP request headers
 
@@ -86,11 +86,17 @@ Retrieve an OTT (One-Time Token) for accessing private endpoints. This endpoint 
 
 ```typescript
 import { createConfiguration, OneTimeTokenApi } from '';
+import type { OneTimeTokenApiGetOTTTokenRequest } from '';
 
 const configuration = createConfiguration();
 const apiInstance = new OneTimeTokenApi(configuration);
 
-const request = {};
+const request: OneTimeTokenApiGetOTTTokenRequest = {
+    // Optional. If true, the response will include a One-Time Token (OTT) for accessing private endpoints. (optional)
+  wantOtt: "true",
+    // Optional. If true, the response will include a subscription token for WebSocket streaming of workflow updates. (optional)
+  wantSubscribe: "true",
+};
 
 const data = await apiInstance.getOTTToken(request);
 console.log('API called successfully. Returned data:', data);
@@ -98,7 +104,11 @@ console.log('API called successfully. Returned data:', data);
 
 
 ### Parameters
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **wantOtt** | [**&#39;true&#39; | &#39;false&#39;**]**Array<&#39;true&#39; &#124; &#39;false&#39;>** | Optional. If true, the response will include a One-Time Token (OTT) for accessing private endpoints. | (optional) defaults to undefined
+ **wantSubscribe** | [**&#39;true&#39; | &#39;false&#39;**]**Array<&#39;true&#39; &#124; &#39;false&#39;>** | Optional. If true, the response will include a subscription token for WebSocket streaming of workflow updates. | (optional) defaults to undefined
 
 
 ### Return type
@@ -166,7 +176,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bluvoOtt](README.md#bluvoOtt), [bluvoOttActionId](README.md#bluvoOttActionId), [bluvoWalletId](README.md#bluvoWalletId)
+[bluvoOrgId](README.md#bluvoOrgId), [bluvoOtt](README.md#bluvoOtt), [bluvoOttActionId](README.md#bluvoOttActionId), [bluvoProjectId](README.md#bluvoProjectId), [bluvoWalletId](README.md#bluvoWalletId)
 
 ### HTTP request headers
 

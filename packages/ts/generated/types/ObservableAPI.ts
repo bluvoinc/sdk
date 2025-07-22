@@ -261,11 +261,13 @@ export class ObservableOneTimeTokenApi {
     /**
      * Retrieve an OTT (One-Time Token) for accessing private endpoints. This endpoint requires authentication via a valid Bluvo API Key and accepts an optional \'x-bluvo-wallet-id\' header to tie the token to a specific wallet. The token can then be used for subsequent requests to OTT-enabled endpoints.
      * Get OTT Token
+     * @param [wantOtt] Optional. If true, the response will include a One-Time Token (OTT) for accessing private endpoints.
+     * @param [wantSubscribe] Optional. If true, the response will include a subscription token for WebSocket streaming of workflow updates.
      */
-    public getOTTTokenWithHttpInfo(_options?: ConfigurationOptions): Observable<HttpInfo<GetOTTToken200Response>> {
+    public getOTTTokenWithHttpInfo(wantOtt?: 'true' | 'false', wantSubscribe?: 'true' | 'false', _options?: ConfigurationOptions): Observable<HttpInfo<GetOTTToken200Response>> {
         const _config = mergeConfiguration(this.configuration, _options);
 
-        const requestContextPromise = this.requestFactory.getOTTToken(_config);
+        const requestContextPromise = this.requestFactory.getOTTToken(wantOtt, wantSubscribe, _config);
         // build promise chain
         let middlewarePreObservable = from<RequestContext>(requestContextPromise);
         for (const middleware of _config.middleware) {
@@ -285,9 +287,11 @@ export class ObservableOneTimeTokenApi {
     /**
      * Retrieve an OTT (One-Time Token) for accessing private endpoints. This endpoint requires authentication via a valid Bluvo API Key and accepts an optional \'x-bluvo-wallet-id\' header to tie the token to a specific wallet. The token can then be used for subsequent requests to OTT-enabled endpoints.
      * Get OTT Token
+     * @param [wantOtt] Optional. If true, the response will include a One-Time Token (OTT) for accessing private endpoints.
+     * @param [wantSubscribe] Optional. If true, the response will include a subscription token for WebSocket streaming of workflow updates.
      */
-    public getOTTToken(_options?: ConfigurationOptions): Observable<GetOTTToken200Response> {
-        return this.getOTTTokenWithHttpInfo(_options).pipe(map((apiResponse: HttpInfo<GetOTTToken200Response>) => apiResponse.data));
+    public getOTTToken(wantOtt?: 'true' | 'false', wantSubscribe?: 'true' | 'false', _options?: ConfigurationOptions): Observable<GetOTTToken200Response> {
+        return this.getOTTTokenWithHttpInfo(wantOtt, wantSubscribe, _options).pipe(map((apiResponse: HttpInfo<GetOTTToken200Response>) => apiResponse.data));
     }
 
     /**

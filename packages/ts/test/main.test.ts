@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {createClient} from "../index";
 import sec from "../sec";
+import {ServerConfiguration} from "../generated";
 
 describe('live HTTP calls tests', ()=>{
 
@@ -105,6 +106,53 @@ describe('live HTTP calls tests', ()=>{
             expect(details.status).toBe('complete');
 
         })
+
+    });
+
+    describe('ott',()=>{
+
+        it('get ott', async () => {
+            const ott = await client
+                .ott
+                .get();
+
+            console.log(ott);
+
+            expect(ott).toBeDefined();
+        });
+
+        it('connect exchange with ott', async () => {
+
+            const newWalletId = crypto.randomUUID()
+
+            const {idem, ott} = await client
+                .ott
+                .get(newWalletId);
+
+            console.log(idem, ott);
+
+            console.log('adding bot with id', newWalletId)
+
+            const res = await client
+                .ott
+                .connect(
+                    {
+                        ott,
+                        exchange: 'binance',
+                        walletId: newWalletId,
+                        idem,
+                    },
+                    {
+                        apiKey:         sec.binance.apiKey,
+                        apiSecret:      sec.binance.secret,
+                    }
+                );
+
+            console.log(res); // 'wfr_${newWalletId}_connect';
+
+            expect(res).toBeDefined();
+        });
+
 
     });
 

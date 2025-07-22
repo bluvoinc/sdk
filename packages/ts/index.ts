@@ -1,8 +1,8 @@
 import {
     ConnectWalletRequest,
-    createConfiguration,
+    createConfiguration, OneTimeTokenApi,
     PricesApi,
-    PromiseConfigurationOptions, TransactionsApi,
+    PromiseConfigurationOptions, ServerConfiguration, TransactionsApi,
     WalletsApi, WithdrawFundsRequest, WorkflowApi
 } from "./generated";
 
@@ -43,6 +43,8 @@ export function createClient(
 ) {
     return BluvoClient.createClient({orgId, projectId, apiKey});
 }
+
+type SupportedExchanges = 'ace' | 'ascendex' | 'bequant' | 'bigone' | 'binance' | 'coinbase' | 'binanceus' | 'bingx' | 'bit2c' | 'bitbank' | 'bitbns' | 'bitcoincom' | 'bitfinex' | 'bitflyer' | 'bitget' | 'bithumb' | 'bitmart' | 'bitmex' | 'bitopro' | 'bitpanda' | 'bitrue' | 'bitso' | 'bitstamp' | 'bitteam' | 'bitvavo' | 'bl3p' | 'blockchaincom' | 'blofin' | 'btcalpha' | 'btcbox' | 'btcmarkets' | 'btcturk' | 'cex' | 'coincheck' | 'coinex' | 'coinlist' | 'coinmate' | 'coinmetro' | 'coinone' | 'coinsph' | 'coinspot' | 'cryptocom' | 'delta' | 'deribit' | 'digifinex' | 'exmo' | 'fmfwio' | 'gate' | 'gateio' | 'gemini' | 'hashkey' | 'hitbtc' | 'hollaex' | 'htx' | 'huobi' | 'huobijp' | 'hyperliquid' | 'independentreserve' | 'indodax' | 'kraken' | 'krakenfutures' | 'kucoin' | 'kucoinfutures' | 'latoken' | 'lbank' | 'luno' | 'mercado' | 'mexc' | 'ndax' | 'novadax' | 'oceanex' | 'okcoin' | 'okx' | 'onetrading' | 'oxfun' | 'p2b' | 'paradex' | 'paymium' | 'phemex' | 'poloniex' | 'poloniexfutures' | 'probit' | 'timex' | 'tradeogre' | 'upbit' | 'vertex' | 'wavesexchange' | 'whitebit' | 'woo' | 'woofipro' | 'xt' | 'yobit' | 'zaif' | 'zonda'
 
 /**
  * The core client class for interacting with Bluvo's cryptocurrency exchange integration platform.
@@ -176,7 +178,7 @@ export class BluvoClient {
          * );
          */
         connect: (
-            exchange: 'binance' | 'coinbase' | 'kraken' | 'kucoin' | 'okx' | string,
+            exchange: SupportedExchanges | string,
             walletId: string,
             idem: string,
             request: ConnectWalletRequest,
@@ -474,6 +476,69 @@ export class BluvoClient {
         }
     }
 
+
+    ott = {
+
+
+        /**
+         * Retrieve a one-time token (OTT) for secure, temporary access to Bluvo's API services.
+         *
+         * This method generates a one-time token that can be used to authenticate API requests without exposing your
+         * permanent API key. The token is valid for a limited time and can be used to perform specific actions like
+         * subscribing to services or accessing sensitive data.
+         *
+         * @param walletId Optional wallet identifier to scope the OTT to a specific wallet connection.
+         *                 If provided, the OTT will be tied to this wallet's permissions and access.
+         * @param wantOtt Optional flag indicating whether to generate a new OTT token. Defaults to true.
+         * @param wantSubscribe Optional flag indicating whether to subscribe the OTT for future use. Defaults to false.
+         *
+         * @returns A promise resolving to an object containing the generated OTT token and its expiration details.
+         */
+        get: (
+            walletId?: string,
+        ) => {
+            return new OneTimeTokenApi(this.configuration(walletId))
+                .getOTTToken(
+                    "true",
+                    "false",
+                )
+        },
+
+        getWithSubscribe: (
+            walletId?: string,
+        ) => {
+            return new OneTimeTokenApi(this.configuration(walletId))
+                .getOTTToken(
+                    "true",
+                    "true",
+                )
+        },
+
+        connect: (
+            {
+                exchange,
+                walletId,
+                idem,
+                ott
+            }: {
+                exchange: SupportedExchanges | string;
+                walletId: string;
+                idem: string;
+                ott: string;
+            },
+            request: ConnectWalletRequest,
+            _options?: PromiseConfigurationOptions
+        ) => {
+            return new OneTimeTokenApi(this.configuration(walletId, ott, idem))
+                .connectWalletOTT(
+                    exchange as any,
+                    idem,
+                    request,
+                    _options
+                )
+        }
+    }
+
     /**
      * Creates and returns a properly configured API client configuration object.
      * 
@@ -491,13 +556,30 @@ export class BluvoClient {
      * @private
      * @returns A fully configured API configuration object ready for use with API clients
      */
-    private configuration(walletId?:string) {
+    private configuration(walletId?:string, ott?:string, idem?:string) {
+        if(!!ott) {
+            return createConfiguration({
+
+                // baseServer: server2, // test
+                //baseServer: new ServerConfiguration<{  }>("http://localhost:8787", {  }),
+
+                authMethods: {
+                    bluvoOrgId: this.orgId,
+                    bluvoProjectId: this.projectId,
+                    bluvoWalletId: walletId,
+                    bluvoOtt: ott,
+                    bluvoOttActionId: idem,
+                },
+            });
+        }
+
+
         return createConfiguration({
             authMethods: {
                 bluvoApiKey: this.apiKey,
                 bluvoOrgId: this.orgId,
                 bluvoProjectId: this.projectId,
-                bluvoWalletId: walletId
+                bluvoWalletId: walletId,
             }
         });
     }

@@ -18,6 +18,10 @@ export class GetOTTToken200Response {
     * The generated OTT token for accessing private endpoints
     */
     'idem': string;
+    /**
+    * The One-Time Token (OTT) for accessing private endpoints. This token is valid for a limited time and can be used to authenticate subsequent requests to private endpoints.
+    */
+    'ott'?: string;
     'topic'?: GetOTTToken200ResponseTopic;
 
     static readonly discriminator: string | undefined = undefined;
@@ -28,6 +32,12 @@ export class GetOTTToken200Response {
         {
             "name": "idem",
             "baseName": "idem",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "ott",
+            "baseName": "ott",
             "type": "string",
             "format": ""
         },

@@ -213,6 +213,20 @@ export interface OneTimeTokenApiConnectWalletOTTRequest {
 }
 
 export interface OneTimeTokenApiGetOTTTokenRequest {
+    /**
+     * Optional. If true, the response will include a One-Time Token (OTT) for accessing private endpoints.
+     * Defaults to: undefined
+     * @type &#39;true&#39; | &#39;false&#39;
+     * @memberof OneTimeTokenApigetOTTToken
+     */
+    wantOtt?: 'true' | 'false'
+    /**
+     * Optional. If true, the response will include a subscription token for WebSocket streaming of workflow updates.
+     * Defaults to: undefined
+     * @type &#39;true&#39; | &#39;false&#39;
+     * @memberof OneTimeTokenApigetOTTToken
+     */
+    wantSubscribe?: 'true' | 'false'
 }
 
 export interface OneTimeTokenApiWithdrawFundsOTTRequest {
@@ -255,7 +269,7 @@ export class ObjectOneTimeTokenApi {
      * @param param the request object
      */
     public getOTTTokenWithHttpInfo(param: OneTimeTokenApiGetOTTTokenRequest = {}, options?: ConfigurationOptions): Promise<HttpInfo<GetOTTToken200Response>> {
-        return this.api.getOTTTokenWithHttpInfo( options).toPromise();
+        return this.api.getOTTTokenWithHttpInfo(param.wantOtt, param.wantSubscribe,  options).toPromise();
     }
 
     /**
@@ -264,7 +278,7 @@ export class ObjectOneTimeTokenApi {
      * @param param the request object
      */
     public getOTTToken(param: OneTimeTokenApiGetOTTTokenRequest = {}, options?: ConfigurationOptions): Promise<GetOTTToken200Response> {
-        return this.api.getOTTToken( options).toPromise();
+        return this.api.getOTTToken(param.wantOtt, param.wantSubscribe,  options).toPromise();
     }
 
     /**

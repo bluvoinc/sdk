@@ -4,10 +4,10 @@ export * from '../models/ConnectWallet200Response';
 export * from '../models/ConnectWalletRequest';
 export * from '../models/DeleteWallet200Response';
 export * from '../models/GetOTTToken200Response';
+export * from '../models/GetOTTToken200ResponseTopic';
 export * from '../models/GetWallet200Response';
 export * from '../models/GetWorkflow200Response';
-export * from '../models/GetWorkflow200ResponseStepsInner';
-export * from '../models/GetWorkflow200ResponseStepsInnerErrorsInner';
+export * from '../models/GetWorkflow200ResponseDetails';
 export * from '../models/ListAssets200Response';
 export * from '../models/ListAssets200ResponseAssetsInner';
 export * from '../models/ListPairs200Response';
@@ -17,6 +17,7 @@ export * from '../models/ListTransactions200ResponseTransactionsInner';
 export * from '../models/ListWallets200Response';
 export * from '../models/ListWallets200ResponsePagination';
 export * from '../models/ListWallets200ResponseWalletsInner';
+export * from '../models/OAuth2Link200Response';
 export * from '../models/WithdrawFunds200Response';
 export * from '../models/WithdrawFundsRequest';
 
@@ -26,10 +27,10 @@ import { ConnectWallet200Response } from '../models/ConnectWallet200Response';
 import { ConnectWalletRequest } from '../models/ConnectWalletRequest';
 import { DeleteWallet200Response } from '../models/DeleteWallet200Response';
 import { GetOTTToken200Response } from '../models/GetOTTToken200Response';
+import { GetOTTToken200ResponseTopic } from '../models/GetOTTToken200ResponseTopic';
 import { GetWallet200Response } from '../models/GetWallet200Response';
 import { GetWorkflow200Response } from '../models/GetWorkflow200Response';
-import { GetWorkflow200ResponseStepsInner   , GetWorkflow200ResponseStepsInnerStateEnum     } from '../models/GetWorkflow200ResponseStepsInner';
-import { GetWorkflow200ResponseStepsInnerErrorsInner } from '../models/GetWorkflow200ResponseStepsInnerErrorsInner';
+import { GetWorkflow200ResponseDetails, GetWorkflow200ResponseDetailsStatusEnum    } from '../models/GetWorkflow200ResponseDetails';
 import { ListAssets200Response } from '../models/ListAssets200Response';
 import { ListAssets200ResponseAssetsInner } from '../models/ListAssets200ResponseAssetsInner';
 import { ListPairs200Response } from '../models/ListPairs200Response';
@@ -39,6 +40,7 @@ import { ListTransactions200ResponseTransactionsInner } from '../models/ListTran
 import { ListWallets200Response } from '../models/ListWallets200Response';
 import { ListWallets200ResponsePagination } from '../models/ListWallets200ResponsePagination';
 import { ListWallets200ResponseWalletsInner } from '../models/ListWallets200ResponseWalletsInner';
+import { OAuth2Link200Response } from '../models/OAuth2Link200Response';
 import { WithdrawFunds200Response } from '../models/WithdrawFunds200Response';
 import { WithdrawFundsRequest } from '../models/WithdrawFundsRequest';
 
@@ -55,7 +57,7 @@ let primitives = [
                  ];
 
 let enumsMap: Set<string> = new Set<string>([
-    "GetWorkflow200ResponseStepsInnerStateEnum",
+    "GetWorkflow200ResponseDetailsStatusEnum",
 ]);
 
 let typeMap: {[index: string]: any} = {
@@ -65,10 +67,10 @@ let typeMap: {[index: string]: any} = {
     "ConnectWalletRequest": ConnectWalletRequest,
     "DeleteWallet200Response": DeleteWallet200Response,
     "GetOTTToken200Response": GetOTTToken200Response,
+    "GetOTTToken200ResponseTopic": GetOTTToken200ResponseTopic,
     "GetWallet200Response": GetWallet200Response,
     "GetWorkflow200Response": GetWorkflow200Response,
-    "GetWorkflow200ResponseStepsInner": GetWorkflow200ResponseStepsInner,
-    "GetWorkflow200ResponseStepsInnerErrorsInner": GetWorkflow200ResponseStepsInnerErrorsInner,
+    "GetWorkflow200ResponseDetails": GetWorkflow200ResponseDetails,
     "ListAssets200Response": ListAssets200Response,
     "ListAssets200ResponseAssetsInner": ListAssets200ResponseAssetsInner,
     "ListPairs200Response": ListPairs200Response,
@@ -78,6 +80,7 @@ let typeMap: {[index: string]: any} = {
     "ListWallets200Response": ListWallets200Response,
     "ListWallets200ResponsePagination": ListWallets200ResponsePagination,
     "ListWallets200ResponseWalletsInner": ListWallets200ResponseWalletsInner,
+    "OAuth2Link200Response": OAuth2Link200Response,
     "WithdrawFunds200Response": WithdrawFunds200Response,
     "WithdrawFundsRequest": WithdrawFundsRequest,
 }

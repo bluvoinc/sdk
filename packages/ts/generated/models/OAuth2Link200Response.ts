@@ -12,11 +12,15 @@
 
 import { HttpFile } from '../http/http';
 
-export class ListPairs200Response {
+export class OAuth2Link200Response {
     /**
-    * List of trading pair symbols (e.g. \'BTC/USDT\')
+    * The URL to which the user should be redirected to complete the OAuth2 flow
     */
-    'pairs': Array<string>;
+    'url': string;
+    /**
+    * Indicates whether the OAuth2 link was successfully created
+    */
+    'success': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -24,14 +28,20 @@ export class ListPairs200Response {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "pairs",
-            "baseName": "pairs",
-            "type": "Array<string>",
+            "name": "url",
+            "baseName": "url",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "success",
+            "baseName": "success",
+            "type": "boolean",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ListPairs200Response.attributeTypeMap;
+        return OAuth2Link200Response.attributeTypeMap;
     }
 
     public constructor() {

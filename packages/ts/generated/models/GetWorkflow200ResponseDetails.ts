@@ -10,15 +10,20 @@
  * Do not edit the class manually.
  */
 
-import { GetWorkflow200ResponseDetails } from '../models/GetWorkflow200ResponseDetails';
 import { HttpFile } from '../http/http';
 
-export class GetWorkflow200Response {
+/**
+* Details about the workflow run status and any errors that occurred
+*/
+export class GetWorkflow200ResponseDetails {
     /**
-    * The unique identifier of the workflow run
+    * The current status of the workflow run
     */
-    'id': string;
-    'details': GetWorkflow200ResponseDetails;
+    'status': GetWorkflow200ResponseDetailsStatusEnum;
+    /**
+    * Error message if the workflow failed, null if successful
+    */
+    'error'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -26,22 +31,30 @@ export class GetWorkflow200Response {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "id",
-            "baseName": "id",
-            "type": "string",
+            "name": "status",
+            "baseName": "status",
+            "type": "GetWorkflow200ResponseDetailsStatusEnum",
             "format": ""
         },
         {
-            "name": "details",
-            "baseName": "details",
-            "type": "GetWorkflow200ResponseDetails",
+            "name": "error",
+            "baseName": "error",
+            "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return GetWorkflow200Response.attributeTypeMap;
+        return GetWorkflow200ResponseDetails.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
+
+export enum GetWorkflow200ResponseDetailsStatusEnum {
+    Pending = 'pending',
+    Running = 'running',
+    Complete = 'complete',
+    Failed = 'failed'
+}
+

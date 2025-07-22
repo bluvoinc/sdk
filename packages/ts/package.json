@@ -1,7 +1,7 @@
 {
   "name": "@bluvo/sdk-ts",
   "main": "index.ts",
-  "version": "1.1.0",
+  "version": "1.1.8",
   "description": "Bluvo SDK for TypeScript",
   "author": "Bluvo Inc.",
   "license": "MIT",

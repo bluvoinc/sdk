@@ -178,11 +178,17 @@ export class BluvoClient {
         connect: (
             exchange: 'binance' | 'coinbase' | 'kraken' | 'kucoin' | 'okx' | string,
             walletId: string,
+            idem: string,
             request: ConnectWalletRequest,
             _options?: PromiseConfigurationOptions
         ) => {
             return new WalletsApi(this.configuration(walletId))
-                .connectWallet(exchange as any, request, _options);
+                .connectWallet(
+                    exchange as any,
+                    idem,
+                    request,
+                    _options
+                );
         },
 
         /**
@@ -214,7 +220,7 @@ export class BluvoClient {
 
         get: (walletId: string, _options?: PromiseConfigurationOptions) => {
             return new WalletsApi(this.configuration(walletId))
-                .getWallet(walletId, _options);
+                .getWallet(_options);
         },
 
         /**
@@ -245,7 +251,7 @@ export class BluvoClient {
 
         delete: (walletId: string, _options?: PromiseConfigurationOptions) => {
             return new WalletsApi(this.configuration(walletId))
-                .deleteWallet(walletId, _options);
+                .deleteWallet(_options);
         },
 
         /**
@@ -370,7 +376,7 @@ export class BluvoClient {
 
             list: (walletId: string, page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: PromiseConfigurationOptions) => {
                 return new TransactionsApi(this.configuration(walletId))
-                    .listTransactions(walletId, page, limit, asset, type, since, before, status, fields, _options);
+                    .listTransactions(page, limit, asset, type, since, before, status, fields, _options);
             },
 
             /**
@@ -456,9 +462,15 @@ export class BluvoClient {
     }
 
     workflow = {
-        get: (workflowRunId: string, _options?: PromiseConfigurationOptions) => {
+        get: (
+            workflowRunId: string,
+            workflowType: "connect" | "withdraw" | "oauth2",
+            _options?: PromiseConfigurationOptions) => {
             return new WorkflowApi(this.configuration())
-                .getWorkflow(workflowRunId)
+                .getWorkflow(
+                    workflowRunId,
+                    workflowType,
+                )
         }
     }
 

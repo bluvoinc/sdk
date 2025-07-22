@@ -101,13 +101,55 @@ export class BluvoWalletIdAuthentication implements SecurityAuthentication {
     }
 }
 
+/**
+ * Applies apiKey authentication to the request context.
+ */
+export class BluvoOttAuthentication implements SecurityAuthentication {
+    /**
+     * Configures this api key authentication with the necessary properties
+     *
+     * @param apiKey: The api key to be used for every request
+     */
+    public constructor(private apiKey: string) {}
+
+    public getName(): string {
+        return "bluvoOtt";
+    }
+
+    public applySecurityAuthentication(context: RequestContext) {
+        context.setHeaderParam("x-bluvo-ott", this.apiKey);
+    }
+}
+
+/**
+ * Applies apiKey authentication to the request context.
+ */
+export class BluvoOttActionIdAuthentication implements SecurityAuthentication {
+    /**
+     * Configures this api key authentication with the necessary properties
+     *
+     * @param apiKey: The api key to be used for every request
+     */
+    public constructor(private apiKey: string) {}
+
+    public getName(): string {
+        return "bluvoOttActionId";
+    }
+
+    public applySecurityAuthentication(context: RequestContext) {
+        context.setHeaderParam("x-bluvo-ott-action-id", this.apiKey);
+    }
+}
+
 
 export type AuthMethods = {
     "default"?: SecurityAuthentication,
     "bluvoOrgId"?: SecurityAuthentication,
     "bluvoProjectId"?: SecurityAuthentication,
     "bluvoApiKey"?: SecurityAuthentication,
-    "bluvoWalletId"?: SecurityAuthentication
+    "bluvoWalletId"?: SecurityAuthentication,
+    "bluvoOtt"?: SecurityAuthentication,
+    "bluvoOttActionId"?: SecurityAuthentication
 }
 
 export type ApiKeyConfiguration = string;
@@ -121,7 +163,9 @@ export type AuthMethodsConfiguration = {
     "bluvoOrgId"?: ApiKeyConfiguration,
     "bluvoProjectId"?: ApiKeyConfiguration,
     "bluvoApiKey"?: ApiKeyConfiguration,
-    "bluvoWalletId"?: ApiKeyConfiguration
+    "bluvoWalletId"?: ApiKeyConfiguration,
+    "bluvoOtt"?: ApiKeyConfiguration,
+    "bluvoOttActionId"?: ApiKeyConfiguration
 }
 
 /**
@@ -157,6 +201,18 @@ export function configureAuthMethods(config: AuthMethodsConfiguration | undefine
     if (config["bluvoWalletId"]) {
         authMethods["bluvoWalletId"] = new BluvoWalletIdAuthentication(
             config["bluvoWalletId"]
+        );
+    }
+
+    if (config["bluvoOtt"]) {
+        authMethods["bluvoOtt"] = new BluvoOttAuthentication(
+            config["bluvoOtt"]
+        );
+    }
+
+    if (config["bluvoOttActionId"]) {
+        authMethods["bluvoOttActionId"] = new BluvoOttActionIdAuthentication(
+            config["bluvoOttActionId"]
         );
     }
 

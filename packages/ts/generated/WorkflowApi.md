@@ -4,13 +4,13 @@ All URIs are relative to *https://api-bluvo.com*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**getWorkflow**](WorkflowApi.md#getWorkflow) | **GET** /v0/workflow/runs/{workflowRunId} | Get Workflow
+[**getWorkflow**](WorkflowApi.md#getWorkflow) | **GET** /v0/workflow/{workflowType}/get/{workflowRunId} | Get Workflow
 
 
 # **getWorkflow**
 > GetWorkflow200Response getWorkflow()
 
-Retrieve the status of a specific workflow run. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
+Retrieve the details of a specific workflow run by its ID. The workflowType parameter indicates the type of workflow (e.g. \'connect\', \'withdraw\', \'oauth2\'). This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
 
 ### Example
 
@@ -25,6 +25,8 @@ const apiInstance = new WorkflowApi(configuration);
 const request: WorkflowApiGetWorkflowRequest = {
     // The unique identifier of the workflow run to query.
   workflowRunId: "workflowRunId_example",
+    // The type of workflow to query (e.g. \'connect\', \'withdraw\').
+  workflowType: "connect",
 };
 
 const data = await apiInstance.getWorkflow(request);
@@ -37,6 +39,7 @@ console.log('API called successfully. Returned data:', data);
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **workflowRunId** | [**string**] | The unique identifier of the workflow run to query. | defaults to undefined
+ **workflowType** | [**&#39;connect&#39; | &#39;withdraw&#39; | &#39;oauth2&#39;**]**Array<&#39;connect&#39; &#124; &#39;withdraw&#39; &#124; &#39;oauth2&#39;>** | The type of workflow to query (e.g. \&#39;connect\&#39;, \&#39;withdraw\&#39;). | defaults to undefined
 
 
 ### Return type

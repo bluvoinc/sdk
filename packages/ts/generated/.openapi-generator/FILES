@@ -1,6 +1,7 @@
 .gitattributes
 .gitignore
 BasicApi.md
+OAuth2Api.md
 OneTimeTokenApi.md
 PricesApi.md
 README.md
@@ -8,6 +9,7 @@ TransactionsApi.md
 WalletsApi.md
 WorkflowApi.md
 apis/BasicApi.ts
+apis/OAuth2Api.ts
 apis/OneTimeTokenApi.ts
 apis/PricesApi.ts
 apis/TransactionsApi.ts
@@ -28,10 +30,10 @@ models/ConnectWallet200Response.ts
 models/ConnectWalletRequest.ts
 models/DeleteWallet200Response.ts
 models/GetOTTToken200Response.ts
+models/GetOTTToken200ResponseTopic.ts
 models/GetWallet200Response.ts
 models/GetWorkflow200Response.ts
-models/GetWorkflow200ResponseStepsInner.ts
-models/GetWorkflow200ResponseStepsInnerErrorsInner.ts
+models/GetWorkflow200ResponseDetails.ts
 models/ListAssets200Response.ts
 models/ListAssets200ResponseAssetsInner.ts
 models/ListPairs200Response.ts
@@ -41,6 +43,7 @@ models/ListTransactions200ResponseTransactionsInner.ts
 models/ListWallets200Response.ts
 models/ListWallets200ResponsePagination.ts
 models/ListWallets200ResponseWalletsInner.ts
+models/OAuth2Link200Response.ts
 models/ObjectSerializer.ts
 models/WithdrawFunds200Response.ts
 models/WithdrawFundsRequest.ts

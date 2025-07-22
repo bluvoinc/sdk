@@ -16,11 +16,12 @@ import { GetWorkflow200Response } from '../models/GetWorkflow200Response';
 export class WorkflowApiRequestFactory extends BaseAPIRequestFactory {
 
     /**
-     * Retrieve the status of a specific workflow run. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
+     * Retrieve the details of a specific workflow run by its ID. The workflowType parameter indicates the type of workflow (e.g. \'connect\', \'withdraw\', \'oauth2\'). This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
      * Get Workflow
      * @param workflowRunId The unique identifier of the workflow run to query.
+     * @param workflowType The type of workflow to query (e.g. \&#39;connect\&#39;, \&#39;withdraw\&#39;).
      */
-    public async getWorkflow(workflowRunId: string, _options?: Configuration): Promise<RequestContext> {
+    public async getWorkflow(workflowRunId: string, workflowType: 'connect' | 'withdraw' | 'oauth2', _options?: Configuration): Promise<RequestContext> {
         let _config = _options || this.configuration;
 
         // verify required parameter 'workflowRunId' is not null or undefined
@@ -29,9 +30,16 @@ export class WorkflowApiRequestFactory extends BaseAPIRequestFactory {
         }
 
 
+        // verify required parameter 'workflowType' is not null or undefined
+        if (workflowType === null || workflowType === undefined) {
+            throw new RequiredError("WorkflowApi", "getWorkflow", "workflowType");
+        }
+
+
         // Path Params
-        const localVarPath = '/v0/workflow/runs/{workflowRunId}'
-            .replace('{' + 'workflowRunId' + '}', encodeURIComponent(String(workflowRunId)));
+        const localVarPath = '/v0/workflow/{workflowType}/get/{workflowRunId}'
+            .replace('{' + 'workflowRunId' + '}', encodeURIComponent(String(workflowRunId)))
+            .replace('{' + 'workflowType' + '}', encodeURIComponent(String(workflowType)));
 
         // Make Request Context
         const requestContext = _config.baseServer.makeRequestContext(localVarPath, HttpMethod.GET);

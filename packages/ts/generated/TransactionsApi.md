@@ -4,7 +4,7 @@ All URIs are relative to *https://api-bluvo.com*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**listTransactions**](TransactionsApi.md#listTransactions) | **GET** /v0/cex/wallet/{walletId}/transactions | List Transactions
+[**listTransactions**](TransactionsApi.md#listTransactions) | **GET** /v0/cex/wallet/transactions | List Transactions
 [**withdrawFunds**](TransactionsApi.md#withdrawFunds) | **PUT** /v0/cex/wallet/withdraw | Withdraw Funds
 
 
@@ -24,8 +24,6 @@ const configuration = createConfiguration();
 const apiInstance = new TransactionsApi(configuration);
 
 const request: TransactionsApiListTransactionsRequest = {
-  
-  walletId: "walletId_example",
     // Optional. Page number for pagination (0-indexed). Defaults to 0. (optional)
   page: 0,
     // Optional. Maximum number of transactions to return per page. Defaults to 10. Maximum value is 1000. (optional)
@@ -53,7 +51,6 @@ console.log('API called successfully. Returned data:', data);
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **walletId** | [**string**] |  | defaults to undefined
  **page** | [**number**] | Optional. Page number for pagination (0-indexed). Defaults to 0. | (optional) defaults to undefined
  **limit** | [**number**] | Optional. Maximum number of transactions to return per page. Defaults to 10. Maximum value is 1000. | (optional) defaults to undefined
  **asset** | [**string**] | Optional. Filter transactions by asset symbol. | (optional) defaults to undefined
@@ -88,7 +85,7 @@ Name | Type | Description  | Notes
 # **withdrawFunds**
 > WithdrawFunds200Response withdrawFunds(withdrawFundsRequest)
 
-Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint requires authentication via a valid Bluvo API Key. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
+Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/cex/wallet/withdraw\' route. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
 
 ### Example
 

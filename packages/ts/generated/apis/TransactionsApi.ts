@@ -20,7 +20,6 @@ export class TransactionsApiRequestFactory extends BaseAPIRequestFactory {
     /**
      * Retrieve a paginated list of transactions for a specific wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers. Supports pagination, filtering by asset, type, date range, and status, as well as field selection to control which properties are returned in the response.
      * List Transactions
-     * @param walletId 
      * @param page Optional. Page number for pagination (0-indexed). Defaults to 0.
      * @param limit Optional. Maximum number of transactions to return per page. Defaults to 10. Maximum value is 1000.
      * @param asset Optional. Filter transactions by asset symbol.
@@ -30,14 +29,8 @@ export class TransactionsApiRequestFactory extends BaseAPIRequestFactory {
      * @param status Optional. Filter transactions by status (e.g., \&#39;completed\&#39;, \&#39;pending\&#39;).
      * @param fields Optional. Comma-separated list of fields to include in the response. If not specified, all fields are included.
      */
-    public async listTransactions(walletId: string, page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: Configuration): Promise<RequestContext> {
+    public async listTransactions(page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: Configuration): Promise<RequestContext> {
         let _config = _options || this.configuration;
-
-        // verify required parameter 'walletId' is not null or undefined
-        if (walletId === null || walletId === undefined) {
-            throw new RequiredError("TransactionsApi", "listTransactions", "walletId");
-        }
-
 
 
 
@@ -48,8 +41,7 @@ export class TransactionsApiRequestFactory extends BaseAPIRequestFactory {
 
 
         // Path Params
-        const localVarPath = '/v0/cex/wallet/{walletId}/transactions'
-            .replace('{' + 'walletId' + '}', encodeURIComponent(String(walletId)));
+        const localVarPath = '/v0/cex/wallet/transactions';
 
         // Make Request Context
         const requestContext = _config.baseServer.makeRequestContext(localVarPath, HttpMethod.GET);
@@ -127,7 +119,7 @@ export class TransactionsApiRequestFactory extends BaseAPIRequestFactory {
     }
 
     /**
-     * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint requires authentication via a valid Bluvo API Key. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
+     * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/cex/wallet/withdraw\' route. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
      * Withdraw Funds
      * @param withdrawFundsRequest 
      */

@@ -9,10 +9,10 @@ import { ConnectWallet200Response } from '../models/ConnectWallet200Response';
 import { ConnectWalletRequest } from '../models/ConnectWalletRequest';
 import { DeleteWallet200Response } from '../models/DeleteWallet200Response';
 import { GetOTTToken200Response } from '../models/GetOTTToken200Response';
+import { GetOTTToken200ResponseTopic } from '../models/GetOTTToken200ResponseTopic';
 import { GetWallet200Response } from '../models/GetWallet200Response';
 import { GetWorkflow200Response } from '../models/GetWorkflow200Response';
-import { GetWorkflow200ResponseStepsInner } from '../models/GetWorkflow200ResponseStepsInner';
-import { GetWorkflow200ResponseStepsInnerErrorsInner } from '../models/GetWorkflow200ResponseStepsInnerErrorsInner';
+import { GetWorkflow200ResponseDetails } from '../models/GetWorkflow200ResponseDetails';
 import { ListAssets200Response } from '../models/ListAssets200Response';
 import { ListAssets200ResponseAssetsInner } from '../models/ListAssets200ResponseAssetsInner';
 import { ListPairs200Response } from '../models/ListPairs200Response';
@@ -22,6 +22,7 @@ import { ListTransactions200ResponseTransactionsInner } from '../models/ListTran
 import { ListWallets200Response } from '../models/ListWallets200Response';
 import { ListWallets200ResponsePagination } from '../models/ListWallets200ResponsePagination';
 import { ListWallets200ResponseWalletsInner } from '../models/ListWallets200ResponseWalletsInner';
+import { OAuth2Link200Response } from '../models/OAuth2Link200Response';
 import { WithdrawFunds200Response } from '../models/WithdrawFunds200Response';
 import { WithdrawFundsRequest } from '../models/WithdrawFundsRequest';
 
@@ -151,6 +152,58 @@ export class ObservableBasicApi {
 
 }
 
+import { OAuth2ApiRequestFactory, OAuth2ApiResponseProcessor} from "../apis/OAuth2Api";
+export class ObservableOAuth2Api {
+    private requestFactory: OAuth2ApiRequestFactory;
+    private responseProcessor: OAuth2ApiResponseProcessor;
+    private configuration: Configuration;
+
+    public constructor(
+        configuration: Configuration,
+        requestFactory?: OAuth2ApiRequestFactory,
+        responseProcessor?: OAuth2ApiResponseProcessor
+    ) {
+        this.configuration = configuration;
+        this.requestFactory = requestFactory || new OAuth2ApiRequestFactory(configuration);
+        this.responseProcessor = responseProcessor || new OAuth2ApiResponseProcessor();
+    }
+
+    /**
+     * Get the url at which the user can do OAuth2 flow to grant access to their exchange account. The idem key, is the ID at which the OAuth2 flow will be linked to and can be listened either via polling using the \'/workflow/:workflowType/get/:workflowRunId\' endpoint (setting \'oauth2\' as workflowType or via Websocket streaming using the \'topic\' key in the response. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers
+     * OAuth2 Link
+     * @param exchange The identifier of the exchange to link (e.g. \&#39;coinbase\&#39;, \&#39;kraken\&#39;).
+     */
+    public oAuth2LinkWithHttpInfo(exchange: 'coinbase' | 'kraken', _options?: ConfigurationOptions): Observable<HttpInfo<OAuth2Link200Response>> {
+        const _config = mergeConfiguration(this.configuration, _options);
+
+        const requestContextPromise = this.requestFactory.oAuth2Link(exchange, _config);
+        // build promise chain
+        let middlewarePreObservable = from<RequestContext>(requestContextPromise);
+        for (const middleware of _config.middleware) {
+            middlewarePreObservable = middlewarePreObservable.pipe(mergeMap((ctx: RequestContext) => middleware.pre(ctx)));
+        }
+
+        return middlewarePreObservable.pipe(mergeMap((ctx: RequestContext) => _config.httpApi.send(ctx))).
+            pipe(mergeMap((response: ResponseContext) => {
+                let middlewarePostObservable = of(response);
+                for (const middleware of _config.middleware.reverse()) {
+                    middlewarePostObservable = middlewarePostObservable.pipe(mergeMap((rsp: ResponseContext) => middleware.post(rsp)));
+                }
+                return middlewarePostObservable.pipe(map((rsp: ResponseContext) => this.responseProcessor.oAuth2LinkWithHttpInfo(rsp)));
+            }));
+    }
+
+    /**
+     * Get the url at which the user can do OAuth2 flow to grant access to their exchange account. The idem key, is the ID at which the OAuth2 flow will be linked to and can be listened either via polling using the \'/workflow/:workflowType/get/:workflowRunId\' endpoint (setting \'oauth2\' as workflowType or via Websocket streaming using the \'topic\' key in the response. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers
+     * OAuth2 Link
+     * @param exchange The identifier of the exchange to link (e.g. \&#39;coinbase\&#39;, \&#39;kraken\&#39;).
+     */
+    public oAuth2Link(exchange: 'coinbase' | 'kraken', _options?: ConfigurationOptions): Observable<OAuth2Link200Response> {
+        return this.oAuth2LinkWithHttpInfo(exchange, _options).pipe(map((apiResponse: HttpInfo<OAuth2Link200Response>) => apiResponse.data));
+    }
+
+}
+
 import { OneTimeTokenApiRequestFactory, OneTimeTokenApiResponseProcessor} from "../apis/OneTimeTokenApi";
 export class ObservableOneTimeTokenApi {
     private requestFactory: OneTimeTokenApiRequestFactory;
@@ -168,7 +221,45 @@ export class ObservableOneTimeTokenApi {
     }
 
     /**
-     * Retrieve an OTT (One-Time Token) for accessing private endpoints. This endpoint does not require authentication and is used to obtain a temporary token that can be used for subsequent requests to private endpoints.
+     * The same \'/cex/connect/:exchange\' endpoint, but using One-Time Token (OTT) authentication instead of API Key authentication (for UI-based connections). Connect an external cryptocurrency exchange account to your Bluvo project using a One-Time Token (OTT). This endpoint is similar to the \'/cex/connect/:exchange\' endpoint but uses OTT authentication instead of API Key authentication. The connection is established using the exchange API credentials provided in the request body. It returns a unique workflow run ID that can be used to track the connection process.
+     * Connect Wallet (OTT)
+     * @param exchange The identifier of the exchange to connect (e.g. \&#39;binance\&#39;, \&#39;kraken\&#39;).
+     * @param idem The idem provided by OTT or used to identify the workflow run. This is used to track the connection process and can be used to subscribe to updates.
+     * @param connectWalletRequest
+     */
+    public connectWalletOTTWithHttpInfo(exchange: 'ace' | 'ascendex' | 'bequant' | 'bigone' | 'binance' | 'coinbase' | 'binanceus' | 'bingx' | 'bit2c' | 'bitbank' | 'bitbns' | 'bitcoincom' | 'bitfinex' | 'bitflyer' | 'bitget' | 'bithumb' | 'bitmart' | 'bitmex' | 'bitopro' | 'bitpanda' | 'bitrue' | 'bitso' | 'bitstamp' | 'bitteam' | 'bitvavo' | 'bl3p' | 'blockchaincom' | 'blofin' | 'btcalpha' | 'btcbox' | 'btcmarkets' | 'btcturk' | 'cex' | 'coincheck' | 'coinex' | 'coinlist' | 'coinmate' | 'coinmetro' | 'coinone' | 'coinsph' | 'coinspot' | 'cryptocom' | 'delta' | 'deribit' | 'digifinex' | 'exmo' | 'fmfwio' | 'gate' | 'gateio' | 'gemini' | 'hashkey' | 'hitbtc' | 'hollaex' | 'htx' | 'huobi' | 'huobijp' | 'hyperliquid' | 'independentreserve' | 'indodax' | 'kraken' | 'krakenfutures' | 'kucoin' | 'kucoinfutures' | 'latoken' | 'lbank' | 'luno' | 'mercado' | 'mexc' | 'ndax' | 'novadax' | 'oceanex' | 'okcoin' | 'okx' | 'onetrading' | 'oxfun' | 'p2b' | 'paradex' | 'paymium' | 'phemex' | 'poloniex' | 'poloniexfutures' | 'probit' | 'timex' | 'tradeogre' | 'upbit' | 'vertex' | 'wavesexchange' | 'whitebit' | 'woo' | 'woofipro' | 'xt' | 'yobit' | 'zaif' | 'zonda', idem: string, connectWalletRequest: ConnectWalletRequest, _options?: ConfigurationOptions): Observable<HttpInfo<ConnectWallet200Response>> {
+        const _config = mergeConfiguration(this.configuration, _options);
+
+        const requestContextPromise = this.requestFactory.connectWalletOTT(exchange, idem, connectWalletRequest, _config);
+        // build promise chain
+        let middlewarePreObservable = from<RequestContext>(requestContextPromise);
+        for (const middleware of _config.middleware) {
+            middlewarePreObservable = middlewarePreObservable.pipe(mergeMap((ctx: RequestContext) => middleware.pre(ctx)));
+        }
+
+        return middlewarePreObservable.pipe(mergeMap((ctx: RequestContext) => _config.httpApi.send(ctx))).
+            pipe(mergeMap((response: ResponseContext) => {
+                let middlewarePostObservable = of(response);
+                for (const middleware of _config.middleware.reverse()) {
+                    middlewarePostObservable = middlewarePostObservable.pipe(mergeMap((rsp: ResponseContext) => middleware.post(rsp)));
+                }
+                return middlewarePostObservable.pipe(map((rsp: ResponseContext) => this.responseProcessor.connectWalletOTTWithHttpInfo(rsp)));
+            }));
+    }
+
+    /**
+     * The same \'/cex/connect/:exchange\' endpoint, but using One-Time Token (OTT) authentication instead of API Key authentication (for UI-based connections). Connect an external cryptocurrency exchange account to your Bluvo project using a One-Time Token (OTT). This endpoint is similar to the \'/cex/connect/:exchange\' endpoint but uses OTT authentication instead of API Key authentication. The connection is established using the exchange API credentials provided in the request body. It returns a unique workflow run ID that can be used to track the connection process.
+     * Connect Wallet (OTT)
+     * @param exchange The identifier of the exchange to connect (e.g. \&#39;binance\&#39;, \&#39;kraken\&#39;).
+     * @param idem The idem provided by OTT or used to identify the workflow run. This is used to track the connection process and can be used to subscribe to updates.
+     * @param connectWalletRequest
+     */
+    public connectWalletOTT(exchange: 'ace' | 'ascendex' | 'bequant' | 'bigone' | 'binance' | 'coinbase' | 'binanceus' | 'bingx' | 'bit2c' | 'bitbank' | 'bitbns' | 'bitcoincom' | 'bitfinex' | 'bitflyer' | 'bitget' | 'bithumb' | 'bitmart' | 'bitmex' | 'bitopro' | 'bitpanda' | 'bitrue' | 'bitso' | 'bitstamp' | 'bitteam' | 'bitvavo' | 'bl3p' | 'blockchaincom' | 'blofin' | 'btcalpha' | 'btcbox' | 'btcmarkets' | 'btcturk' | 'cex' | 'coincheck' | 'coinex' | 'coinlist' | 'coinmate' | 'coinmetro' | 'coinone' | 'coinsph' | 'coinspot' | 'cryptocom' | 'delta' | 'deribit' | 'digifinex' | 'exmo' | 'fmfwio' | 'gate' | 'gateio' | 'gemini' | 'hashkey' | 'hitbtc' | 'hollaex' | 'htx' | 'huobi' | 'huobijp' | 'hyperliquid' | 'independentreserve' | 'indodax' | 'kraken' | 'krakenfutures' | 'kucoin' | 'kucoinfutures' | 'latoken' | 'lbank' | 'luno' | 'mercado' | 'mexc' | 'ndax' | 'novadax' | 'oceanex' | 'okcoin' | 'okx' | 'onetrading' | 'oxfun' | 'p2b' | 'paradex' | 'paymium' | 'phemex' | 'poloniex' | 'poloniexfutures' | 'probit' | 'timex' | 'tradeogre' | 'upbit' | 'vertex' | 'wavesexchange' | 'whitebit' | 'woo' | 'woofipro' | 'xt' | 'yobit' | 'zaif' | 'zonda', idem: string, connectWalletRequest: ConnectWalletRequest, _options?: ConfigurationOptions): Observable<ConnectWallet200Response> {
+        return this.connectWalletOTTWithHttpInfo(exchange, idem, connectWalletRequest, _options).pipe(map((apiResponse: HttpInfo<ConnectWallet200Response>) => apiResponse.data));
+    }
+
+    /**
+     * Retrieve an OTT (One-Time Token) for accessing private endpoints. This endpoint requires authentication via a valid Bluvo API Key and accepts an optional \'x-bluvo-wallet-id\' header to tie the token to a specific wallet. The token can then be used for subsequent requests to OTT-enabled endpoints.
      * Get OTT Token
      */
     public getOTTTokenWithHttpInfo(_options?: ConfigurationOptions): Observable<HttpInfo<GetOTTToken200Response>> {
@@ -192,11 +283,45 @@ export class ObservableOneTimeTokenApi {
     }
 
     /**
-     * Retrieve an OTT (One-Time Token) for accessing private endpoints. This endpoint does not require authentication and is used to obtain a temporary token that can be used for subsequent requests to private endpoints.
+     * Retrieve an OTT (One-Time Token) for accessing private endpoints. This endpoint requires authentication via a valid Bluvo API Key and accepts an optional \'x-bluvo-wallet-id\' header to tie the token to a specific wallet. The token can then be used for subsequent requests to OTT-enabled endpoints.
      * Get OTT Token
      */
     public getOTTToken(_options?: ConfigurationOptions): Observable<GetOTTToken200Response> {
         return this.getOTTTokenWithHttpInfo(_options).pipe(map((apiResponse: HttpInfo<GetOTTToken200Response>) => apiResponse.data));
+    }
+
+    /**
+     * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/cex/wallet/withdraw\' route. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
+     * Withdraw Funds (OTT)
+     * @param withdrawFundsRequest
+     */
+    public withdrawFundsOTTWithHttpInfo(withdrawFundsRequest: WithdrawFundsRequest, _options?: ConfigurationOptions): Observable<HttpInfo<WithdrawFunds200Response>> {
+        const _config = mergeConfiguration(this.configuration, _options);
+
+        const requestContextPromise = this.requestFactory.withdrawFundsOTT(withdrawFundsRequest, _config);
+        // build promise chain
+        let middlewarePreObservable = from<RequestContext>(requestContextPromise);
+        for (const middleware of _config.middleware) {
+            middlewarePreObservable = middlewarePreObservable.pipe(mergeMap((ctx: RequestContext) => middleware.pre(ctx)));
+        }
+
+        return middlewarePreObservable.pipe(mergeMap((ctx: RequestContext) => _config.httpApi.send(ctx))).
+            pipe(mergeMap((response: ResponseContext) => {
+                let middlewarePostObservable = of(response);
+                for (const middleware of _config.middleware.reverse()) {
+                    middlewarePostObservable = middlewarePostObservable.pipe(mergeMap((rsp: ResponseContext) => middleware.post(rsp)));
+                }
+                return middlewarePostObservable.pipe(map((rsp: ResponseContext) => this.responseProcessor.withdrawFundsOTTWithHttpInfo(rsp)));
+            }));
+    }
+
+    /**
+     * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/cex/wallet/withdraw\' route. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
+     * Withdraw Funds (OTT)
+     * @param withdrawFundsRequest
+     */
+    public withdrawFundsOTT(withdrawFundsRequest: WithdrawFundsRequest, _options?: ConfigurationOptions): Observable<WithdrawFunds200Response> {
+        return this.withdrawFundsOTTWithHttpInfo(withdrawFundsRequest, _options).pipe(map((apiResponse: HttpInfo<WithdrawFunds200Response>) => apiResponse.data));
     }
 
 }
@@ -282,7 +407,6 @@ export class ObservableTransactionsApi {
     /**
      * Retrieve a paginated list of transactions for a specific wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers. Supports pagination, filtering by asset, type, date range, and status, as well as field selection to control which properties are returned in the response.
      * List Transactions
-     * @param walletId
      * @param [page] Optional. Page number for pagination (0-indexed). Defaults to 0.
      * @param [limit] Optional. Maximum number of transactions to return per page. Defaults to 10. Maximum value is 1000.
      * @param [asset] Optional. Filter transactions by asset symbol.
@@ -292,10 +416,10 @@ export class ObservableTransactionsApi {
      * @param [status] Optional. Filter transactions by status (e.g., \&#39;completed\&#39;, \&#39;pending\&#39;).
      * @param [fields] Optional. Comma-separated list of fields to include in the response. If not specified, all fields are included.
      */
-    public listTransactionsWithHttpInfo(walletId: string, page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: ConfigurationOptions): Observable<HttpInfo<ListTransactions200Response>> {
+    public listTransactionsWithHttpInfo(page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: ConfigurationOptions): Observable<HttpInfo<ListTransactions200Response>> {
         const _config = mergeConfiguration(this.configuration, _options);
 
-        const requestContextPromise = this.requestFactory.listTransactions(walletId, page, limit, asset, type, since, before, status, fields, _config);
+        const requestContextPromise = this.requestFactory.listTransactions(page, limit, asset, type, since, before, status, fields, _config);
         // build promise chain
         let middlewarePreObservable = from<RequestContext>(requestContextPromise);
         for (const middleware of _config.middleware) {
@@ -315,7 +439,6 @@ export class ObservableTransactionsApi {
     /**
      * Retrieve a paginated list of transactions for a specific wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers. Supports pagination, filtering by asset, type, date range, and status, as well as field selection to control which properties are returned in the response.
      * List Transactions
-     * @param walletId
      * @param [page] Optional. Page number for pagination (0-indexed). Defaults to 0.
      * @param [limit] Optional. Maximum number of transactions to return per page. Defaults to 10. Maximum value is 1000.
      * @param [asset] Optional. Filter transactions by asset symbol.
@@ -325,12 +448,12 @@ export class ObservableTransactionsApi {
      * @param [status] Optional. Filter transactions by status (e.g., \&#39;completed\&#39;, \&#39;pending\&#39;).
      * @param [fields] Optional. Comma-separated list of fields to include in the response. If not specified, all fields are included.
      */
-    public listTransactions(walletId: string, page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: ConfigurationOptions): Observable<ListTransactions200Response> {
-        return this.listTransactionsWithHttpInfo(walletId, page, limit, asset, type, since, before, status, fields, _options).pipe(map((apiResponse: HttpInfo<ListTransactions200Response>) => apiResponse.data));
+    public listTransactions(page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: ConfigurationOptions): Observable<ListTransactions200Response> {
+        return this.listTransactionsWithHttpInfo(page, limit, asset, type, since, before, status, fields, _options).pipe(map((apiResponse: HttpInfo<ListTransactions200Response>) => apiResponse.data));
     }
 
     /**
-     * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint requires authentication via a valid Bluvo API Key. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
+     * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/cex/wallet/withdraw\' route. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
      * Withdraw Funds
      * @param withdrawFundsRequest
      */
@@ -355,7 +478,7 @@ export class ObservableTransactionsApi {
     }
 
     /**
-     * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint requires authentication via a valid Bluvo API Key. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
+     * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/cex/wallet/withdraw\' route. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
      * Withdraw Funds
      * @param withdrawFundsRequest
      */
@@ -382,15 +505,16 @@ export class ObservableWalletsApi {
     }
 
     /**
-     * Connect an external cryptocurrency exchange account to your Bluvo project. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers. The connection is established using the exchange API credentials provided in the request body. It returns a unique workflow run ID that can be used to track the connection process.
+     * Connect an external cryptocurrency exchange account to your Bluvo project. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/cex/connect/:exchange\' route. The connection is established using the exchange API credentials provided in the request body. It returns a unique workflow run ID that can be used to track the connection process.
      * Connect Wallet
      * @param exchange The identifier of the exchange to connect (e.g. \&#39;binance\&#39;, \&#39;kraken\&#39;).
+     * @param idem The idem provided by OTT or used to identify the workflow run. This is used to track the connection process and can be used to subscribe to updates.
      * @param connectWalletRequest
      */
-    public connectWalletWithHttpInfo(exchange: 'ace' | 'ascendex' | 'bequant' | 'bigone' | 'binance' | 'coinbase' | 'binanceus' | 'bingx' | 'bit2c' | 'bitbank' | 'bitbns' | 'bitcoincom' | 'bitfinex' | 'bitflyer' | 'bitget' | 'bithumb' | 'bitmart' | 'bitmex' | 'bitopro' | 'bitpanda' | 'bitrue' | 'bitso' | 'bitstamp' | 'bitteam' | 'bitvavo' | 'bl3p' | 'blockchaincom' | 'blofin' | 'btcalpha' | 'btcbox' | 'btcmarkets' | 'btcturk' | 'cex' | 'coincheck' | 'coinex' | 'coinlist' | 'coinmate' | 'coinmetro' | 'coinone' | 'coinsph' | 'coinspot' | 'cryptocom' | 'delta' | 'deribit' | 'digifinex' | 'exmo' | 'fmfwio' | 'gate' | 'gateio' | 'gemini' | 'hashkey' | 'hitbtc' | 'hollaex' | 'htx' | 'huobi' | 'huobijp' | 'hyperliquid' | 'independentreserve' | 'indodax' | 'kraken' | 'krakenfutures' | 'kucoin' | 'kucoinfutures' | 'latoken' | 'lbank' | 'luno' | 'mercado' | 'mexc' | 'ndax' | 'novadax' | 'oceanex' | 'okcoin' | 'okx' | 'onetrading' | 'oxfun' | 'p2b' | 'paradex' | 'paymium' | 'phemex' | 'poloniex' | 'poloniexfutures' | 'probit' | 'timex' | 'tradeogre' | 'upbit' | 'vertex' | 'wavesexchange' | 'whitebit' | 'woo' | 'woofipro' | 'xt' | 'yobit' | 'zaif' | 'zonda', connectWalletRequest: ConnectWalletRequest, _options?: ConfigurationOptions): Observable<HttpInfo<ConnectWallet200Response>> {
+    public connectWalletWithHttpInfo(exchange: 'ace' | 'ascendex' | 'bequant' | 'bigone' | 'binance' | 'coinbase' | 'binanceus' | 'bingx' | 'bit2c' | 'bitbank' | 'bitbns' | 'bitcoincom' | 'bitfinex' | 'bitflyer' | 'bitget' | 'bithumb' | 'bitmart' | 'bitmex' | 'bitopro' | 'bitpanda' | 'bitrue' | 'bitso' | 'bitstamp' | 'bitteam' | 'bitvavo' | 'bl3p' | 'blockchaincom' | 'blofin' | 'btcalpha' | 'btcbox' | 'btcmarkets' | 'btcturk' | 'cex' | 'coincheck' | 'coinex' | 'coinlist' | 'coinmate' | 'coinmetro' | 'coinone' | 'coinsph' | 'coinspot' | 'cryptocom' | 'delta' | 'deribit' | 'digifinex' | 'exmo' | 'fmfwio' | 'gate' | 'gateio' | 'gemini' | 'hashkey' | 'hitbtc' | 'hollaex' | 'htx' | 'huobi' | 'huobijp' | 'hyperliquid' | 'independentreserve' | 'indodax' | 'kraken' | 'krakenfutures' | 'kucoin' | 'kucoinfutures' | 'latoken' | 'lbank' | 'luno' | 'mercado' | 'mexc' | 'ndax' | 'novadax' | 'oceanex' | 'okcoin' | 'okx' | 'onetrading' | 'oxfun' | 'p2b' | 'paradex' | 'paymium' | 'phemex' | 'poloniex' | 'poloniexfutures' | 'probit' | 'timex' | 'tradeogre' | 'upbit' | 'vertex' | 'wavesexchange' | 'whitebit' | 'woo' | 'woofipro' | 'xt' | 'yobit' | 'zaif' | 'zonda', idem: string, connectWalletRequest: ConnectWalletRequest, _options?: ConfigurationOptions): Observable<HttpInfo<ConnectWallet200Response>> {
         const _config = mergeConfiguration(this.configuration, _options);
 
-        const requestContextPromise = this.requestFactory.connectWallet(exchange, connectWalletRequest, _config);
+        const requestContextPromise = this.requestFactory.connectWallet(exchange, idem, connectWalletRequest, _config);
         // build promise chain
         let middlewarePreObservable = from<RequestContext>(requestContextPromise);
         for (const middleware of _config.middleware) {
@@ -408,24 +532,24 @@ export class ObservableWalletsApi {
     }
 
     /**
-     * Connect an external cryptocurrency exchange account to your Bluvo project. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers. The connection is established using the exchange API credentials provided in the request body. It returns a unique workflow run ID that can be used to track the connection process.
+     * Connect an external cryptocurrency exchange account to your Bluvo project. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/cex/connect/:exchange\' route. The connection is established using the exchange API credentials provided in the request body. It returns a unique workflow run ID that can be used to track the connection process.
      * Connect Wallet
      * @param exchange The identifier of the exchange to connect (e.g. \&#39;binance\&#39;, \&#39;kraken\&#39;).
+     * @param idem The idem provided by OTT or used to identify the workflow run. This is used to track the connection process and can be used to subscribe to updates.
      * @param connectWalletRequest
      */
-    public connectWallet(exchange: 'ace' | 'ascendex' | 'bequant' | 'bigone' | 'binance' | 'coinbase' | 'binanceus' | 'bingx' | 'bit2c' | 'bitbank' | 'bitbns' | 'bitcoincom' | 'bitfinex' | 'bitflyer' | 'bitget' | 'bithumb' | 'bitmart' | 'bitmex' | 'bitopro' | 'bitpanda' | 'bitrue' | 'bitso' | 'bitstamp' | 'bitteam' | 'bitvavo' | 'bl3p' | 'blockchaincom' | 'blofin' | 'btcalpha' | 'btcbox' | 'btcmarkets' | 'btcturk' | 'cex' | 'coincheck' | 'coinex' | 'coinlist' | 'coinmate' | 'coinmetro' | 'coinone' | 'coinsph' | 'coinspot' | 'cryptocom' | 'delta' | 'deribit' | 'digifinex' | 'exmo' | 'fmfwio' | 'gate' | 'gateio' | 'gemini' | 'hashkey' | 'hitbtc' | 'hollaex' | 'htx' | 'huobi' | 'huobijp' | 'hyperliquid' | 'independentreserve' | 'indodax' | 'kraken' | 'krakenfutures' | 'kucoin' | 'kucoinfutures' | 'latoken' | 'lbank' | 'luno' | 'mercado' | 'mexc' | 'ndax' | 'novadax' | 'oceanex' | 'okcoin' | 'okx' | 'onetrading' | 'oxfun' | 'p2b' | 'paradex' | 'paymium' | 'phemex' | 'poloniex' | 'poloniexfutures' | 'probit' | 'timex' | 'tradeogre' | 'upbit' | 'vertex' | 'wavesexchange' | 'whitebit' | 'woo' | 'woofipro' | 'xt' | 'yobit' | 'zaif' | 'zonda', connectWalletRequest: ConnectWalletRequest, _options?: ConfigurationOptions): Observable<ConnectWallet200Response> {
-        return this.connectWalletWithHttpInfo(exchange, connectWalletRequest, _options).pipe(map((apiResponse: HttpInfo<ConnectWallet200Response>) => apiResponse.data));
+    public connectWallet(exchange: 'ace' | 'ascendex' | 'bequant' | 'bigone' | 'binance' | 'coinbase' | 'binanceus' | 'bingx' | 'bit2c' | 'bitbank' | 'bitbns' | 'bitcoincom' | 'bitfinex' | 'bitflyer' | 'bitget' | 'bithumb' | 'bitmart' | 'bitmex' | 'bitopro' | 'bitpanda' | 'bitrue' | 'bitso' | 'bitstamp' | 'bitteam' | 'bitvavo' | 'bl3p' | 'blockchaincom' | 'blofin' | 'btcalpha' | 'btcbox' | 'btcmarkets' | 'btcturk' | 'cex' | 'coincheck' | 'coinex' | 'coinlist' | 'coinmate' | 'coinmetro' | 'coinone' | 'coinsph' | 'coinspot' | 'cryptocom' | 'delta' | 'deribit' | 'digifinex' | 'exmo' | 'fmfwio' | 'gate' | 'gateio' | 'gemini' | 'hashkey' | 'hitbtc' | 'hollaex' | 'htx' | 'huobi' | 'huobijp' | 'hyperliquid' | 'independentreserve' | 'indodax' | 'kraken' | 'krakenfutures' | 'kucoin' | 'kucoinfutures' | 'latoken' | 'lbank' | 'luno' | 'mercado' | 'mexc' | 'ndax' | 'novadax' | 'oceanex' | 'okcoin' | 'okx' | 'onetrading' | 'oxfun' | 'p2b' | 'paradex' | 'paymium' | 'phemex' | 'poloniex' | 'poloniexfutures' | 'probit' | 'timex' | 'tradeogre' | 'upbit' | 'vertex' | 'wavesexchange' | 'whitebit' | 'woo' | 'woofipro' | 'xt' | 'yobit' | 'zaif' | 'zonda', idem: string, connectWalletRequest: ConnectWalletRequest, _options?: ConfigurationOptions): Observable<ConnectWallet200Response> {
+        return this.connectWalletWithHttpInfo(exchange, idem, connectWalletRequest, _options).pipe(map((apiResponse: HttpInfo<ConnectWallet200Response>) => apiResponse.data));
     }
 
     /**
      * Delete a connected exchange wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
      * Delete Wallet
-     * @param walletId
      */
-    public deleteWalletWithHttpInfo(walletId: string, _options?: ConfigurationOptions): Observable<HttpInfo<DeleteWallet200Response>> {
+    public deleteWalletWithHttpInfo(_options?: ConfigurationOptions): Observable<HttpInfo<DeleteWallet200Response>> {
         const _config = mergeConfiguration(this.configuration, _options);
 
-        const requestContextPromise = this.requestFactory.deleteWallet(walletId, _config);
+        const requestContextPromise = this.requestFactory.deleteWallet(_config);
         // build promise chain
         let middlewarePreObservable = from<RequestContext>(requestContextPromise);
         for (const middleware of _config.middleware) {
@@ -445,21 +569,19 @@ export class ObservableWalletsApi {
     /**
      * Delete a connected exchange wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
      * Delete Wallet
-     * @param walletId
      */
-    public deleteWallet(walletId: string, _options?: ConfigurationOptions): Observable<DeleteWallet200Response> {
-        return this.deleteWalletWithHttpInfo(walletId, _options).pipe(map((apiResponse: HttpInfo<DeleteWallet200Response>) => apiResponse.data));
+    public deleteWallet(_options?: ConfigurationOptions): Observable<DeleteWallet200Response> {
+        return this.deleteWalletWithHttpInfo(_options).pipe(map((apiResponse: HttpInfo<DeleteWallet200Response>) => apiResponse.data));
     }
 
     /**
      * Retrieve basic information about a connected exchange wallet, including a simple dictionary of balances. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
      * Get Wallet
-     * @param walletId
      */
-    public getWalletWithHttpInfo(walletId: string, _options?: ConfigurationOptions): Observable<HttpInfo<GetWallet200Response>> {
+    public getWalletWithHttpInfo(_options?: ConfigurationOptions): Observable<HttpInfo<GetWallet200Response>> {
         const _config = mergeConfiguration(this.configuration, _options);
 
-        const requestContextPromise = this.requestFactory.getWallet(walletId, _config);
+        const requestContextPromise = this.requestFactory.getWallet(_config);
         // build promise chain
         let middlewarePreObservable = from<RequestContext>(requestContextPromise);
         for (const middleware of _config.middleware) {
@@ -479,10 +601,9 @@ export class ObservableWalletsApi {
     /**
      * Retrieve basic information about a connected exchange wallet, including a simple dictionary of balances. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
      * Get Wallet
-     * @param walletId
      */
-    public getWallet(walletId: string, _options?: ConfigurationOptions): Observable<GetWallet200Response> {
-        return this.getWalletWithHttpInfo(walletId, _options).pipe(map((apiResponse: HttpInfo<GetWallet200Response>) => apiResponse.data));
+    public getWallet(_options?: ConfigurationOptions): Observable<GetWallet200Response> {
+        return this.getWalletWithHttpInfo(_options).pipe(map((apiResponse: HttpInfo<GetWallet200Response>) => apiResponse.data));
     }
 
     /**
@@ -554,14 +675,15 @@ export class ObservableWorkflowApi {
     }
 
     /**
-     * Retrieve the status of a specific workflow run. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
+     * Retrieve the details of a specific workflow run by its ID. The workflowType parameter indicates the type of workflow (e.g. \'connect\', \'withdraw\', \'oauth2\'). This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
      * Get Workflow
      * @param workflowRunId The unique identifier of the workflow run to query.
+     * @param workflowType The type of workflow to query (e.g. \&#39;connect\&#39;, \&#39;withdraw\&#39;).
      */
-    public getWorkflowWithHttpInfo(workflowRunId: string, _options?: ConfigurationOptions): Observable<HttpInfo<GetWorkflow200Response>> {
+    public getWorkflowWithHttpInfo(workflowRunId: string, workflowType: 'connect' | 'withdraw' | 'oauth2', _options?: ConfigurationOptions): Observable<HttpInfo<GetWorkflow200Response>> {
         const _config = mergeConfiguration(this.configuration, _options);
 
-        const requestContextPromise = this.requestFactory.getWorkflow(workflowRunId, _config);
+        const requestContextPromise = this.requestFactory.getWorkflow(workflowRunId, workflowType, _config);
         // build promise chain
         let middlewarePreObservable = from<RequestContext>(requestContextPromise);
         for (const middleware of _config.middleware) {
@@ -579,12 +701,13 @@ export class ObservableWorkflowApi {
     }
 
     /**
-     * Retrieve the status of a specific workflow run. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
+     * Retrieve the details of a specific workflow run by its ID. The workflowType parameter indicates the type of workflow (e.g. \'connect\', \'withdraw\', \'oauth2\'). This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
      * Get Workflow
      * @param workflowRunId The unique identifier of the workflow run to query.
+     * @param workflowType The type of workflow to query (e.g. \&#39;connect\&#39;, \&#39;withdraw\&#39;).
      */
-    public getWorkflow(workflowRunId: string, _options?: ConfigurationOptions): Observable<GetWorkflow200Response> {
-        return this.getWorkflowWithHttpInfo(workflowRunId, _options).pipe(map((apiResponse: HttpInfo<GetWorkflow200Response>) => apiResponse.data));
+    public getWorkflow(workflowRunId: string, workflowType: 'connect' | 'withdraw' | 'oauth2', _options?: ConfigurationOptions): Observable<GetWorkflow200Response> {
+        return this.getWorkflowWithHttpInfo(workflowRunId, workflowType, _options).pipe(map((apiResponse: HttpInfo<GetWorkflow200Response>) => apiResponse.data));
     }
 
 }

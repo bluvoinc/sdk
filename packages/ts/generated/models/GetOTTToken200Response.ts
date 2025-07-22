@@ -1,5 +1,5 @@
 /**
- * Bluvo API
+ * Bluvo API (v0)
  * APIs to supercharge your crypto project.
  *
  * OpenAPI spec version: 0.0.3
@@ -10,17 +10,15 @@
  * Do not edit the class manually.
  */
 
+import { GetOTTToken200ResponseTopic } from '../models/GetOTTToken200ResponseTopic';
 import { HttpFile } from '../http/http';
 
 export class GetOTTToken200Response {
     /**
     * The generated OTT token for accessing private endpoints
     */
-    'token': string;
-    /**
-    * The date and time when the token expires
-    */
-    'expiresAt': string;
+    'idem': string;
+    'topic'?: GetOTTToken200ResponseTopic;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -28,15 +26,15 @@ export class GetOTTToken200Response {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "token",
-            "baseName": "token",
+            "name": "idem",
+            "baseName": "idem",
             "type": "string",
             "format": ""
         },
         {
-            "name": "expiresAt",
-            "baseName": "expiresAt",
-            "type": "string",
+            "name": "topic",
+            "baseName": "topic",
+            "type": "GetOTTToken200ResponseTopic",
             "format": ""
         }    ];
 

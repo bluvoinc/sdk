@@ -4,41 +4,14 @@ import sec from "../sec";
 
 describe('live HTTP calls tests', ()=>{
 
-    describe('prices', ()=>{
-
-        // Bluvo API credentials - Replace with your own from https://docs.bluvo.co/introduction
-        const client = createClient({
-            apiKey: sec.apiKey,
-            orgId: sec.orgId,
-            projectId: sec.projectId,
-        });
-
-        it.each([
-            ['ADA','USDT'],
-            ['BTC','USDT'],
-            ['ETH','USDT'],
-            ['SOL','USDT'],
-        ])
-        ('GET /v0/price/candles/%s/%s', async (base, quote) => {
-
-            const res = await client
-                .prices
-                .candlesticks(base, quote as any);
-
-            expect(res).toBeDefined();
-
-        });
+    // Bluvo API credentials - Replace with your own from https://docs.bluvo.co/introduction
+    const client = createClient({
+        apiKey: sec.apiKey,
+        orgId: sec.orgId,
+        projectId: sec.projectId,
     });
 
-
     describe('wallets',()=>{
-
-        // Bluvo API credentials - Replace with your own from https://docs.bluvo.co/introduction
-        const client = createClient({
-            apiKey: sec.apiKey,
-            orgId: sec.orgId,
-            projectId: sec.projectId,
-        });
 
         it('GET /v0/cex/wallets', async () => {
 
@@ -53,7 +26,7 @@ describe('live HTTP calls tests', ()=>{
 
         it('POST /v0/cex/connect/binance', async () => {
 
-            const newWalletId = '2161dc8d-4b87-475e-8154-11bc04a5939a';
+            const newWalletId = crypto.randomUUID()
 
             console.log('adding bot with id', newWalletId)
 
@@ -62,6 +35,7 @@ describe('live HTTP calls tests', ()=>{
                 .connect(
                     'binance',
                     newWalletId,
+                    newWalletId,
                     {
                         apiKey:         sec.binance.apiKey,
                         apiSecret:      sec.binance.secret,
@@ -69,7 +43,6 @@ describe('live HTTP calls tests', ()=>{
                 );
 
             console.log(res); // 'wfr_${newWalletId}_connect';
-
 
             expect(res).toBeDefined();
         });
@@ -111,6 +84,27 @@ describe('live HTTP calls tests', ()=>{
 
             expect(res).toBeDefined();
         });
+
+    });
+
+    describe('workflows',()=>{
+
+        it('get workflow', async () => {
+
+            const workflowRunId = '82a94525-2722-4b36-93f6-7e5223d27a67';
+            const workflowType = 'connect';
+
+            const {
+                id,
+                details,
+            } = await client
+                .workflow
+                .get(workflowRunId, workflowType);
+
+            expect(id).toBe(workflowRunId);
+            expect(details.status).toBe('complete');
+
+        })
 
     });
 

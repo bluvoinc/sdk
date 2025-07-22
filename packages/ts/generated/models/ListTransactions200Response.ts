@@ -1,5 +1,5 @@
 /**
- * Bluvo API
+ * Bluvo API (v0)
  * APIs to supercharge your crypto project.
  *
  * OpenAPI spec version: 0.0.3

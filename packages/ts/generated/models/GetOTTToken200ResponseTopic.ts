@@ -12,24 +12,26 @@
 
 import { HttpFile } from '../http/http';
 
-export class WithdrawFundsRequest {
+/**
+* Subscription topic wantSubscription is true, allows to subscribe to workflows using Websocket UDP streaming
+*/
+export class GetOTTToken200ResponseTopic {
     /**
-    * The asset symbol to withdraw (e.g., \'BTC\', \'ETH\')
+    * Indicates whether the subscription token was successfully generated
     */
-    'asset': string;
+    'success': boolean;
     /**
-    * The amount to withdraw
+    * The unique identifier for the subscription topic, which is the same as the idem
     */
-    'amount': number;
+    'name': string;
     /**
-    * The blockchain address to send funds to
+    * The subscription token for accessing the topic (if requested)
     */
-    'address': string;
+    'token'?: string;
     /**
-    * Optional memo/tag for cryptocurrencies that require it (e.g., XRP, XLM)
+    * The expiration timestamp of the subscription token in milliseconds since epoch
     */
-    'tag'?: string;
-    'params'?: any | null;
+    'expiresAt'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -37,38 +39,32 @@ export class WithdrawFundsRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "asset",
-            "baseName": "asset",
+            "name": "success",
+            "baseName": "success",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "name",
+            "baseName": "name",
             "type": "string",
             "format": ""
         },
         {
-            "name": "amount",
-            "baseName": "amount",
+            "name": "token",
+            "baseName": "token",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "expiresAt",
+            "baseName": "expiresAt",
             "type": "number",
-            "format": ""
-        },
-        {
-            "name": "address",
-            "baseName": "address",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "tag",
-            "baseName": "tag",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "params",
-            "baseName": "params",
-            "type": "any",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return WithdrawFundsRequest.attributeTypeMap;
+        return GetOTTToken200ResponseTopic.attributeTypeMap;
     }
 
     public constructor() {

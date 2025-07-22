@@ -34,35 +34,45 @@ import { createClient } from '@bluvo/sdk-ts';
 
 // Get yours at https://docs.bluvo.co/introduction
 const client = createClient({
-  apiKey: 'your-api-key',
-  orgId: 'your-org-id',
-  projectId: 'your-project-id',
+    apiKey: 'your-api-key',
+    orgId: 'your-org-id',
+    projectId: 'your-project-id',
 });
-```
-
-### Usage
-```typescript
-// Example: Get OHLCV data for BTC/USDT
-const candlesticks = await client.prices.candlesticks('BTC', 'USDT');
-
-// Example: List connected wallets
-const wallets = await client.wallet.list();
 ```
 
 ## Wallets
 
-### Connect a Wallet
+### Connect a Wallet (Server-side)
 
 ```typescript
 // See full list here -> https://docs.bluvo.co/supported-exchanges
-const {workflowRunId} = await client
-    .wallet
-    .connect(
-        'binance',
-        'i decide my own wallet id',
-        '<your-binance-account-api-key>',
-        '<your-binance-account-api-secret>'
-    );
+const connection = await client.wallet.connect(
+  'binance',                    // exchange
+  'unique-wallet-id',           // walletId
+  'unique-workflow-id',         // idem (workflow identifier)
+  {                            // ConnectWalletRequest
+    apiKey: 'your-binance-api-key',
+    apiSecret: 'your-binance-api-secret',
+    apiPassphrase: 'optional-passphrase',  // Required for some exchanges
+    ips: ['192.168.1.1']                   // Optional IP whitelist
+  }
+);
+```
+
+### Withdraw from Wallet (Server-side)
+
+```typescript
+// Withdraw cryptocurrency from a connected wallet
+const withdrawal = await client.wallet.transaction.withdraw({
+  walletId: 'connected-wallet-id',
+  destinationAddress: '3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5',
+  amount: '0.05',
+  asset: 'BTC',
+  network: 'BTC',           // Optional network specification
+  tag: '123456'             // Optional memo/tag for certain cryptos
+});
+
+console.log('Withdrawal status:', withdrawal.status);
 ```
 ### Get Wallet Details
 
@@ -123,6 +133,73 @@ For more examples and inspiration, check out the [Bluvo Awesome List](https://gi
 ## Documentation
 
 For comprehensive documentation, visit the [Bluvo API Documentation](https://docs.bluvo.co).
+
+## Client-side OTT (One-Time Token) Usage
+
+For client-side applications where you don't want to expose your API keys, use OTT tokens:
+
+### Step 1: Generate OTT Token (Server-side)
+
+```typescript
+// On your server, generate an OTT token
+const ottResponse = await client.ott.get('wallet-id');
+const { ott, idem } = ottResponse;
+
+// Send the OTT token to your client-side application
+// (e.g., through an API endpoint or WebSocket)
+```
+
+### Step 2: Connect Wallet with OTT (Client-side)
+
+```typescript
+// On the client-side, use the OTT token to connect a wallet
+import { createClient } from '@bluvo/sdk-ts';
+
+const client = createClient({
+  orgId: 'your-org-id',
+  projectId: 'your-project-id',
+  // No API key needed for OTT operations
+});
+
+// Connect wallet using OTT
+const connection = await client.ott.connect(
+  {
+    exchange: 'binance',
+    walletId: 'unique-wallet-id',
+    idem: idem,               // From server
+    ott: ott                  // From server
+  },
+  {
+    apiKey: 'user-exchange-api-key',
+    apiSecret: 'user-exchange-api-secret'
+  }
+);
+
+console.log('Wallet connected:', connection.status);
+```
+
+### Step 3: Withdraw with OTT (Client-side)
+
+```typescript
+// Withdraw funds using OTT authentication
+const withdrawal = await client.ott.withdraw({
+  walletId: 'connected-wallet-id',
+  asset: 'BTC',
+  amount: 0.05,
+  address: '3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5',
+  tag: 'optional-memo',
+  network: 'BTC'
+});
+
+console.log('Withdrawal initiated:', withdrawal.transactionId);
+```
+
+### Benefits of OTT Pattern
+
+- **Security**: API keys never leave your server
+- **Flexibility**: Users can perform operations without exposing credentials
+- **Controlled Access**: Each OTT token is single-use and time-limited
+- **Client-side Friendly**: Perfect for web applications and mobile apps
 
 ## Related Projects
 

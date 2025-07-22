@@ -84,6 +84,11 @@ export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
             await authMethod?.applySecurityAuthentication(requestContext);
         }
         // Apply auth methods
+        authMethod = _config.authMethods["bluvoOttActionId"]
+        if (authMethod?.applySecurityAuthentication) {
+            await authMethod?.applySecurityAuthentication(requestContext);
+        }
+        // Apply auth methods
         authMethod = _config.authMethods["bluvoProjectId"]
         if (authMethod?.applySecurityAuthentication) {
             await authMethod?.applySecurityAuthentication(requestContext);

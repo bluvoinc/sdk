@@ -176,7 +176,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bluvoOrgId](README.md#bluvoOrgId), [bluvoOtt](README.md#bluvoOtt), [bluvoOttActionId](README.md#bluvoOttActionId), [bluvoProjectId](README.md#bluvoProjectId), [bluvoWalletId](README.md#bluvoWalletId)
+[bluvoOrgId](README.md#bluvoOrgId), [bluvoOtt](README.md#bluvoOtt), [bluvoProjectId](README.md#bluvoProjectId), [bluvoWalletId](README.md#bluvoWalletId)
 
 ### HTTP request headers
 

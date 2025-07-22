@@ -1,7 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {createClient} from "../index";
 import sec from "../sec";
-import {ServerConfiguration} from "../generated";
 
 describe('live HTTP calls tests', ()=>{
 
@@ -27,7 +26,8 @@ describe('live HTTP calls tests', ()=>{
 
         it('POST /v0/cex/connect/binance', async () => {
 
-            const newWalletId = crypto.randomUUID()
+            const newWalletId = crypto.randomUUID();
+            const randomIdem = crypto.randomUUID();
 
             console.log('adding bot with id', newWalletId)
 
@@ -36,7 +36,7 @@ describe('live HTTP calls tests', ()=>{
                 .connect(
                     'binance',
                     newWalletId,
-                    newWalletId,
+                    randomIdem,
                     {
                         apiKey:         sec.binance.apiKey,
                         apiSecret:      sec.binance.secret,
@@ -123,15 +123,12 @@ describe('live HTTP calls tests', ()=>{
 
         it('connect exchange with ott', async () => {
 
-            const newWalletId = crypto.randomUUID()
+            const newWalletId = crypto
+                .randomUUID();
 
             const {idem, ott} = await client
                 .ott
                 .get(newWalletId);
-
-            console.log(idem, ott);
-
-            console.log('adding bot with id', newWalletId)
 
             const res = await client
                 .ott

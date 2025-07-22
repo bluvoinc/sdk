@@ -184,7 +184,7 @@ export class BluvoClient {
             request: ConnectWalletRequest,
             _options?: PromiseConfigurationOptions
         ) => {
-            return new WalletsApi(this.configuration(walletId))
+            return new WalletsApi(this.configuration(walletId, undefined, idem))
                 .connectWallet(
                     exchange as any,
                     idem,
@@ -559,15 +559,15 @@ export class BluvoClient {
     private configuration(walletId?:string, ott?:string, idem?:string) {
         if(!!ott) {
             return createConfiguration({
-
                 // baseServer: server2, // test
-                //baseServer: new ServerConfiguration<{  }>("http://localhost:8787", {  }),
+                // baseServer: new ServerConfiguration<{  }>("http://localhost:8787", {  }),
 
                 authMethods: {
+                    bluvoOtt: ott,
+
                     bluvoOrgId: this.orgId,
                     bluvoProjectId: this.projectId,
                     bluvoWalletId: walletId,
-                    bluvoOtt: ott,
                     bluvoOttActionId: idem,
                 },
             });
@@ -580,6 +580,7 @@ export class BluvoClient {
                 bluvoOrgId: this.orgId,
                 bluvoProjectId: this.projectId,
                 bluvoWalletId: walletId,
+                bluvoOttActionId: idem,
             }
         });
     }

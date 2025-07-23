@@ -25,6 +25,8 @@ const apiInstance = new OAuth2Api(configuration);
 const request: OAuth2ApiOAuth2LinkRequest = {
     // The identifier of the exchange to link (e.g. \'coinbase\', \'kraken\').
   exchange: "coinbase",
+    // The idem provided by OTT or used to identify the workflow run. This is used to track the OAuth2 flow and can be used to subscribe to updates.
+  idem: "idem_example",
 };
 
 const data = await apiInstance.oAuth2Link(request);
@@ -37,6 +39,7 @@ console.log('API called successfully. Returned data:', data);
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **exchange** | [**&#39;coinbase&#39; | &#39;kraken&#39;**]**Array<&#39;coinbase&#39; &#124; &#39;kraken&#39;>** | The identifier of the exchange to link (e.g. \&#39;coinbase\&#39;, \&#39;kraken\&#39;). | defaults to undefined
+ **idem** | [**string**] | The idem provided by OTT or used to identify the workflow run. This is used to track the OAuth2 flow and can be used to subscribe to updates. | defaults to undefined
 
 
 ### Return type
@@ -45,7 +48,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[bluvoOrgId](README.md#bluvoOrgId), [bluvoOttActionId](README.md#bluvoOttActionId), [bluvoProjectId](README.md#bluvoProjectId), [bluvoWalletId](README.md#bluvoWalletId)
 
 ### HTTP request headers
 

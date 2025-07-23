@@ -1,6 +1,6 @@
 import {
     ConnectWalletRequest,
-    createConfiguration, OneTimeTokenApi,
+    createConfiguration, OAuth2Api, OneTimeTokenApi,
     PricesApi,
     PromiseConfigurationOptions, ServerConfiguration, TransactionsApi,
     WalletsApi, WithdrawFundsRequest, WorkflowApi
@@ -476,6 +476,18 @@ export class BluvoClient {
         }
     }
 
+
+    oauth2 = {
+        getLink : (
+            exchange: 'coinbase' | 'kraken',
+            walletId?: string,
+            idem?: string,
+            _options?: PromiseConfigurationOptions
+        ) => {
+            return new OAuth2Api(this.configuration(walletId, undefined, idem))
+                .oAuth2Link(exchange,idem, _options)
+        }
+    }
 
     ott = {
 

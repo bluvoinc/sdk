@@ -153,4 +153,23 @@ describe('live HTTP calls tests', ()=>{
 
     });
 
+    describe('oauth2',()=>{
+
+        it('get oauth2 link', async () => {
+
+            const act = await client
+                .oauth2
+                .getLink(
+                    'coinbase',
+                    'my-wallet-id',
+                    'my-idem',
+                );
+
+            console.log(act);
+
+            expect(act).toBeDefined();
+        });
+
+    });
+
 });

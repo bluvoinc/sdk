@@ -36,7 +36,7 @@ jobs:
       #      - name: Run tests
       #        run: pnpm test
       - name: Build packages
-        run: pnpm build
+        run: pnpm -F @bluvo/sdk-ts build
 
       - name: Configure .npmrc for authentication
         run: |

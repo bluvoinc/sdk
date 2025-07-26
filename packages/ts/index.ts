@@ -2,8 +2,8 @@ import {
     ConnectWalletRequest,
     createConfiguration, OAuth2Api, OneTimeTokenApi,
     PricesApi,
-    PromiseConfigurationOptions, ServerConfiguration, TransactionsApi,
-    WalletsApi, WithdrawFundsRequest, WorkflowApi
+    PromiseConfigurationOptions, TransactionsApi,
+    WalletsApi, WorkflowApi
 } from "./generated";
 
 /**
@@ -444,12 +444,19 @@ export class BluvoClient {
                            asset,
                            network,
                            tag
+                       }: {
+                           walletId: string;
+                           destinationAddress: string;
+                           amount: string | number;
+                           asset: string;
+                           network?: string;
+                           tag?: string;
                        }, _options?: PromiseConfigurationOptions) => {
                 return new TransactionsApi(this.configuration(walletId))
                     .withdrawFunds(
                         {
                             asset,
-                            amount,
+                            amount: typeof amount === 'string' ? parseFloat(amount) : amount,
                             address: destinationAddress,
                             tag,
                             params: {
@@ -485,7 +492,7 @@ export class BluvoClient {
             _options?: PromiseConfigurationOptions
         ) => {
             return new OAuth2Api(this.configuration(walletId, undefined, idem))
-                .oAuth2Link(exchange,idem, _options)
+                .oAuth2Link(exchange, idem!, _options)
         }
     }
 

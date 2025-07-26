@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["es2021", "dom"],
+    "removeComments": false
+  },
+  "include": [
+    "index.ts",
+    "generated/**/*"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "test"
+  ]
+}

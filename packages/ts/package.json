@@ -1,6 +1,8 @@
 {
   "name": "@bluvo/sdk-ts",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
   "version": "1.1.19",
   "description": "Bluvo SDK for TypeScript",
   "author": "Bluvo Inc.",
@@ -14,7 +16,9 @@
     "url": "https://github.com/bluvoinc/sdk/issues"
   },
   "scripts": {
-    "test": "vitest"
+    "build": "tsc && tsc --module esnext --outDir dist/esm && mv dist/esm/index.js dist/index.esm.js && rm -rf dist/esm",
+    "test": "vitest",
+    "prepublishOnly": "pnpm build"
   },
   "publishConfig": {
     "access": "public"
@@ -27,6 +31,11 @@
     "api"
   ],
   "devDependencies": {
+    "typescript": "^5.0.0",
     "vitest": "^3.1.1"
-  }
+  },
+  "files": [
+    "dist/**/*",
+    "README.md"
+  ]
 }

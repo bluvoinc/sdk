@@ -43,14 +43,27 @@ export class BluvoWebClient {
          *
          * @param exchange The exchange to authenticate with (currently supports 'coinbase').
          * @param options OAuth2 flow configuration options:
-         *   @param hooks
-         *   @param windowRef
+         *   @param walletId - A unique identifier for this wallet connection
+         *   @param idem - A unique identifier for this specific OAuth2 flow instance
+         * @param hooks Optional callback hooks:
+         *   @param onWindowClose - Called when the OAuth window is closed by the user
+         * @param popupOptions Optional window customization:
+         *   @param title - Window title (defaults to '{exchange}OAuth')
+         *   @param width - Window width in pixels (defaults to 500)
+         *   @param height - Window height in pixels (defaults to 600)
+         * @param windowRef Optional window reference (defaults to global window)
          *
          * @example
          * const webClient = new BluvoWebClient('org-123', 'project-456');
-         * await webClient.openOAuth2('coinbase', {
+         * await webClient.oauth2.openWindow('coinbase', {
          *   walletId: 'user-coinbase-wallet',
          *   idem: 'oauth-flow-123'
+         * }, {
+         *   onWindowClose: () => console.log('Window closed')
+         * }, {
+         *   title: 'Connect to Coinbase',
+         *   width: 600,
+         *   height: 700
          * });
          */
         async openWindow(
@@ -65,6 +78,11 @@ export class BluvoWebClient {
                 // instead those two will be used on .listen
                 // onComplete?: (walletId: string) => void;
                 // onError?: (error: any) => void;
+            },
+            popupOptions?: {
+                title?: string;
+                width?: number;
+                height?: number;
             },
             windowRef?: Window | undefined
         ) {
@@ -91,10 +109,15 @@ export class BluvoWebClient {
                 throw new Error('Failed to generate OAuth2 link');
             }
 
+            // Set default window options
+            const windowTitle = popupOptions?.title || `${exchange} OAuth`;
+            const windowWidth = popupOptions?.width || 500;
+            const windowHeight = popupOptions?.height || 600;
+            
             const newWindow = windowRef.open(
                 url,
-                `${exchange}OAuth`,
-                'width=500,height=600,status=yes,scrollbars=yes,resizable=yes'
+                windowTitle,
+                `width=${windowWidth},height=${windowHeight},status=yes,scrollbars=yes,resizable=yes`
             );
             
             if (!newWindow) {

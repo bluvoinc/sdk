@@ -3,6 +3,8 @@ import { BluvoClient } from './src/BluvoClient';
 
 export { BluvoWebClient } from './src/BluvoWebClient';
 export { BluvoClient } from './src/BluvoClient';
+export { WebSocketClient } from './src/WebSocketClient';
+export type { TopicInfo } from './src/WebSocketClient';
 
 /**
  * Create a fully configured Bluvo SDK client instance with a single function call.

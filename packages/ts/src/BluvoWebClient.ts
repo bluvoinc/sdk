@@ -1,4 +1,6 @@
 import {createConfiguration, OAuth2Api, PromiseConfigurationOptions} from "../generated";
+import {WebSocketClient, TopicInfo} from "./WebSocketClient";
+import {TopicSubscribe} from "@gomomento/sdk-web";
 
 /**
  * A web-specific client for Bluvo SDK that provides browser-oriented functionality
@@ -12,6 +14,8 @@ import {createConfiguration, OAuth2Api, PromiseConfigurationOptions} from "../ge
  * organization and project identifiers, making it safe for client-side applications.
  */
 export class BluvoWebClient {
+    private wsClient: WebSocketClient;
+    
     /**
      * Creates a new BluvoWebClient instance for browser environments.
      * 
@@ -21,7 +25,9 @@ export class BluvoWebClient {
     constructor(
         private readonly orgId: string,
         private readonly projectId: string
-    ) {}
+    ) {
+        this.wsClient = new WebSocketClient();
+    }
 
 
 
@@ -31,7 +37,41 @@ export class BluvoWebClient {
         return new BluvoWebClient(orgId, projectId);
     }
 
-    oauth2 = {
+    oauth2: {
+        openWindow: (
+            exchange: 'coinbase',
+            options: {
+                walletId: string;
+                idem: string;
+            },
+            hooks?: {
+                onWindowClose?: () => void;
+            },
+            popupOptions?: {
+                title?: string;
+                width?: number;
+                height?: number;
+            },
+            windowRef?: Window | undefined
+        ) => Promise<(() => void) | undefined>;
+        getLink: (
+            exchange: 'coinbase' | 'kraken',
+            options: {
+                walletId: string;
+                idem: string;
+            }
+        ) => Promise<{url: string; success: boolean}>;
+        listen: (
+            idem: string,
+            topicInfo: string,
+            options: {
+                onComplete?: (walletId: string) => void;
+                onError?: (error: Error) => void;
+                onMessage?: (data: any) => void;
+                cacheName?: string;
+            }
+        ) => Promise<TopicSubscribe.Subscription>;
+    } = {
 
         /**
          * Opens an OAuth2 authentication flow for connecting to a cryptocurrency exchange.
@@ -184,34 +224,149 @@ export class BluvoWebClient {
         ) => {
             return new OAuth2Api(this.configuration(walletId, undefined, idem))
                 .oAuth2Link(exchange, idem!)
+        },
+
+        /**
+         * Listen to a Momento topic for messages.
+         * 
+         * This method is used to subscribe to topics created by the server-side SDK's
+         * client.ott.getWithSubscribe() function. It's particularly useful for OAuth2
+         * flows to receive wallet connection confirmations.
+         * 
+         * @param idem The idempotency key/topic name to subscribe to
+         * @param topicInfo Topic information including authentication token
+         * @param options Subscription callbacks:
+         *   @param onComplete - Called when the operation completes successfully (e.g., OAuth flow completed)
+         *   @param onError - Called when an error occurs
+         *   @param onMessage - Called for each message received (optional)
+         * 
+         * @example
+         * // Server-side: Generate OTT with topic subscription
+         * const ottResponse = await bluvoClient.ott.getWithSubscribe({
+         *   walletId: 'user-wallet-123',
+         *   actionId: 'oauth-coinbase'
+         * });
+         * 
+         * // Client-side: Listen for OAuth completion
+         * await webClient.oauth2.listen(
+         *   ottResponse.idem,
+         *   ottResponse.topic,
+         *   {
+         *     onComplete: (walletId) => {
+         *       console.log('OAuth completed, wallet connected:', walletId);
+         *     },
+         *     onError: (error) => {
+         *       console.error('OAuth failed:', error);
+         *     }
+         *   }
+         * );
+         */
+        listen: async (
+            idem: string,
+            topicInfo: string,
+            options: {
+                onComplete?: (walletId: string) => void;
+                onError?: (error: Error) => void;
+                onMessage?: (data: any) => void;
+                cacheName?: string;
+            }
+        ) => {
+            return this.wsClient.subscribe(idem, topicInfo, {
+                cacheName: options.cacheName,
+                onMessage: (data) => {
+                    // Call custom message handler if provided
+                    options.onMessage?.(data);
+                    
+                    // Check for OAuth completion pattern
+                    if (data?.success === true && data?.walletId) {
+                        options.onComplete?.(data.walletId);
+                    }
+                },
+                onError: options.onError,
+                onComplete: () => {
+                    // This is called by WebSocketClient when it detects completion
+                    // but we handle completion in onMessage above for OAuth flows
+                }
+            });
         }
-
-
-        // listen is a function that uses MomentoTopic to subscribe to a topic and receive messages.
-        // it can be used to listen for the WalletId/Completion/Error of an OAuth2 flow for example.
-        // it works only if previously called client.ott.getWithSubscribe from the server-side SDK.
-        //  that getWithSubscribe function will return an object like this:
-        //  {{
-        //   "idem": "c6b20b11-297a-4721-895b-c1a6abc1ea02",
-        //   "ott": "eyJhbGciOiJIUzI1NiJ9.eyJvcmdJZCI6ImEyZTk4NDA5LWNkNjgtNDhjNC04NTNjLTczZDkyMjg3NjRjMCIsImlkZW0iOiJjN2UzNjViYS04MjRhLTQ1MWQtYjM3Ny04MDI2NzQ2MTdkZmMiLCJpYXQiOjE3NTMyMDEzMDQsImV4cCI6MTc1MzIwNDkwNH0.xwwx-Jl1ij1S1vufBfAI8btytCr_9skTqFTPPh5qVOI",
-        //   "topic": {
-        //     "success": true,
-        //     "name": "c6b20b11-297a-4721-895b-c1a6abc1ea02",
-        //     "token": "eyJlbmRwb2ludCI6ImNlbGwtNC11cy13ZXN0LTItMS5wcm9kLmEubW9tZW50b2hxLmNvbSIsImFwaV9rZXkiOiJleUpoYkdjaU9pSklVekkxTmlKOS5leUp6ZFdJaU9pSm1iRzlBWW14MWRtOHVZMjhpTENKMlpYSWlPakVzSW5BaU9pSkZhRWxMUlVKSlQwTkJTV0ZEUVc5SFlqSkdNV1JIWjNsSlowRTlJbjAuU0Y2M3NHWkoxYUdKckJpRVZCdXZlbG9pOEFWWkNFVzd1ZnNOUklGYUx5dyJ9",
-        //     "expiresAt": 1752425364044
-        //   }
-        // }
-        //  the idem is the same that will be used by the openWindow method
-        //  the ott can be used for other API calls that require authentication from UI.
-        //  the topic.name is the same as idem
-        //  the topic.token is required by MomentoTopic to subscribe to the topic!
-        // implement the listen method so that it can be used to subscribe to a momento topic, and have 2 hooks:
-        //  onComplete: (walletId: string) => void;
-        //  onError: (error: any) => void;
-        // can create a WebSocketClient class to be used to handle subscriptions with MomentoTopic
-
     }
 
+    /**
+     * Listen to a Momento topic for messages (generic version).
+     *
+     * This method provides a general-purpose subscription to Momento topics,
+     * useful for any real-time messaging needs beyond OAuth2 flows.
+     *
+     * @param topicName The name of the topic to subscribe to
+     * @param topicToken
+     * @param options Subscription options including callbacks
+     * @returns A subscription object that can be used to unsubscribe
+     *
+     * @example
+     * // Listen to a custom topic
+     * const subscription = await webClient.listen(
+     *   'my-topic-123',
+     *   topicInfo,
+     *   {
+     *     onMessage: (data) => {
+     *       console.log('Received message:', data);
+     *     },
+     *     onError: (error) => {
+     *       console.error('Subscription error:', error);
+     *     }
+     *   }
+     * );
+     *
+     * // Later: unsubscribe
+     * await webClient.unsubscribe('my-topic-123');
+     */
+    async listen(
+        topicName: string,
+        topicToken: string,
+        options: {
+            onMessage: (data: any) => void;
+            onError?: (error: Error) => void;
+            onComplete?: () => void;
+            cacheName?: string;
+        }
+    ): Promise<TopicSubscribe.Subscription> {
+        return this.wsClient.subscribe(topicName, topicToken, options);
+    }
+
+    /**
+     * Unsubscribe from a topic.
+     * 
+     * @param topicName The name of the topic to unsubscribe from
+     */
+    async unsubscribe(topicName: string) {
+        return this.wsClient.unsubscribe(topicName);
+    }
+
+    /**
+     * Unsubscribe from all active topics.
+     */
+    async unsubscribeAll() {
+        return this.wsClient.unsubscribeAll();
+    }
+
+    /**
+     * Check if currently subscribed to a topic.
+     * 
+     * @param topicName The topic name to check
+     * @returns True if subscribed, false otherwise
+     */
+    isSubscribed(topicName: string): boolean {
+        return this.wsClient.isSubscribed(topicName);
+    }
+
+    /**
+     * Get the number of active subscriptions.
+     * 
+     * @returns Number of active subscriptions
+     */
+    getActiveSubscriptionCount(): number {
+        return this.wsClient.getActiveSubscriptionCount();
+    }
 
     /**
      * Creates and returns a properly configured API client configuration object.

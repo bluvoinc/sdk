@@ -28,7 +28,7 @@ pnpm add @bluvo/sdk-ts
 
 ## Quick Start
 
-### Initialize the SDK
+### Initialize the SDK Server Side
 ```typescript
 import { createClient } from '@bluvo/sdk-ts';
 
@@ -41,23 +41,6 @@ const client = createClient({
 ```
 
 ## Wallets
-
-### Connect a Wallet (Server-side)
-
-```typescript
-// See full list here -> https://docs.bluvo.co/supported-exchanges
-const connection = await client.wallet.connect(
-  'binance',                    // exchange
-  'unique-wallet-id',           // walletId
-  'unique-workflow-id',         // idem (workflow identifier)
-  {                            // ConnectWalletRequest
-    apiKey: 'your-binance-api-key',
-    apiSecret: 'your-binance-api-secret',
-    apiPassphrase: 'optional-passphrase',  // Required for some exchanges
-    ips: ['192.168.1.1']                   // Optional IP whitelist
-  }
-);
-```
 
 ### Withdraw from Wallet (Server-side)
 
@@ -81,31 +64,6 @@ console.log('Withdrawal status:', withdrawal.status);
 const wallet = await client.wallet.get('wallet-id');
 ```
 
-### Delete a Wallet
-
-```typescript
-// Delete a wallet connection
-const deleteResult = await client.wallet.delete('wallet-id');
-```
-
-## Market Data
-
-### Get OHLCV Candlesticks
-
-```typescript
-// Get historical price data
-const candlesticks = await client.prices.candlesticks(
-  'ETH',           // Base asset
-  'USDT',          // Quote asset
-  1649619000000,   // Start time (optional, Unix timestamp in ms)
-  1649629000000,   // End time (optional, Unix timestamp in ms)
-  'binance',       // Exchange (optional)
-  '1h'             // Granularity (optional: 1m, 15m, 30m, 1h, 4h, 1d)
-);
-
-console.log('ETH/USDT candlesticks:', candlesticks);
-```
-
 ## Workflow Management
 
 Track the status of asynchronous operations:
@@ -123,6 +81,8 @@ console.log('Workflow steps:', workflow.steps);
 - Coinbase
 - Kraken
 - KuCoin
+- Gemini
+- Bitfinex
 - OKX
 - More coming soon!
 
@@ -144,9 +104,6 @@ For client-side applications where you don't want to expose your API keys, use O
 // On your server, generate an OTT token
 const ottResponse = await client.ott.get('wallet-id');
 const { ott, idem } = ottResponse;
-
-// Send the OTT token to your client-side application
-// (e.g., through an API endpoint or WebSocket)
 ```
 
 ### Step 2: Connect Wallet with OTT (Client-side)

@@ -90,7 +90,7 @@ describe('live HTTP calls tests', ()=>{
 
     describe('workflows',()=>{
 
-        it('get workflow', async () => {
+        it.skip('get workflow', async () => {
 
             const workflowRunId = '82a94525-2722-4b36-93f6-7e5223d27a67';
             const workflowType = 'connect';

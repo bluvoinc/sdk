@@ -105,6 +105,7 @@ export class BluvoWebClient {
                         idem: options.idem
                     }
                 );
+
             if (!success) {
                 throw new Error('Failed to generate OAuth2 link');
             }
@@ -184,6 +185,31 @@ export class BluvoWebClient {
             return new OAuth2Api(this.configuration(walletId, undefined, idem))
                 .oAuth2Link(exchange, idem!)
         }
+
+
+        // listen is a function that uses MomentoTopic to subscribe to a topic and receive messages.
+        // it can be used to listen for the WalletId/Completion/Error of an OAuth2 flow for example.
+        // it works only if previously called client.ott.getWithSubscribe from the server-side SDK.
+        //  that getWithSubscribe function will return an object like this:
+        //  {{
+        //   "idem": "c6b20b11-297a-4721-895b-c1a6abc1ea02",
+        //   "ott": "eyJhbGciOiJIUzI1NiJ9.eyJvcmdJZCI6ImEyZTk4NDA5LWNkNjgtNDhjNC04NTNjLTczZDkyMjg3NjRjMCIsImlkZW0iOiJjN2UzNjViYS04MjRhLTQ1MWQtYjM3Ny04MDI2NzQ2MTdkZmMiLCJpYXQiOjE3NTMyMDEzMDQsImV4cCI6MTc1MzIwNDkwNH0.xwwx-Jl1ij1S1vufBfAI8btytCr_9skTqFTPPh5qVOI",
+        //   "topic": {
+        //     "success": true,
+        //     "name": "c6b20b11-297a-4721-895b-c1a6abc1ea02",
+        //     "token": "eyJlbmRwb2ludCI6ImNlbGwtNC11cy13ZXN0LTItMS5wcm9kLmEubW9tZW50b2hxLmNvbSIsImFwaV9rZXkiOiJleUpoYkdjaU9pSklVekkxTmlKOS5leUp6ZFdJaU9pSm1iRzlBWW14MWRtOHVZMjhpTENKMlpYSWlPakVzSW5BaU9pSkZhRWxMUlVKSlQwTkJTV0ZEUVc5SFlqSkdNV1JIWjNsSlowRTlJbjAuU0Y2M3NHWkoxYUdKckJpRVZCdXZlbG9pOEFWWkNFVzd1ZnNOUklGYUx5dyJ9",
+        //     "expiresAt": 1752425364044
+        //   }
+        // }
+        //  the idem is the same that will be used by the openWindow method
+        //  the ott can be used for other API calls that require authentication from UI.
+        //  the topic.name is the same as idem
+        //  the topic.token is required by MomentoTopic to subscribe to the topic!
+        // implement the listen method so that it can be used to subscribe to a momento topic, and have 2 hooks:
+        //  onComplete: (walletId: string) => void;
+        //  onError: (error: any) => void;
+        // can create a WebSocketClient class to be used to handle subscriptions with MomentoTopic
+
     }
 
 

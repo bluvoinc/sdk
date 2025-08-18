@@ -324,7 +324,11 @@ export class BluvoWebClient {
         topicName: string,
         topicToken: string,
         options: {
-            onMessage: (data: any) => void;
+            onMessage: (data: {
+                success?: boolean;
+                walletId?: string;
+                [key: string]: any;
+            }) => void;
             onError?: (error: Error) => void;
             onComplete?: () => void;
             cacheName?: string;

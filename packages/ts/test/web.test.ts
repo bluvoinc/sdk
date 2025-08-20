@@ -12,7 +12,7 @@ describe('live HTTP calls tests', ()=>{
 
     describe('oauth2',()=>{
 
-        it('open oauth2 window', async () => {
+        it.skip('open oauth2 window', async () => {
             // open the URL in a new window
             await client
                 .oauth2

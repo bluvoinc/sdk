@@ -1,48 +1,52 @@
-export * from '../models/Asset200Response';
-export * from '../models/Asset200ResponseAssetsInner';
-export * from '../models/ConnectWallet200Response';
-export * from '../models/ConnectWalletRequest';
-export * from '../models/DeleteWallet200Response';
-export * from '../models/GetOTTToken200Response';
-export * from '../models/GetOTTToken200ResponseTopic';
-export * from '../models/GetWallet200Response';
-export * from '../models/GetWorkflow200Response';
-export * from '../models/GetWorkflow200ResponseDetails';
-export * from '../models/ListAssets200Response';
-export * from '../models/ListAssets200ResponseAssetsInner';
-export * from '../models/ListPairs200Response';
-export * from '../models/ListTransactions200Response';
-export * from '../models/ListTransactions200ResponsePagination';
-export * from '../models/ListTransactions200ResponseTransactionsInner';
-export * from '../models/ListWallets200Response';
-export * from '../models/ListWallets200ResponsePagination';
-export * from '../models/ListWallets200ResponseWalletsInner';
-export * from '../models/OAuth2Link200Response';
-export * from '../models/WithdrawFunds200Response';
-export * from '../models/WithdrawFundsRequest';
+export * from '../models/Oauth2exchangeurlgeturl200Response';
+export * from '../models/Ottgenerate200Response';
+export * from '../models/Ottgenerate200ResponseTopic';
+export * from '../models/Walletdelete200Response';
+export * from '../models/WalletexchangeconnectconnectwalletRequest';
+export * from '../models/Walletget200Response';
+export * from '../models/Walletlistlistwallets200Response';
+export * from '../models/Walletlistlistwallets200ResponsePagination';
+export * from '../models/Walletlistlistwallets200ResponseWalletsInner';
+export * from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValue';
+export * from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
+export * from '../models/Walletlistlistwallets200ResponseWalletsInnerCreatedAt';
+export * from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
+export * from '../models/Wallettransactionslisttransactions200Response';
+export * from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
+export * from '../models/Walletwithdrawbalancebalance200Response';
+export * from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
+export * from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
+export * from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
+export * from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
+export * from '../models/Walletwithdrawquotequotation200Response';
+export * from '../models/WalletwithdrawquotequotationRequest';
+export * from '../models/Workflowworkflowtypegetworkflowrunidget200Response';
+export * from '../models/Workflowworkflowtypegetworkflowrunidget200ResponseDetails';
 
-import { Asset200Response } from '../models/Asset200Response';
-import { Asset200ResponseAssetsInner } from '../models/Asset200ResponseAssetsInner';
-import { ConnectWallet200Response } from '../models/ConnectWallet200Response';
-import { ConnectWalletRequest } from '../models/ConnectWalletRequest';
-import { DeleteWallet200Response } from '../models/DeleteWallet200Response';
-import { GetOTTToken200Response } from '../models/GetOTTToken200Response';
-import { GetOTTToken200ResponseTopic } from '../models/GetOTTToken200ResponseTopic';
-import { GetWallet200Response } from '../models/GetWallet200Response';
-import { GetWorkflow200Response } from '../models/GetWorkflow200Response';
-import { GetWorkflow200ResponseDetails, GetWorkflow200ResponseDetailsStatusEnum    } from '../models/GetWorkflow200ResponseDetails';
-import { ListAssets200Response } from '../models/ListAssets200Response';
-import { ListAssets200ResponseAssetsInner } from '../models/ListAssets200ResponseAssetsInner';
-import { ListPairs200Response } from '../models/ListPairs200Response';
-import { ListTransactions200Response } from '../models/ListTransactions200Response';
-import { ListTransactions200ResponsePagination } from '../models/ListTransactions200ResponsePagination';
-import { ListTransactions200ResponseTransactionsInner } from '../models/ListTransactions200ResponseTransactionsInner';
-import { ListWallets200Response } from '../models/ListWallets200Response';
-import { ListWallets200ResponsePagination } from '../models/ListWallets200ResponsePagination';
-import { ListWallets200ResponseWalletsInner } from '../models/ListWallets200ResponseWalletsInner';
-import { OAuth2Link200Response } from '../models/OAuth2Link200Response';
-import { WithdrawFunds200Response } from '../models/WithdrawFunds200Response';
-import { WithdrawFundsRequest } from '../models/WithdrawFundsRequest';
+import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlgeturl200Response';
+import { Ottgenerate200Response } from '../models/Ottgenerate200Response';
+import { Ottgenerate200ResponseTopic } from '../models/Ottgenerate200ResponseTopic';
+import { Walletdelete200Response } from '../models/Walletdelete200Response';
+import { WalletexchangeconnectconnectwalletRequest } from '../models/WalletexchangeconnectconnectwalletRequest';
+import { Walletget200Response } from '../models/Walletget200Response';
+import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
+import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
+import { Walletlistlistwallets200ResponseWalletsInner } from '../models/Walletlistlistwallets200ResponseWalletsInner';
+import { Walletlistlistwallets200ResponseWalletsInnerBalancesValue } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValue';
+import { Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
+import { Walletlistlistwallets200ResponseWalletsInnerCreatedAt } from '../models/Walletlistlistwallets200ResponseWalletsInnerCreatedAt';
+import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
+import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
+import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
+import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
+import { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
+import { Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
+import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
+import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
+import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
+import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
+import { Workflowworkflowtypegetworkflowrunidget200Response } from '../models/Workflowworkflowtypegetworkflowrunidget200Response';
+import { Workflowworkflowtypegetworkflowrunidget200ResponseDetails, Workflowworkflowtypegetworkflowrunidget200ResponseDetailsStatusEnum    } from '../models/Workflowworkflowtypegetworkflowrunidget200ResponseDetails';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -57,32 +61,34 @@ let primitives = [
                  ];
 
 let enumsMap: Set<string> = new Set<string>([
-    "GetWorkflow200ResponseDetailsStatusEnum",
+    "Workflowworkflowtypegetworkflowrunidget200ResponseDetailsStatusEnum",
 ]);
 
 let typeMap: {[index: string]: any} = {
-    "Asset200Response": Asset200Response,
-    "Asset200ResponseAssetsInner": Asset200ResponseAssetsInner,
-    "ConnectWallet200Response": ConnectWallet200Response,
-    "ConnectWalletRequest": ConnectWalletRequest,
-    "DeleteWallet200Response": DeleteWallet200Response,
-    "GetOTTToken200Response": GetOTTToken200Response,
-    "GetOTTToken200ResponseTopic": GetOTTToken200ResponseTopic,
-    "GetWallet200Response": GetWallet200Response,
-    "GetWorkflow200Response": GetWorkflow200Response,
-    "GetWorkflow200ResponseDetails": GetWorkflow200ResponseDetails,
-    "ListAssets200Response": ListAssets200Response,
-    "ListAssets200ResponseAssetsInner": ListAssets200ResponseAssetsInner,
-    "ListPairs200Response": ListPairs200Response,
-    "ListTransactions200Response": ListTransactions200Response,
-    "ListTransactions200ResponsePagination": ListTransactions200ResponsePagination,
-    "ListTransactions200ResponseTransactionsInner": ListTransactions200ResponseTransactionsInner,
-    "ListWallets200Response": ListWallets200Response,
-    "ListWallets200ResponsePagination": ListWallets200ResponsePagination,
-    "ListWallets200ResponseWalletsInner": ListWallets200ResponseWalletsInner,
-    "OAuth2Link200Response": OAuth2Link200Response,
-    "WithdrawFunds200Response": WithdrawFunds200Response,
-    "WithdrawFundsRequest": WithdrawFundsRequest,
+    "Oauth2exchangeurlgeturl200Response": Oauth2exchangeurlgeturl200Response,
+    "Ottgenerate200Response": Ottgenerate200Response,
+    "Ottgenerate200ResponseTopic": Ottgenerate200ResponseTopic,
+    "Walletdelete200Response": Walletdelete200Response,
+    "WalletexchangeconnectconnectwalletRequest": WalletexchangeconnectconnectwalletRequest,
+    "Walletget200Response": Walletget200Response,
+    "Walletlistlistwallets200Response": Walletlistlistwallets200Response,
+    "Walletlistlistwallets200ResponsePagination": Walletlistlistwallets200ResponsePagination,
+    "Walletlistlistwallets200ResponseWalletsInner": Walletlistlistwallets200ResponseWalletsInner,
+    "Walletlistlistwallets200ResponseWalletsInnerBalancesValue": Walletlistlistwallets200ResponseWalletsInnerBalancesValue,
+    "Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf": Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf,
+    "Walletlistlistwallets200ResponseWalletsInnerCreatedAt": Walletlistlistwallets200ResponseWalletsInnerCreatedAt,
+    "Walletlistlistwallets200ResponseWalletsInnerInvalidApi": Walletlistlistwallets200ResponseWalletsInnerInvalidApi,
+    "Wallettransactionslisttransactions200Response": Wallettransactionslisttransactions200Response,
+    "Wallettransactionslisttransactions200ResponseTransactionsInner": Wallettransactionslisttransactions200ResponseTransactionsInner,
+    "Walletwithdrawbalancebalance200Response": Walletwithdrawbalancebalance200Response,
+    "Walletwithdrawbalancebalance200ResponseBalancesInner": Walletwithdrawbalancebalance200ResponseBalancesInner,
+    "Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner": Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner,
+    "Walletwithdrawquoteidexecutewithdraw200Response": Walletwithdrawquoteidexecutewithdraw200Response,
+    "WalletwithdrawquoteidexecutewithdrawRequest": WalletwithdrawquoteidexecutewithdrawRequest,
+    "Walletwithdrawquotequotation200Response": Walletwithdrawquotequotation200Response,
+    "WalletwithdrawquotequotationRequest": WalletwithdrawquotequotationRequest,
+    "Workflowworkflowtypegetworkflowrunidget200Response": Workflowworkflowtypegetworkflowrunidget200Response,
+    "Workflowworkflowtypegetworkflowrunidget200ResponseDetails": Workflowworkflowtypegetworkflowrunidget200ResponseDetails,
 }
 
 type MimeTypeDescriptor = {

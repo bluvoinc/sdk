@@ -4,32 +4,32 @@ All URIs are relative to *https://api-bluvo.com*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**oAuth2Link**](OAuth2Api.md#oAuth2Link) | **GET** /v0/oauth2/{exchange}/link | OAuth2 Link
+[**oauth2exchangeurlgeturl**](OAuth2Api.md#oauth2exchangeurlgeturl) | **GET** /v0/oauth2/{exchange}/url | Get URL
 
 
-# **oAuth2Link**
-> OAuth2Link200Response oAuth2Link()
+# **oauth2exchangeurlgeturl**
+> Oauth2exchangeurlgeturl200Response oauth2exchangeurlgeturl()
 
-Get the url at which the user can do OAuth2 flow to grant access to their exchange account. The idem key, is the ID at which the OAuth2 flow will be linked to and can be listened either via polling using the \'/workflow/:workflowType/get/:workflowRunId\' endpoint (setting \'oauth2\' as workflowType or via Websocket streaming using the \'topic\' key in the response. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers
+Get the url at which the user can do OAuth2 flow to grant access to their exchange account. The idem key, is the ID at which the OAuth2 flow will be linked to and can be listened either via polling using the \'/workflow/:workflowType/get/:workflowRunId\' endpoint (setting \'oauth2\' as workflowType or via Websocket streaming using the \'topic\' key in the response.
 
 ### Example
 
 
 ```typescript
 import { createConfiguration, OAuth2Api } from '';
-import type { OAuth2ApiOAuth2LinkRequest } from '';
+import type { OAuth2ApiOauth2exchangeurlgeturlRequest } from '';
 
 const configuration = createConfiguration();
 const apiInstance = new OAuth2Api(configuration);
 
-const request: OAuth2ApiOAuth2LinkRequest = {
+const request: OAuth2ApiOauth2exchangeurlgeturlRequest = {
     // The identifier of the exchange to link (e.g. \'coinbase\', \'kraken\').
   exchange: "coinbase",
     // The idem provided by OTT or used to identify the workflow run. This is used to track the OAuth2 flow and can be used to subscribe to updates.
   idem: "idem_example",
 };
 
-const data = await apiInstance.oAuth2Link(request);
+const data = await apiInstance.oauth2exchangeurlgeturl(request);
 console.log('API called successfully. Returned data:', data);
 ```
 
@@ -44,7 +44,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**OAuth2Link200Response**
+**Oauth2exchangeurlgeturl200Response**
 
 ### Authorization
 

@@ -1,11 +1,12 @@
 import {
-    ConnectWalletRequest, createConfiguration, OAuth2Api, OneTimeTokenApi,
-    PricesApi,
-    PromiseConfigurationOptions,
-    TransactionsApi,
-    WalletsApi,
+    APIKeysApi,
+    createConfiguration, OAuth2Api,
+    OneTimeTokenApi,
+    PromiseConfigurationOptions, server1, server2,
+    WalletsApi, WithdrawalsApi,
     WorkflowApi
 } from "../generated";
+import {ConnectWalletRequest} from "../generated/models/ConnectWalletRequest";
 
 type SupportedExchanges = 'ace' | 'ascendex' | 'bequant' | 'bigone' | 'binance' | 'coinbase' | 'binanceus' | 'bingx' | 'bit2c' | 'bitbank' | 'bitbns' | 'bitcoincom' | 'bitfinex' | 'bitflyer' | 'bitget' | 'bithumb' | 'bitmart' | 'bitmex' | 'bitopro' | 'bitpanda' | 'bitrue' | 'bitso' | 'bitstamp' | 'bitteam' | 'bitvavo' | 'bl3p' | 'blockchaincom' | 'blofin' | 'btcalpha' | 'btcbox' | 'btcmarkets' | 'btcturk' | 'cex' | 'coincheck' | 'coinex' | 'coinlist' | 'coinmate' | 'coinmetro' | 'coinone' | 'coinsph' | 'coinspot' | 'cryptocom' | 'delta' | 'deribit' | 'digifinex' | 'exmo' | 'fmfwio' | 'gate' | 'gateio' | 'gemini' | 'hashkey' | 'hitbtc' | 'hollaex' | 'htx' | 'huobi' | 'huobijp' | 'hyperliquid' | 'independentreserve' | 'indodax' | 'kraken' | 'krakenfutures' | 'kucoin' | 'kucoinfutures' | 'latoken' | 'lbank' | 'luno' | 'mercado' | 'mexc' | 'ndax' | 'novadax' | 'oceanex' | 'okcoin' | 'okx' | 'onetrading' | 'oxfun' | 'p2b' | 'paradex' | 'paymium' | 'phemex' | 'poloniex' | 'poloniexfutures' | 'probit' | 'timex' | 'tradeogre' | 'upbit' | 'vertex' | 'wavesexchange' | 'whitebit' | 'woo' | 'woofipro' | 'xt' | 'yobit' | 'zaif' | 'zonda'
 
@@ -27,12 +28,14 @@ export class BluvoClient {
      * @param orgId Your Bluvo organization identifier.
      * @param projectId Your Bluvo project identifier.
      * @param apiKey Your Bluvo API access key.
+     * @param sandbox
      * @private Use the static `createClient` method or the global `createClient` function instead.
      */
     private constructor(
         private readonly orgId: string,
         private readonly projectId: string,
         private readonly apiKey: string,
+        private readonly sandbox: boolean = false
     ) {
     }
 
@@ -50,63 +53,13 @@ export class BluvoClient {
      *
      * @returns A fully configured BluvoClient instance ready for use.
      */
-    static createClient({orgId, projectId, apiKey}: { orgId: string; projectId: string; apiKey: string }) {
+    static createClient({orgId, projectId, apiKey, sandbox}: { orgId: string; projectId: string; apiKey: string, sandbox?: boolean }) {
         return new BluvoClient(
             orgId,
             projectId,
-            apiKey
+            apiKey,
+            sandbox
         );
-    }
-
-    prices = {
-
-        /**
-         * Fetch comprehensive historical candlestick (OHLCV) data across multiple exchanges with powerful filtering capabilities.
-         *
-         * This powerful method provides access to high-quality, normalized candlestick data that can be used for technical analysis,
-         * backtesting trading strategies, building custom charting interfaces, or powering algorithmic trading systems. The data
-         * is collected from reliable exchange APIs and normalized into a consistent format regardless of the source exchange.
-         *
-         * Candlestick data includes open, high, low, close prices and volume (OHLCV) for each time interval, enabling
-         * comprehensive market analysis and visualization. Data is provided in chronological order with precise timestamps.
-         *
-         * @param asset The cryptocurrency asset symbol to retrieve data for (e.g., 'BTC', 'ETH', 'SOL').
-         *              Case-insensitive and supports all major cryptocurrencies and many altcoins.
-         * @param quote The quote currency used in the trading pair, currently supporting 'USDT' as the standard quote currency
-         *             for maximum data availability and consistency across exchanges.
-         * @param [since] Optional timestamp (UNIX milliseconds) marking the beginning of the requested data range.
-         *                If omitted, returns data starting from the earliest available record, subject to other constraints.
-         * @param [until] Optional timestamp (UNIX milliseconds) marking the end of the requested data range.
-         *                If omitted, returns data up to the most recent available record, subject to other constraints.
-         * @param [exchange] Optional exchange identifier to source data from a specific platform. Defaults to 'binance'.
-         *                   Supported exchanges include major platforms like Binance, Bitget, Bitmart, Bybit, Coinbase,
-         *                   Crypto.com, Gate.io, Kraken, KuCoin, and OKX.
-         * @param [granularity] Optional time interval for each candlestick, allowing different time-frame analysis.
-         *                       Currently defaults to '1h' (1 hour intervals). Supported values include:
-         *                       - '1m': 1 minute (highest resolution, suitable for short-term trading)
-         *                       - '15m': 15 minutes
-         *                       - '30m': 30 minutes
-         *                       - '1h': 1 hour (default, balanced between detail and range)
-         *                       - '4h': 4 hours
-         *                       - '1d': 1 day (best for long-term trend analysis)
-         *
-         * @returns A promise resolving to an array of candlestick objects, each containing timestamp, open, high, low, close prices,
-         *          and volume data in a consistent format regardless of the source exchange.
-         *
-         * @example
-         * // Fetch hourly BTC/USDT candlesticks from Binance for the last 7 days
-         * const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-         * const candlesticks = await client.prices.candlesticks('BTC', 'USDT', sevenDaysAgo);
-         *
-         * // Fetch daily ETH/USDT candlesticks from Coinbase for a specific date range
-         * const startDate = new Date('2023-01-01').getTime();
-         * const endDate = new Date('2023-12-31').getTime();
-         * const dailyCandles = await client.prices.candlesticks('ETH', 'USDT', startDate, endDate, 'coinbase', '1d');
-         */
-        candlesticks: (asset: string, quote: 'USDT', since?: number, until?: number, exchange?: 'binance' | 'bitget' | 'bitmart' | 'bybit' | 'coinbase' | 'cryptocom' | 'gateio' | 'kraken' | 'kucoin' | 'okx', granularity?: '1h', _options?: PromiseConfigurationOptions) => {
-            return new PricesApi(this.configuration())
-                .candlesticks(asset, quote, since, until, exchange, granularity, _options);
-        }
     }
 
     wallet = {
@@ -147,8 +100,8 @@ export class BluvoClient {
             request: ConnectWalletRequest,
             _options?: PromiseConfigurationOptions
         ) => {
-            return new WalletsApi(this.configuration(walletId, undefined, idem))
-                .connectWallet(
+            return new APIKeysApi(this.configuration(walletId, undefined, idem))
+                .walletexchangeconnectconnectwallet(
                     exchange as any,
                     idem,
                     request,
@@ -185,7 +138,7 @@ export class BluvoClient {
 
         get: (walletId: string, _options?: PromiseConfigurationOptions) => {
             return new WalletsApi(this.configuration(walletId))
-                .getWallet(_options);
+                .walletget(_options);
         },
 
         /**
@@ -216,7 +169,7 @@ export class BluvoClient {
 
         delete: (walletId: string, _options?: PromiseConfigurationOptions) => {
             return new WalletsApi(this.configuration(walletId))
-                .deleteWallet(_options);
+                .walletdelete(_options);
         },
 
         /**
@@ -266,7 +219,7 @@ export class BluvoClient {
             _options?: PromiseConfigurationOptions
         ) => {
             return new WalletsApi(this.configuration())
-                .listWallets(page, limit, exchange as any, undefined, undefined, undefined, undefined, undefined, undefined, _options);
+                .walletlistlistwallets(page, limit, exchange as any, undefined, undefined, undefined, undefined, undefined, undefined, _options);
         },
 
         transaction: {
@@ -340,8 +293,8 @@ export class BluvoClient {
              */
 
             list: (walletId: string, page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: PromiseConfigurationOptions) => {
-                return new TransactionsApi(this.configuration(walletId))
-                    .listTransactions(page, limit, asset, type, since, before, status, fields, _options);
+                return new WalletsApi(this.configuration(walletId))
+                    .wallettransactionslisttransactions(page, limit, asset, type, since, before, status, fields, _options);
             },
 
             /**
@@ -401,6 +354,7 @@ export class BluvoClient {
              */
 
             withdraw: ({
+                           quoteId,
                            walletId,
                            destinationAddress,
                            amount,
@@ -408,6 +362,7 @@ export class BluvoClient {
                            network,
                            tag
                        }: {
+                quoteId: string;
                 walletId: string;
                 destinationAddress: string;
                 amount: string | number;
@@ -415,8 +370,9 @@ export class BluvoClient {
                 network?: string;
                 tag?: string;
             }, _options?: PromiseConfigurationOptions) => {
-                return new TransactionsApi(this.configuration(walletId))
-                    .withdrawFunds(
+                return new WithdrawalsApi(this.configuration(walletId))
+                    .walletwithdrawquoteidexecutewithdraw(
+                        quoteId,
                         {
                             asset,
                             amount: typeof amount === 'string' ? parseFloat(amount) : amount,
@@ -439,7 +395,7 @@ export class BluvoClient {
             workflowType: "connect" | "withdraw" | "oauth2",
             _options?: PromiseConfigurationOptions) => {
             return new WorkflowApi(this.configuration())
-                .getWorkflow(
+                .workflowworkflowtypegetworkflowrunidget(
                     workflowRunId,
                     workflowType,
                 )
@@ -455,7 +411,7 @@ export class BluvoClient {
             _options?: PromiseConfigurationOptions
         ) => {
             return new OAuth2Api(this.configuration(walletId, undefined, idem))
-                .oAuth2Link(exchange, idem!, _options)
+                .oauth2exchangeurlgeturl(exchange, idem!, _options)
         }
     }
 
@@ -480,7 +436,7 @@ export class BluvoClient {
             walletId?: string,
         ) => {
             return new OneTimeTokenApi(this.configuration(walletId))
-                .getOTTToken(
+                .ottgenerate(
                     "true",
                     "false",
                 )
@@ -490,33 +446,17 @@ export class BluvoClient {
             walletId?: string,
         ) => {
             return new OneTimeTokenApi(this.configuration(walletId))
-                .getOTTToken(
+                .ottgenerate(
                     "true",
                     "true",
                 )
         },
 
-        connect: (
-            {
-                exchange,
-                walletId,
-                idem,
-                ott
-            }: {
-                exchange: SupportedExchanges | string;
-                walletId: string;
-                idem: string;
-                ott: string;
-            },
-            request: ConnectWalletRequest,
-            _options?: PromiseConfigurationOptions
-        ) => {
-            return new OneTimeTokenApi(this.configuration(walletId, ott, idem))
-                .connectWalletOTT(
-                    exchange as any,
-                    idem,
-                    request,
-                    _options
+        onlySubscribe: (walletId?: string) => {
+            return new OneTimeTokenApi(this.configuration(walletId))
+                .ottgenerate(
+                    "false",
+                    "true",
                 )
         }
     }
@@ -541,8 +481,8 @@ export class BluvoClient {
     private configuration(walletId?:string, ott?:string, idem?:string) {
         if(!!ott) {
             return createConfiguration({
-                // baseServer: server2, // test
-                // baseServer: new ServerConfiguration<{  }>("http://localhost:8787", {  }),
+
+                baseServer: this.sandbox ? server2 : server1,
 
                 authMethods: {
                     bluvoOtt: ott,
@@ -557,6 +497,8 @@ export class BluvoClient {
 
 
         return createConfiguration({
+            baseServer: this.sandbox ? server2 : server1,
+
             authMethods: {
                 bluvoApiKey: this.apiKey,
                 bluvoOrgId: this.orgId,

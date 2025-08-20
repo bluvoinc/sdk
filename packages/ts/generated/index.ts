@@ -9,5 +9,5 @@ export { RequiredError } from "./apis/baseapi";
 
 export type { PromiseMiddleware as Middleware, Middleware as ObservableMiddleware } from './middleware';
 export { Observable } from './rxjsStub';
-export { PromiseBasicApi as BasicApi,  PromiseOAuth2Api as OAuth2Api,  PromiseOneTimeTokenApi as OneTimeTokenApi,  PromisePricesApi as PricesApi,  PromiseTransactionsApi as TransactionsApi,  PromiseWalletsApi as WalletsApi,  PromiseWorkflowApi as WorkflowApi } from './types/PromiseAPI';
+export { PromiseAPIKeysApi as APIKeysApi,  PromiseOAuth2Api as OAuth2Api,  PromiseOneTimeTokenApi as OneTimeTokenApi,  PromiseWalletsApi as WalletsApi,  PromiseWithdrawalsApi as WithdrawalsApi,  PromiseWorkflowApi as WorkflowApi } from './types/PromiseAPI';
 

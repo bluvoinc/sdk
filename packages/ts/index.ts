@@ -41,7 +41,18 @@ export type { TopicInfo } from './src/WebSocketClient';
 export function createClient(
     {orgId, projectId, apiKey}: { orgId: string; projectId: string; apiKey: string }
 ) {
-    return BluvoClient.createClient({orgId, projectId, apiKey});
+    return BluvoClient.createClient({
+        orgId, projectId, apiKey
+    });
+}
+
+export function createSandboxClient(
+    {orgId, projectId, apiKey}: { orgId: string; projectId: string; apiKey: string }
+) {
+    return BluvoClient.createClient({
+        orgId, projectId, apiKey,
+        sandbox: true
+    });
 }
 
 // createWebClient

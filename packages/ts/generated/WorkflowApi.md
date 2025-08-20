@@ -4,11 +4,11 @@ All URIs are relative to *https://api-bluvo.com*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**getWorkflow**](WorkflowApi.md#getWorkflow) | **GET** /v0/workflow/{workflowType}/get/{workflowRunId} | Get Workflow
+[**workflowworkflowtypegetworkflowrunidget**](WorkflowApi.md#workflowworkflowtypegetworkflowrunidget) | **GET** /v0/workflow/{workflowType}/get/{workflowRunId} | Get
 
 
-# **getWorkflow**
-> GetWorkflow200Response getWorkflow()
+# **workflowworkflowtypegetworkflowrunidget**
+> Workflowworkflowtypegetworkflowrunidget200Response workflowworkflowtypegetworkflowrunidget()
 
 Retrieve the details of a specific workflow run by its ID. The workflowType parameter indicates the type of workflow (e.g. \'connect\', \'withdraw\', \'oauth2\'). This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
 
@@ -17,19 +17,19 @@ Retrieve the details of a specific workflow run by its ID. The workflowType para
 
 ```typescript
 import { createConfiguration, WorkflowApi } from '';
-import type { WorkflowApiGetWorkflowRequest } from '';
+import type { WorkflowApiWorkflowworkflowtypegetworkflowrunidgetRequest } from '';
 
 const configuration = createConfiguration();
 const apiInstance = new WorkflowApi(configuration);
 
-const request: WorkflowApiGetWorkflowRequest = {
+const request: WorkflowApiWorkflowworkflowtypegetworkflowrunidgetRequest = {
     // The unique identifier of the workflow run to query.
   workflowRunId: "workflowRunId_example",
     // The type of workflow to query (e.g. \'connect\', \'withdraw\').
   workflowType: "connect",
 };
 
-const data = await apiInstance.getWorkflow(request);
+const data = await apiInstance.workflowworkflowtypegetworkflowrunidget(request);
 console.log('API called successfully. Returned data:', data);
 ```
 
@@ -44,7 +44,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**GetWorkflow200Response**
+**Workflowworkflowtypegetworkflowrunidget200Response**
 
 ### Authorization
 

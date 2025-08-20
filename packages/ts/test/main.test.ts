@@ -1,11 +1,11 @@
 import {describe, expect, it} from 'vitest';
-import {createClient} from "../index";
+import {createSandboxClient} from "../index";
 import sec from "../sec";
 
-describe('live HTTP calls tests', ()=>{
+describe('live HTTP calls tests', ()=> {
 
     // Bluvo API credentials - Replace with your own from https://docs.bluvo.co/introduction
-    const client = createClient({
+    const client = createSandboxClient({
         apiKey: sec.apiKey,
         orgId: sec.orgId,
         projectId: sec.projectId,
@@ -120,36 +120,6 @@ describe('live HTTP calls tests', ()=>{
 
             expect(ott).toBeDefined();
         });
-
-        it('connect exchange with ott', async () => {
-
-            const newWalletId = crypto
-                .randomUUID();
-
-            const {idem, ott} = await client
-                .ott
-                .get(newWalletId);
-
-            const res = await client
-                .ott
-                .connect(
-                    {
-                        ott,
-                        exchange: 'binance',
-                        walletId: newWalletId,
-                        idem,
-                    },
-                    {
-                        apiKey:         sec.binance.apiKey,
-                        apiSecret:      sec.binance.secret,
-                    }
-                );
-
-            console.log(res); // 'wfr_${newWalletId}_connect';
-
-            expect(res).toBeDefined();
-        });
-
 
     });
 

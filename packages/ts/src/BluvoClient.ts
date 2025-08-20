@@ -353,40 +353,86 @@ export class BluvoClient {
              * });
              */
 
-            withdraw: ({
-                           quoteId,
-                           walletId,
-                           destinationAddress,
-                           amount,
-                           asset,
-                           network,
-                           tag
-                       }: {
-                quoteId: string;
-                walletId: string;
-                destinationAddress: string;
-                amount: string | number;
+            // withdraw: ({
+            //                quoteId,
+            //                walletId,
+            //                destinationAddress,
+            //                amount,
+            //                asset,
+            //                network,
+            //                tag
+            //            }: {
+            //     quoteId: string;
+            //     walletId: string;
+            //     destinationAddress: string;
+            //     amount: string | number;
+            //     asset: string;
+            //     network?: string;
+            //     tag?: string;
+            // }, _options?: PromiseConfigurationOptions) => {
+            //     return new WithdrawalsApi(this.configuration(walletId))
+            //         .walletwithdrawquoteidexecutewithdraw(
+            //             quoteId,
+            //             {
+            //                 asset,
+            //                 amount: typeof amount === 'string' ? parseFloat(amount) : amount,
+            //                 address: destinationAddress,
+            //                 tag,
+            //                 params: {
+            //                     network
+            //                 }
+            //             },
+            //             _options
+            //         );
+            // }
+
+        },
+
+        withdrawals: {
+
+            getWithdrawableBalance: (walletId: string) => {
+                return new WithdrawalsApi(this.configuration(walletId))
+                    .walletwithdrawbalancebalance();
+            },
+
+            // request a quotation
+            requestQuotation: (walletId: string, body: {
                 asset: string;
-                network?: string;
+                amount: string;
+                address: string;
                 tag?: string;
-            }, _options?: PromiseConfigurationOptions) => {
+                network?: string;
+            }) => {
+                return new WithdrawalsApi(this.configuration(walletId))
+                    .walletwithdrawquotequotation({
+                        asset: body.asset,
+                        amount: parseFloat(body.amount),
+                        address: body.address,
+                        tag: body.tag,
+                        network: body.network,
+                    });
+            },
+
+            // give a quotation ID, execute the withdrawal
+            executeWithdrawal: (
+                walletId: string,
+                idem: string,
+                quotationId: string,
+                args?: {
+                    twofa?: string;
+                }
+            ) => {
                 return new WithdrawalsApi(this.configuration(walletId))
                     .walletwithdrawquoteidexecutewithdraw(
-                        quoteId,
+                        idem,
+                        quotationId,
                         {
-                            asset,
-                            amount: typeof amount === 'string' ? parseFloat(amount) : amount,
-                            address: destinationAddress,
-                            tag,
-                            params: {
-                                network
-                            }
-                        },
-                        _options
+                            twofa: args?.twofa!,
+                        }
                     );
             }
-
         }
+
     }
 
     workflow = {
@@ -401,7 +447,6 @@ export class BluvoClient {
                 )
         }
     }
-
 
     oauth2 = {
         getLink : (

@@ -237,51 +237,6 @@ export class BluvoWebClient {
         return this.wsClient.subscribe(topicName, topicToken, options);
     }
 
-    withdrawals = {
-
-        getWithdrawableBalance: (walletId: string) => {
-            return new WithdrawalsApi(this.configuration(walletId))
-                .walletwithdrawbalancebalance();
-        },
-
-        // request a quotation
-        requestQuotation: (walletId: string, body: {
-            asset: string;
-            amount: string;
-            address: string;
-            tag?: string;
-            network?: string;
-        }) => {
-            return new WithdrawalsApi(this.configuration(walletId))
-                .walletwithdrawquotequotation({
-                    asset: body.asset,
-                    amount: parseFloat(body.amount),
-                    address: body.address,
-                    tag: body.tag,
-                    network: body.network,
-                });
-        },
-
-        // give a quotation ID, execute the withdrawal
-        executeWithdrawal: (
-            walletId: string,
-            idem: string,
-            quotationId: string,
-            args?: {
-                twofa?: string;
-            }
-        ) => {
-            return new WithdrawalsApi(this.configuration(walletId))
-                .walletwithdrawquoteidexecutewithdraw(
-                    idem,
-                    quotationId,
-                    {
-                        twofa: args?.twofa!,
-                    }
-                );
-        }
-    }
-
     /**
      * Unsubscribe from a topic.
      * 

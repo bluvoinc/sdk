@@ -402,14 +402,16 @@ export class BluvoClient {
                 address: string;
                 tag?: string;
                 network?: string;
+                includeFee?: boolean;
             }) => {
                 return new WithdrawalsApi(this.configuration(walletId))
                     .walletwithdrawquotequotation({
                         asset: body.asset,
-                        amount: parseFloat(body.amount),
+                        amount: body.amount,
                         address: body.address,
                         tag: body.tag,
                         network: body.network,
+                        includeFee: body.includeFee ?? true,
                     });
             },
 

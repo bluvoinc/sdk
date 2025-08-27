@@ -17,6 +17,7 @@
     "url": "https://github.com/bluvoinc/sdk/issues"
   },
   "scripts": {
+    "dev": "tsc --watch",
     "build": "tsc && tsc --module esnext --outDir dist/esm && mv dist/esm/index.js dist/index.esm.js && rm -rf dist/esm",
     "test": "vitest",
     "prepublishOnly": "pnpm build"

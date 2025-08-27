@@ -31,6 +31,7 @@ export function createMachine<TState, TAction>(
     },
 
     send(action: TAction): void {
+      console.log('send action', action);
       assertNotDisposed();
       const prevState = state;
       state = transition(state, action);

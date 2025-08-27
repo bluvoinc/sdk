@@ -83,8 +83,12 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
     isQuoteLoading: flow.state?.type === 'quote:requesting',
     isQuoteReady: flow.state?.type === 'quote:ready',
     isQuoteExpired: flow.state?.type === 'quote:expired',
-    isWithdrawing: flow.state?.type?.startsWith('withdraw:') || false,
+    isWithdrawing: flow.state?.type?.startsWith('withdraw:') && 
+                   flow.state?.type !== 'withdraw:completed' && 
+                   flow.state?.type !== 'withdraw:fatal' &&
+                   !flow.state?.type?.startsWith('withdraw:error') || false,
     isWithdrawalComplete: flow.state?.type === 'withdraw:completed',
+    hasFatalError: flow.state?.type === 'withdraw:fatal',
     requires2FA: flow.state?.type === 'withdraw:error2FA',
     requiresSMS: flow.state?.type === 'withdraw:errorSMS',
     requiresKYC: flow.state?.type === 'withdraw:errorKYC',

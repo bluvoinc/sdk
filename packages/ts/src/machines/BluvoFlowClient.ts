@@ -287,10 +287,20 @@ export class BluvoFlowClient {
       },
       // on error should check if the error is recoverable (i.e. requires 2FA, SMS, KYC, etc)
       onError: (error) => {
-        console.error("errore ricevuto", JSON.stringify(error));
+        console.error("errore ricevuto", error);
+        
+        // Ensure we have a proper Error object with a message
+        let fatalError: Error;
+        if (!error) {
+          fatalError = new Error('Unknown withdrawal error occurred');
+        } else {
+          fatalError = error;
+        }
+
+        console.log("will send fatal error", fatalError);
         this.flowMachine?.send({
           type: 'WITHDRAWAL_FATAL',
-          error
+          error: fatalError
         });
       }
     });

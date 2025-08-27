@@ -289,4 +289,39 @@ describe('FlowMachine', () => {
     // Should throw after disposal
     expect(() => machine.getState()).toThrow('Machine has been disposed');
   });
+
+  it('should handle WITHDRAWAL_FATAL action and transition to fatal state', () => {
+    const machine = createFlowMachine(defaultOptions);
+
+    // Set up a withdrawal processing state
+    machine.send({ type: 'START_OAUTH', exchange: 'coinbase', walletId: 'wallet-123', idem: 'oauth-456' });
+    machine.send({ type: 'OAUTH_WINDOW_OPENED' });
+    machine.send({ type: 'OAUTH_COMPLETED', walletId: 'wallet-123' });
+    machine.send({ type: 'LOAD_WALLET' });
+    machine.send({ type: 'WALLET_LOADED', balances: [{ asset: 'BTC', balance: '0.5' }] });
+    machine.send({ type: 'REQUEST_QUOTE', asset: 'BTC', amount: '0.1', destinationAddress: '1A1zP...', network: 'bitcoin' });
+    machine.send({ 
+      type: 'QUOTE_RECEIVED', 
+      quote: { 
+        id: 'quote-789', 
+        asset: 'BTC', 
+        amount: '0.1', 
+        estimatedFee: '0.0001', 
+        estimatedTotal: '0.1001',
+        expiresAt: Date.now() + 5000
+      } 
+    });
+    machine.send({ type: 'START_WITHDRAWAL', quoteId: 'quote-789' });
+    
+    expect(machine.getState().type).toBe('withdraw:processing');
+    
+    // Send WITHDRAWAL_FATAL action
+    const fatalError = new Error('Fatal withdrawal error');
+    machine.send({ type: 'WITHDRAWAL_FATAL', error: fatalError });
+    
+    // Should transition to withdraw:fatal
+    const state = machine.getState();
+    expect(state.type).toBe('withdraw:fatal');
+    expect(state.error).toBe(fatalError);
+  });
 });

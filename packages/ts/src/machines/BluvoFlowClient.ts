@@ -298,6 +298,8 @@ export class BluvoFlowClient {
         }
 
         console.log("will send fatal error", fatalError);
+        
+        // Send WITHDRAWAL_FATAL to trigger the fatal state transition
         this.flowMachine?.send({
           type: 'WITHDRAWAL_FATAL',
           error: fatalError

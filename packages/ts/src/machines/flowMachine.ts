@@ -252,14 +252,12 @@ function flowTransition(
             break;
           
           case 'failed':
-            if (action.type === 'WITHDRAWAL_FATAL') {
-              return {
-                type: 'withdraw:fatal',
-                context: state.context,
-                error: action.error
-              };
-            }
-            break;
+            // Automatically transition to fatal state when withdrawal machine fails
+            return {
+              type: 'withdraw:fatal',
+              context: state.context,
+              error: withdrawalState.error || new Error('Withdrawal failed')
+            };
           
           case 'retrying':
             if (state.type !== 'withdraw:retrying') {
@@ -322,6 +320,13 @@ function flowTransition(
             type: 'withdraw:errorBalance',
             context: state.context,
             error: new Error('Insufficient balance')
+          };
+        
+        case 'WITHDRAWAL_FATAL':
+          return {
+            type: 'withdraw:fatal',
+            context: state.context,
+            error: action.error
           };
       }
       break;

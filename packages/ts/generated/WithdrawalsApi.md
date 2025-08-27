@@ -52,6 +52,7 @@ This endpoint does not need any parameter.
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful response |  -  |
+**404** | Not Found |  -  |
 
 [[Back to top]](#) [[Back to API list]](README.md#documentation-for-api-endpoints) [[Back to Model list]](README.md#documentation-for-models) [[Back to README]](README.md)
 
@@ -71,13 +72,14 @@ const configuration = createConfiguration();
 const apiInstance = new WithdrawalsApi(configuration);
 
 const request: WithdrawalsApiWalletwithdrawquoteidexecutewithdrawRequest = {
-    // The idem provided by OTT or used to identify the workflow run. This is used to track the Withdrawal flow and can be used to subscribe to updates.
+    // Any UUID. This is used to track the Withdrawal flow and can be used to subscribe to updates.
   idem: "idem_example",
   
   quoteId: "quoteId_example",
   
   walletwithdrawquoteidexecutewithdrawRequest: {
     twofa: "twofa_example",
+    tag: "tag_example",
   },
 };
 
@@ -91,7 +93,7 @@ console.log('API called successfully. Returned data:', data);
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **walletwithdrawquoteidexecutewithdrawRequest** | **WalletwithdrawquoteidexecutewithdrawRequest**|  |
- **idem** | [**string**] | The idem provided by OTT or used to identify the workflow run. This is used to track the Withdrawal flow and can be used to subscribe to updates. | defaults to undefined
+ **idem** | [**string**] | Any UUID. This is used to track the Withdrawal flow and can be used to subscribe to updates. | defaults to undefined
  **quoteId** | [**string**] |  | defaults to undefined
 
 
@@ -113,6 +115,8 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful response |  -  |
+**400** | Bad Request |  -  |
+**404** | Not Found |  -  |
 
 [[Back to top]](#) [[Back to API list]](README.md#documentation-for-api-endpoints) [[Back to Model list]](README.md#documentation-for-models) [[Back to README]](README.md)
 
@@ -173,6 +177,8 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful response |  -  |
+**400** | Bad Request |  -  |
+**404** | Not Found |  -  |
 
 [[Back to top]](#) [[Back to API list]](README.md#documentation-for-api-endpoints) [[Back to Model list]](README.md#documentation-for-models) [[Back to README]](README.md)
 

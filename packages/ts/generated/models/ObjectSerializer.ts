@@ -16,9 +16,13 @@ export * from '../models/Wallettransactionslisttransactions200ResponseTransactio
 export * from '../models/Walletwithdrawbalancebalance200Response';
 export * from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
 export * from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
+export * from '../models/Walletwithdrawbalancebalance404Response';
 export * from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
+export * from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 export * from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 export * from '../models/Walletwithdrawquotequotation200Response';
+export * from '../models/Walletwithdrawquotequotation400Response';
+export * from '../models/Walletwithdrawquotequotation404Response';
 export * from '../models/WalletwithdrawquotequotationRequest';
 export * from '../models/Workflowworkflowtypegetworkflowrunidget200Response';
 export * from '../models/Workflowworkflowtypegetworkflowrunidget200ResponseDetails';
@@ -41,9 +45,13 @@ import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '
 import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
 import { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
 import { Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
+import { Walletwithdrawbalancebalance404Response , Walletwithdrawbalancebalance404ResponseTypeEnum   } from '../models/Walletwithdrawbalancebalance404Response';
 import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
+import { Walletwithdrawquoteidexecutewithdraw400Response , Walletwithdrawquoteidexecutewithdraw400ResponseTypeEnum   } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
+import { Walletwithdrawquotequotation400Response , Walletwithdrawquotequotation400ResponseTypeEnum   } from '../models/Walletwithdrawquotequotation400Response';
+import { Walletwithdrawquotequotation404Response , Walletwithdrawquotequotation404ResponseTypeEnum   } from '../models/Walletwithdrawquotequotation404Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
 import { Workflowworkflowtypegetworkflowrunidget200Response } from '../models/Workflowworkflowtypegetworkflowrunidget200Response';
 import { Workflowworkflowtypegetworkflowrunidget200ResponseDetails, Workflowworkflowtypegetworkflowrunidget200ResponseDetailsStatusEnum    } from '../models/Workflowworkflowtypegetworkflowrunidget200ResponseDetails';
@@ -61,6 +69,10 @@ let primitives = [
                  ];
 
 let enumsMap: Set<string> = new Set<string>([
+    "Walletwithdrawbalancebalance404ResponseTypeEnum",
+    "Walletwithdrawquoteidexecutewithdraw400ResponseTypeEnum",
+    "Walletwithdrawquotequotation400ResponseTypeEnum",
+    "Walletwithdrawquotequotation404ResponseTypeEnum",
     "Workflowworkflowtypegetworkflowrunidget200ResponseDetailsStatusEnum",
 ]);
 
@@ -83,9 +95,13 @@ let typeMap: {[index: string]: any} = {
     "Walletwithdrawbalancebalance200Response": Walletwithdrawbalancebalance200Response,
     "Walletwithdrawbalancebalance200ResponseBalancesInner": Walletwithdrawbalancebalance200ResponseBalancesInner,
     "Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner": Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner,
+    "Walletwithdrawbalancebalance404Response": Walletwithdrawbalancebalance404Response,
     "Walletwithdrawquoteidexecutewithdraw200Response": Walletwithdrawquoteidexecutewithdraw200Response,
+    "Walletwithdrawquoteidexecutewithdraw400Response": Walletwithdrawquoteidexecutewithdraw400Response,
     "WalletwithdrawquoteidexecutewithdrawRequest": WalletwithdrawquoteidexecutewithdrawRequest,
     "Walletwithdrawquotequotation200Response": Walletwithdrawquotequotation200Response,
+    "Walletwithdrawquotequotation400Response": Walletwithdrawquotequotation400Response,
+    "Walletwithdrawquotequotation404Response": Walletwithdrawquotequotation404Response,
     "WalletwithdrawquotequotationRequest": WalletwithdrawquotequotationRequest,
     "Workflowworkflowtypegetworkflowrunidget200Response": Workflowworkflowtypegetworkflowrunidget200Response,
     "Workflowworkflowtypegetworkflowrunidget200ResponseDetails": Workflowworkflowtypegetworkflowrunidget200ResponseDetails,

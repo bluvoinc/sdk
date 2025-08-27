@@ -20,9 +20,13 @@ import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '
 import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
 import { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
 import { Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
+import { Walletwithdrawbalancebalance404Response } from '../models/Walletwithdrawbalancebalance404Response';
 import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
+import { Walletwithdrawquoteidexecutewithdraw400Response } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
+import { Walletwithdrawquotequotation400Response } from '../models/Walletwithdrawquotequotation400Response';
+import { Walletwithdrawquotequotation404Response } from '../models/Walletwithdrawquotequotation404Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
 import { Workflowworkflowtypegetworkflowrunidget200Response } from '../models/Workflowworkflowtypegetworkflowrunidget200Response';
 import { Workflowworkflowtypegetworkflowrunidget200ResponseDetails } from '../models/Workflowworkflowtypegetworkflowrunidget200ResponseDetails';
@@ -405,7 +409,7 @@ export interface WithdrawalsApiWalletwithdrawbalancebalanceRequest {
 
 export interface WithdrawalsApiWalletwithdrawquoteidexecutewithdrawRequest {
     /**
-     * The idem provided by OTT or used to identify the workflow run. This is used to track the Withdrawal flow and can be used to subscribe to updates.
+     * Any UUID. This is used to track the Withdrawal flow and can be used to subscribe to updates.
      * Defaults to: undefined
      * @type string
      * @memberof WithdrawalsApiwalletwithdrawquoteidexecutewithdraw

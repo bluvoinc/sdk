@@ -20,9 +20,13 @@ import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '
 import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
 import { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
 import { Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
+import { Walletwithdrawbalancebalance404Response } from '../models/Walletwithdrawbalancebalance404Response';
 import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
+import { Walletwithdrawquoteidexecutewithdraw400Response } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
+import { Walletwithdrawquotequotation400Response } from '../models/Walletwithdrawquotequotation400Response';
+import { Walletwithdrawquotequotation404Response } from '../models/Walletwithdrawquotequotation404Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
 import { Workflowworkflowtypegetworkflowrunidget200Response } from '../models/Workflowworkflowtypegetworkflowrunidget200Response';
 import { Workflowworkflowtypegetworkflowrunidget200ResponseDetails } from '../models/Workflowworkflowtypegetworkflowrunidget200ResponseDetails';
@@ -327,7 +331,7 @@ export class PromiseWithdrawalsApi {
     /**
      * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/wallet/withdraw\' route. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
      * Withdraw
-     * @param idem The idem provided by OTT or used to identify the workflow run. This is used to track the Withdrawal flow and can be used to subscribe to updates.
+     * @param idem Any UUID. This is used to track the Withdrawal flow and can be used to subscribe to updates.
      * @param quoteId
      * @param walletwithdrawquoteidexecutewithdrawRequest
      */
@@ -340,7 +344,7 @@ export class PromiseWithdrawalsApi {
     /**
      * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/wallet/withdraw\' route. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
      * Withdraw
-     * @param idem The idem provided by OTT or used to identify the workflow run. This is used to track the Withdrawal flow and can be used to subscribe to updates.
+     * @param idem Any UUID. This is used to track the Withdrawal flow and can be used to subscribe to updates.
      * @param quoteId
      * @param walletwithdrawquoteidexecutewithdrawRequest
      */

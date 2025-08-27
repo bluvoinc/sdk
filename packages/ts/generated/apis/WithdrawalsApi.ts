@@ -9,9 +9,13 @@ import {SecurityAuthentication} from '../auth/auth';
 
 
 import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
+import { Walletwithdrawbalancebalance404Response } from '../models/Walletwithdrawbalancebalance404Response';
 import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
+import { Walletwithdrawquoteidexecutewithdraw400Response } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
+import { Walletwithdrawquotequotation400Response } from '../models/Walletwithdrawquotequotation400Response';
+import { Walletwithdrawquotequotation404Response } from '../models/Walletwithdrawquotequotation404Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
 
 /**
@@ -67,7 +71,7 @@ export class WithdrawalsApiRequestFactory extends BaseAPIRequestFactory {
     /**
      * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/wallet/withdraw\' route. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
      * Withdraw
-     * @param idem The idem provided by OTT or used to identify the workflow run. This is used to track the Withdrawal flow and can be used to subscribe to updates.
+     * @param idem Any UUID. This is used to track the Withdrawal flow and can be used to subscribe to updates.
      * @param quoteId 
      * @param walletwithdrawquoteidexecutewithdrawRequest 
      */
@@ -230,6 +234,13 @@ export class WithdrawalsApiResponseProcessor {
             ) as Walletwithdrawbalancebalance200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
+        if (isCodeInRange("404", response.httpStatusCode)) {
+            const body: Walletwithdrawbalancebalance404Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletwithdrawbalancebalance404Response", ""
+            ) as Walletwithdrawbalancebalance404Response;
+            throw new ApiException<Walletwithdrawbalancebalance404Response>(response.httpStatusCode, "Not Found", body, response.headers);
+        }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml
         if (response.httpStatusCode >= 200 && response.httpStatusCode <= 299) {
@@ -259,6 +270,20 @@ export class WithdrawalsApiResponseProcessor {
             ) as Walletwithdrawquoteidexecutewithdraw200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
+        if (isCodeInRange("400", response.httpStatusCode)) {
+            const body: Walletwithdrawquoteidexecutewithdraw400Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletwithdrawquoteidexecutewithdraw400Response", ""
+            ) as Walletwithdrawquoteidexecutewithdraw400Response;
+            throw new ApiException<Walletwithdrawquoteidexecutewithdraw400Response>(response.httpStatusCode, "Bad Request", body, response.headers);
+        }
+        if (isCodeInRange("404", response.httpStatusCode)) {
+            const body: Walletwithdrawquotequotation404Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletwithdrawquotequotation404Response", ""
+            ) as Walletwithdrawquotequotation404Response;
+            throw new ApiException<Walletwithdrawquotequotation404Response>(response.httpStatusCode, "Not Found", body, response.headers);
+        }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml
         if (response.httpStatusCode >= 200 && response.httpStatusCode <= 299) {
@@ -287,6 +312,20 @@ export class WithdrawalsApiResponseProcessor {
                 "Walletwithdrawquotequotation200Response", ""
             ) as Walletwithdrawquotequotation200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
+        }
+        if (isCodeInRange("400", response.httpStatusCode)) {
+            const body: Walletwithdrawquotequotation400Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletwithdrawquotequotation400Response", ""
+            ) as Walletwithdrawquotequotation400Response;
+            throw new ApiException<Walletwithdrawquotequotation400Response>(response.httpStatusCode, "Bad Request", body, response.headers);
+        }
+        if (isCodeInRange("404", response.httpStatusCode)) {
+            const body: Walletwithdrawquotequotation404Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletwithdrawquotequotation404Response", ""
+            ) as Walletwithdrawquotequotation404Response;
+            throw new ApiException<Walletwithdrawquotequotation404Response>(response.httpStatusCode, "Not Found", body, response.headers);
         }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml

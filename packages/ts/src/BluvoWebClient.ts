@@ -1,6 +1,33 @@
-import {createConfiguration, OAuth2Api, WithdrawalsApi} from "../generated";
+import {createConfiguration, OAuth2Api} from "../generated";
 import {WebSocketClient} from "./WebSocketClient";
 import {TopicSubscribe} from "@gomomento/sdk-web";
+import {
+    OAuth2WorkflowMessageBody,
+    WithdrawFundsWorkflowMessageBody,
+    WorkflowMessageBody,
+    WorkflowTypes
+} from "./WorkflowTypes";
+
+export type BaseOptions = {
+    onStep?: (message: WorkflowMessageBody) => void;
+    onError?: (error: Error) => void;
+    onFatal?: (error: Error) => void;
+    cacheName?: string
+    topicToken?: string;
+};
+
+export type OAuth2Options = BaseOptions & {
+    onOAuth2Complete: (message: OAuth2WorkflowMessageBody) => any;
+    onWithdrawComplete?: never;
+};
+
+export type WithdrawOptions = BaseOptions & {
+    onWithdrawComplete: (message: WithdrawFundsWorkflowMessageBody) => any;
+    onOAuth2Complete?: never;
+};
+
+// Constants
+const DEFAULT_SUBSCRIBE_ONLY_TOKEN = 'eyJlbmRwb2ludCI6ImNlbGwtNC11cy13ZXN0LTItMS5wcm9kLmEubW9tZW50b2hxLmNvbSIsImFwaV9rZXkiOiJleUpoYkdjaU9pSklVekkxTmlKOS5leUp6ZFdJaU9pSm1iRzlBWW14MWRtOHVZMjhpTENKMlpYSWlPakVzSW5BaU9pSkZhRWxMUlVKSlQwTkJTV0ZEUVc5SFlqSkdNV1JIWjNsSlowRTlJbjAuU0Y2M3NHWkoxYUdKckJpRVZCdXZlbG9pOEFWWkNFVzd1ZnNOUklGYUx5dyJ9'
 
 /**
  * A web-specific client for Bluvo SDK that provides browser-oriented functionality
@@ -222,19 +249,71 @@ export class BluvoWebClient {
      */
     async listen(
         topicName: string,
-        topicToken: string,
-        options: {
-            onMessage: (data: {
-                success?: boolean;
-                walletId?: string;
-                [key: string]: any;
-            }) => void;
-            onError?: (error: Error) => void;
-            onComplete?: () => void;
-            cacheName?: string;
-        }
+        options: OAuth2Options | WithdrawOptions
     ): Promise<TopicSubscribe.Subscription> {
-        return this.wsClient.subscribe(topicName, topicToken, options);
+
+        // TODO: Manually split cacheName per argument and per-tenant
+        // Safely resolve topicToken with fallback and validation
+        let topicToken: string;
+
+        if (options.topicToken && (options?.topicToken?.trim()?.length??0) > 0) {
+            topicToken = options.topicToken;
+        } else {
+            topicToken = DEFAULT_SUBSCRIBE_ONLY_TOKEN;
+        }
+        
+        const cacheName = options.cacheName ?? 'oauth2';
+
+        const onMessage = (data:WorkflowMessageBody) => {
+
+            // if success === true
+            const success = data?.success === true;
+            const failure = data?.success === false;
+            const pending = typeof data?.success === 'undefined' || (!success && !failure);
+
+            if (pending) {
+                if (options.onStep) {
+                    return options.onStep(data);
+                }
+                return;
+            }
+
+            if (data.type === WorkflowTypes.OAuth2Flow && !options.onOAuth2Complete) {
+                throw new Error('received OAuth2 message but no onOAuth2Complete handler is defined');
+            }
+
+            if (data.type === WorkflowTypes.WithdrawFunds && !options.onWithdrawComplete) {
+                throw new Error('received Withdraw message but no onWithdrawComplete handler is defined');
+            }
+
+            if (data.type === WorkflowTypes.OAuth2Flow) {
+                if (success && data.walletId) {
+                    return options.onOAuth2Complete?.(data);
+                }
+                if (failure) {
+                    return options.onError?.(new Error(data.error || 'OAuth2 flow failed'));
+                }
+            }
+
+            if (data.type === WorkflowTypes.WithdrawFunds) {
+                if (success && data.walletId) {
+                    return options.onWithdrawComplete?.(data);
+                }
+                if (failure) {
+                    // handle better error
+                    return options.onError?.(new Error(data.error || 'Withdraw funds flow failed'));
+                }
+            }
+        }
+
+        return this.wsClient.subscribe(
+            topicName,
+            topicToken,
+            {
+            onError: options.onError,
+            cacheName: cacheName,
+            onMessage: onMessage,
+        })
     }
 
     /**

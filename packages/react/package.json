@@ -1,22 +1,22 @@
 {
-  "name": "@bluvo/sdk-ts",
+  "name": "@bluvo/react",
+  "version": "1.0.0",
+  "description": "React hooks for Bluvo SDK - Framework-agnostic state machine for crypto withdrawals",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
-  "version": "1.1.38",
-  "description": "Bluvo SDK for TypeScript",
   "author": "Bluvo Inc.",
   "license": "MIT",
   "homepage": "https://github.com/bluvoinc/sdk#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bluvoinc/sdk.git"
+    "url": "https://github.com/bluvoinc/sdk.git",
+    "directory": "packages/react"
   },
   "bugs": {
     "url": "https://github.com/bluvoinc/sdk/issues"
   },
   "scripts": {
-    "dev": "tsc --watch",
     "build": "tsc && tsc --module esnext --outDir dist/esm && mv dist/esm/index.js dist/index.esm.js && rm -rf dist/esm",
     "test": "vitest",
     "prepublishOnly": "pnpm build"
@@ -26,15 +26,22 @@
   },
   "keywords": [
     "bluvo",
-    "sdk",
-    "typescript",
-    "nodejs",
-    "api"
+    "react",
+    "hooks",
+    "crypto",
+    "withdrawal",
+    "state-machine",
+    "typescript"
   ],
   "dependencies": {
-    "@gomomento/sdk-web": "^1.113.0"
+    "@bluvo/sdk-ts": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
+    "@types/react": "^18.0.0",
+    "react": "^18.0.0",
     "typescript": "^5.0.0",
     "vitest": "^3.1.1"
   },

@@ -12,6 +12,7 @@ import { Walletdelete200Response } from '../models/Walletdelete200Response';
 import { Walletget200Response } from '../models/Walletget200Response';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
+import { Walletwithdrawbalancebalance404Response } from '../models/Walletwithdrawbalancebalance404Response';
 
 /**
  * no description
@@ -332,6 +333,13 @@ export class WalletsApiResponseProcessor {
             ) as Walletdelete200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
+        if (isCodeInRange("404", response.httpStatusCode)) {
+            const body: Walletwithdrawbalancebalance404Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletwithdrawbalancebalance404Response", ""
+            ) as Walletwithdrawbalancebalance404Response;
+            throw new ApiException<Walletwithdrawbalancebalance404Response>(response.httpStatusCode, "Not Found", body, response.headers);
+        }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml
         if (response.httpStatusCode >= 200 && response.httpStatusCode <= 299) {
@@ -360,6 +368,13 @@ export class WalletsApiResponseProcessor {
                 "Walletget200Response", ""
             ) as Walletget200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
+        }
+        if (isCodeInRange("404", response.httpStatusCode)) {
+            const body: Walletwithdrawbalancebalance404Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletwithdrawbalancebalance404Response", ""
+            ) as Walletwithdrawbalancebalance404Response;
+            throw new ApiException<Walletwithdrawbalancebalance404Response>(response.httpStatusCode, "Not Found", body, response.headers);
         }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml

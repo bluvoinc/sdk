@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {createSandboxClient} from "../index";
 import sec from "../sec";
+import {WALLET_ERROR_TYPES} from "../src/ErrorTypes";
 
 describe('live HTTP calls tests', ()=> {
 
@@ -73,6 +74,14 @@ describe('live HTTP calls tests', ()=> {
             expect(res).toBeDefined();
         });
 
+        it('GET /v0/cex/wallet/:walletId not-found', async () => {
+            const walletId = 'i-do-not-exist';
+
+            await expect(client.wallet.get(walletId))
+                .rejects
+                .toThrow(WALLET_ERROR_TYPES.NOT_FOUND);
+        })
+
         it('GET /v0/cex/wallet/:walletId/transactions', async () => {
             const walletId = '99a01408-4ef4-47da-935a-848618c11aro';
 
@@ -88,39 +97,15 @@ describe('live HTTP calls tests', ()=> {
 
     });
 
-    describe('workflows',()=>{
-
-        it.skip('get workflow', async () => {
-
-            const workflowRunId = '82a94525-2722-4b36-93f6-7e5223d27a67';
-            const workflowType = 'connect';
-
-            const {
-                id,
-                details,
-            } = await client
-                .workflow
-                .get(workflowRunId, workflowType);
-
-            expect(id).toBe(workflowRunId);
-            expect(details.status).toBe('complete');
-
-        })
-
-    });
-
     describe('ott',()=>{
 
         it('get ott', async () => {
             const ott = await client
                 .ott
                 .get();
-
             console.log(ott);
-
             expect(ott).toBeDefined();
         });
-
     });
 
     describe('oauth2',()=>{

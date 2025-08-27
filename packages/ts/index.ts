@@ -6,6 +6,12 @@ export { BluvoClient } from './src/BluvoClient';
 export { WebSocketClient } from './src/WebSocketClient';
 export type { TopicInfo } from './src/WebSocketClient';
 
+// State Machine exports
+export * from './src/machines';
+export * from './src/types/machine.types';
+export * from './src/types/flow.types';
+export * from './src/types/withdrawal.types';
+
 /**
  * Create a fully configured Bluvo SDK client instance with a single function call.
  *

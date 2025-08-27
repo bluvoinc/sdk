@@ -1,9 +1,15 @@
-name: Release
+name: Release React Package
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'packages/react/**'
+  workflow_run:
+    workflows: ["Release"]
+    types:
+      - completed
   workflow_dispatch:
 
 permissions:
@@ -11,9 +17,11 @@ permissions:
   id-token: write
 
 jobs:
-  release:
-    name: "Publish packages"
+  release-react:
+    name: "Publish React package"
     runs-on: ubuntu-latest
+    # Only run if the main release succeeded or if manually triggered
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Check out code
@@ -33,23 +41,17 @@ jobs:
 
       - name: Install dependencies
         run: pnpm i
-      #      - name: Run tests
-      #        run: pnpm test
-      - name: Build packages
-        run: |
-          pnpm -F @bluvo/sdk-ts build
-          pnpm -F @bluvo/react build
+
+      - name: Build core SDK first
+        run: pnpm -F @bluvo/sdk-ts build
+
+      - name: Build React package
+        run: pnpm -F @bluvo/react build
 
       - name: Configure .npmrc for authentication
         run: |
           echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish @bluvo/sdk-ts
-        run: |
-          pnpm -F @bluvo/sdk-ts publish --no-git-checks --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 

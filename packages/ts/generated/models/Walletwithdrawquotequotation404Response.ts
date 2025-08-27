@@ -12,9 +12,9 @@
 
 import { HttpFile } from '../http/http';
 
-export class WalletwithdrawquoteidexecutewithdrawRequest {
-    'twofa'?: string;
-    'tag'?: string;
+export class Walletwithdrawquotequotation404Response {
+    'error': string;
+    'type': Walletwithdrawquotequotation404ResponseTypeEnum;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -22,22 +22,27 @@ export class WalletwithdrawquoteidexecutewithdrawRequest {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "twofa",
-            "baseName": "twofa",
+            "name": "error",
+            "baseName": "error",
             "type": "string",
             "format": ""
         },
         {
-            "name": "tag",
-            "baseName": "tag",
-            "type": "string",
+            "name": "type",
+            "baseName": "type",
+            "type": "Walletwithdrawquotequotation404ResponseTypeEnum",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return WalletwithdrawquoteidexecutewithdrawRequest.attributeTypeMap;
+        return Walletwithdrawquotequotation404Response.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
+
+export enum Walletwithdrawquotequotation404ResponseTypeEnum {
+    NotFound = 'not_found'
+}
+

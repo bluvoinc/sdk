@@ -19,36 +19,18 @@ import React from 'react';
 import { useBluvoFlow } from '@bluvo/react';
 
 function WithdrawalComponent() {
-  const flow = useBluvoFlow({
-    orgId: 'your-org-id',
-    projectId: 'your-project-id',
-    maxRetryAttempts: 3,
-    
-    // Provide secure callback functions (call your server actions)
-    fetchWithdrawableBalanceFn: async (walletId) => {
-      const response = await fetch(`/api/wallets/${walletId}/balances`);
-      const data = await response.json();
-      return data.balances;
-    },
-    
-    requestQuotationFn: async (walletId, params) => {
-      const response = await fetch(`/api/quotes`, {
-        method: 'POST',
-        body: JSON.stringify({ walletId, ...params })
-      });
-      const data = await response.json();
-      return data.quote;
-    },
-    
-    executeWithdrawalFn: async (walletId, idem, quoteId, params) => {
-      const response = await fetch(`/api/withdrawals`, {
-        method: 'POST',
-        body: JSON.stringify({ walletId, idem, quoteId, ...params })
-      });
-      const data = await response.json();
-      return data;
-    }
-  });
+    const flow = useBluvoFlow({
+        orgId: "bluvo-org-id",
+        projectId: "bluvo-project-id", // <- deprecated soon to be removed
+
+        fetchWithdrawableBalanceFn: fetchWithdrawableBalances,
+        requestQuotationFn: requestQuotation,
+        executeWithdrawalFn: executeWithdrawal,
+
+        onWalletConnectedFn: (walletId, exchange) => {
+            // call server action store this walletId for the currently-logged in user
+        }
+    });
 
   const handleStart = () => {
     flow.startWithdrawalFlow({

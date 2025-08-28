@@ -32,6 +32,7 @@ export interface BluvoFlowClientOptions {
     smsCode?: string;
   }) => Promise<Walletwithdrawquoteidexecutewithdraw200Response>;
   mkUUIDFn?: () => string;
+  onWalletConnectedFn?: (walletId: string, exchange: string) => any;
 }
 
 export interface WithdrawalFlowOptions {
@@ -88,8 +89,14 @@ export class BluvoFlowClient {
       onOAuth2Complete: (message) => {
         this.flowMachine?.send({
           type: 'OAUTH_COMPLETED',
-          walletId: message.walletId
+          walletId: message.walletId,
+          exchange: message.exchange,
         });
+        
+        // Call the onWalletConnected hook if provided
+        if (this.options.onWalletConnectedFn) {
+          this.options.onWalletConnectedFn(message.walletId, message.exchange);
+        }
         
         // Auto-proceed to wallet loading
         this.loadWallet(message.walletId);

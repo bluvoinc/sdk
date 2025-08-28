@@ -57,7 +57,7 @@ export type FlowState = StateValue<FlowStateType> & {
 export type FlowActionType =
   | { type: 'START_OAUTH'; exchange: string; walletId: string; idem: string }
   | { type: 'OAUTH_WINDOW_OPENED' }
-  | { type: 'OAUTH_COMPLETED'; walletId: string }
+  | { type: 'OAUTH_COMPLETED'; walletId: string; exchange: string }
   | { type: 'OAUTH_FAILED'; error: Error }
   | { type: 'LOAD_WALLET' }
   | { type: 'WALLET_LOADED'; balances: Array<{ asset: string; balance: string }> }

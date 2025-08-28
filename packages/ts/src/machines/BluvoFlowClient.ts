@@ -5,6 +5,11 @@ import {FlowActionType, FlowState} from '../types/flow.types';
 import {TopicSubscribe} from '@gomomento/sdk-web';
 import {WithdrawFundsWorkflowMessageBody, WorkflowMessageBody, WorkflowTypes} from '../WorkflowTypes';
 import {WITHDRAWAL_EXECUTION_ERROR_TYPES, WITHDRAWAL_QUOTATION_ERROR_TYPES} from '../ErrorTypes';
+import {
+  Walletwithdrawbalancebalance200Response,
+  Walletwithdrawquoteidexecutewithdraw200Response,
+  Walletwithdrawquotequotation200Response,
+} from "../../generated";
 
 export interface BluvoFlowClientOptions {
   orgId: string;
@@ -13,7 +18,7 @@ export interface BluvoFlowClientOptions {
   topicToken?: string;
   cacheName?: string;
   // API function callbacks (to be implemented by the consumer)
-  fetchWithdrawableBalanceFn: (walletId: string) => Promise<Array<{ asset: string; amount: string }>>;
+  fetchWithdrawableBalanceFn: (walletId: string) => Promise<Walletwithdrawbalancebalance200Response>;
   requestQuotationFn: (walletId: string, params: {
     asset: string;
     amount: string;
@@ -21,22 +26,11 @@ export interface BluvoFlowClientOptions {
     network?: string;
     tag?: string;
     includeFee?: boolean;
-  }) => Promise<{
-    id: string;
-    asset: string;
-    amountWithFee?: number;
-    amountNoFee?: number;
-    destinationAddress: string;
-    network?: string | null;
-    tag?: string | null;
-    estimatedFee?: number;
-    estimatedTotal?: number;
-    expiresAt: string;
-  }>;
+  }) => Promise<Walletwithdrawquotequotation200Response>;
   executeWithdrawalFn: (walletId: string, idem: string, quoteId: string, params?: {
     twofa?: string;
     smsCode?: string;
-  }) => Promise<{ workflowRunId: string }>;
+  }) => Promise<Walletwithdrawquoteidexecutewithdraw200Response>;
   mkUUIDFn?: () => string;
 }
 
@@ -142,13 +136,13 @@ export class BluvoFlowClient {
     this.flowMachine.send({ type: 'LOAD_WALLET' });
 
     try {
-      const balances = await this.options.fetchWithdrawableBalanceFn(walletId);
+      const withdrawableBalanceInfo = await this.options.fetchWithdrawableBalanceFn(walletId);
 
       this.flowMachine.send({
         type: 'WALLET_LOADED',
-        balances: balances.map(b => ({
+        balances: withdrawableBalanceInfo.balances.map(b => ({
           asset: b.asset,
-          balance: b.amount
+          balance: String(b.amount),
         }))
       });
 

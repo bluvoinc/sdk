@@ -38,6 +38,9 @@ export interface BluvoFlowClientOptions {
 export interface WithdrawalFlowOptions {
   exchange: string;
   walletId: string;
+}
+
+export interface QuoteRequestOptions {
   asset: string;
   amount: string;
   destinationAddress: string;
@@ -128,9 +131,6 @@ export class BluvoFlowClient {
 
     this.flowMachine.send({ type: 'OAUTH_WINDOW_OPENED' });
 
-    // Store flow options for later use
-    (this as any).flowOptions = flowOptions;
-
     return {
       machine: this.flowMachine,
       closeOAuthWindow: closeWindow
@@ -150,14 +150,9 @@ export class BluvoFlowClient {
         balances: withdrawableBalanceInfo.balances.map(b => ({
           asset: b.asset,
           balance: String(b.amount),
+          networks: b.networks,
         }))
       });
-
-      // Auto-proceed to quote request if we have flow options
-      const flowOptions = (this as any).flowOptions as WithdrawalFlowOptions;
-      if (flowOptions) {
-        this.requestQuote(flowOptions);
-      }
     } catch (error) {
       this.flowMachine.send({
         type: 'WALLET_FAILED',
@@ -166,7 +161,7 @@ export class BluvoFlowClient {
     }
   }
 
-  private async requestQuote(options: WithdrawalFlowOptions) {
+  async requestQuote(options: QuoteRequestOptions) {
     if (!this.flowMachine) return;
 
     const state = this.flowMachine.getState();

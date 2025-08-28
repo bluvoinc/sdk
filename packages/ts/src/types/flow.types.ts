@@ -30,7 +30,19 @@ export interface FlowContext {
   projectId: string;
   exchange?: string;
   walletId?: string;
-  walletBalances?: Array<{ asset: string; balance: string }>;
+  walletBalances?: Array<{ 
+    asset: string; 
+    balance: string;
+    networks?: Array<{
+      'id': string;
+      'name': string;
+      'displayName': string;
+      'minWithdrawal': string;
+      'maxWithdrawal': string;
+      'assetName': string;
+      'addressRegex'?: string;
+    }>;
+  }>;
   quote?: {
     id: string;
     asset: string;
@@ -60,7 +72,19 @@ export type FlowActionType =
   | { type: 'OAUTH_COMPLETED'; walletId: string; exchange: string }
   | { type: 'OAUTH_FAILED'; error: Error }
   | { type: 'LOAD_WALLET' }
-  | { type: 'WALLET_LOADED'; balances: Array<{ asset: string; balance: string }> }
+  | { type: 'WALLET_LOADED'; balances: Array<{
+    asset: string;
+    balance: string;
+    networks?: Array<{
+      'id': string;
+      'name': string;
+      'displayName': string;
+      'minWithdrawal': string;
+      'maxWithdrawal': string;
+      'assetName': string;
+      'addressRegex'?: string;
+    }>;
+  }> }
   | { type: 'WALLET_FAILED'; error: Error }
   | { type: 'REQUEST_QUOTE'; asset: string; amount: string; destinationAddress: string; network?: string }
   | { type: 'QUOTE_RECEIVED'; quote: FlowContext['quote'] }

@@ -6,6 +6,7 @@ export { useBluvoFlow } from './useBluvoFlow';
 export type {
   BluvoFlowClientOptions,
   WithdrawalFlowOptions,
+  QuoteRequestOptions,
   FlowState,
   FlowActionType,
   WithdrawalState,

@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import type { 
   BluvoFlowClientOptions,
   WithdrawalFlowOptions,
+  QuoteRequestOptions,
   Machine,
   FlowState,
   FlowActionType
@@ -26,6 +27,10 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
     setFlowMachine(result.machine);
     closeOAuthWindowRef.current = result.closeOAuthWindow;
     return result;
+  }, [flowClient]);
+
+  const requestQuote = useCallback(async (options: QuoteRequestOptions) => {
+    await flowClient.requestQuote(options);
   }, [flowClient]);
 
   const executeWithdrawal = useCallback(async (quoteId: string) => {
@@ -69,6 +74,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
     
     // Actions
     startWithdrawalFlow,
+    requestQuote,
     executeWithdrawal,
     submit2FA,
     submitSMS,

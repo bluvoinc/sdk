@@ -40,6 +40,11 @@ export interface WithdrawalFlowOptions {
   walletId: string;
 }
 
+export interface ResumeWithdrawalFlowOptions {
+  exchange: string;
+  walletId: string;
+}
+
 export interface QuoteRequestOptions {
   asset: string;
   amount: string;
@@ -134,6 +139,51 @@ export class BluvoFlowClient {
     return {
       machine: this.flowMachine,
       closeOAuthWindow: closeWindow
+    };
+  }
+
+  async resumeWithdrawalFlow(flowOptions: ResumeWithdrawalFlowOptions) {
+    // Dispose any existing flow
+    this.dispose();
+
+    // Create new flow machine
+    this.flowMachine = createFlowMachine({
+      orgId: this.options.orgId,
+      projectId: this.options.projectId,
+      maxRetryAttempts: this.options.maxRetryAttempts
+    });
+
+    // We need to transition through the states properly
+    // First, start OAuth flow to set up context
+    this.flowMachine.send({
+      type: 'START_OAUTH',
+      exchange: flowOptions.exchange,
+      walletId: flowOptions.walletId,
+      idem: this.generateId()
+    });
+
+    // Then mark OAuth as completed
+    this.flowMachine.send({
+      type: 'OAUTH_WINDOW_OPENED'
+    });
+
+    // Complete OAuth
+    this.flowMachine.send({
+      type: 'OAUTH_COMPLETED',
+      walletId: flowOptions.walletId,
+      exchange: flowOptions.exchange,
+    });
+
+    // Call the onWalletConnected hook if provided
+    if (this.options.onWalletConnectedFn) {
+      this.options.onWalletConnectedFn(flowOptions.walletId, flowOptions.exchange);
+    }
+
+    // Load wallet immediately
+    await this.loadWallet(flowOptions.walletId);
+
+    return {
+      machine: this.flowMachine
     };
   }
 

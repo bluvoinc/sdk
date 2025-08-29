@@ -333,22 +333,45 @@ export class BluvoFlowClient {
       },
       // on error should check if the error is recoverable (i.e. requires 2FA, SMS, KYC, etc)
       onError: (error) => {
-        console.error("errore ricevuto", error);
-        
-        // Ensure we have a proper Error object with a message
-        let fatalError: Error;
-        if (!error) {
-          fatalError = new Error('Unknown withdrawal error occurred');
-        } else {
-          fatalError = error;
+        if (error.name === 'TwoFaRequiredTOTPError') {
+            this.flowMachine?.send({ type: 'WITHDRAWAL_REQUIRES_2FA' });
+            return;
+        }
+        if (error.name === 'TwoFaRequiredSMSError') {
+            this.flowMachine?.send({ type: 'WITHDRAWAL_REQUIRES_SMS' });
+            return;
         }
 
-        console.log("will send fatal error", fatalError);
-        
+        if (error.name === 'KycRequiredError') {
+            this.flowMachine?.send({ type: 'WITHDRAWAL_REQUIRES_KYC' });
+            return;
+        }
+
+        if (error.name === 'InsufficientBalanceError') {
+            this.flowMachine?.send({ type: 'WITHDRAWAL_INSUFFICIENT_BALANCE' });
+            return;
+        }
+
+        // InvalidAddressError
+        if (error.name === 'InvalidAddressError') {
+            this.flowMachine?.send({ type: 'WITHDRAWAL_FATAL', error: new Error('Invalid destination address') });
+            return;
+        }
+        // AmountBelowMinimumError
+        if (error.name === 'AmountBelowMinimumError') {
+            this.flowMachine?.send({ type: 'WITHDRAWAL_FATAL', error: new Error('Amount below minimum') });
+            return;
+        }
+
+        if (error.name === 'ResourceExhaustedError' || error.name === 'QuoteExpiredError') {
+            this.flowMachine?.send({ type: 'QUOTE_EXPIRED' });
+            return;
+        }
+
         // Send WITHDRAWAL_FATAL to trigger the fatal state transition
         this.flowMachine?.send({
           type: 'WITHDRAWAL_FATAL',
-          error: fatalError
+          error: error
         });
       }
     });
@@ -365,9 +388,7 @@ export class BluvoFlowClient {
 
       // IMMEDIATE ERRROR HANDLING (i.e. wrong schema type, network error, etc)
       console.error("executeWithdrawal error", error);
-
       const errorType = error.type || error.response?.data?.type;
-      
       switch (errorType) {
         case WITHDRAWAL_EXECUTION_ERROR_TYPES.TWO_FACTOR_REQUIRED:
           this.flowMachine.send({ type: 'WITHDRAWAL_REQUIRES_2FA' });

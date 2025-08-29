@@ -2,7 +2,7 @@ import {
     APIKeysApi,
     createConfiguration, OAuth2Api,
     OneTimeTokenApi,
-    PromiseConfigurationOptions, server1, server2,
+    PromiseConfigurationOptions, server1, server2, ServerConfiguration,
     WalletsApi, WithdrawalsApi,
     WorkflowApi
 } from "../generated";
@@ -29,13 +29,15 @@ export class BluvoClient {
      * @param projectId Your Bluvo project identifier.
      * @param apiKey Your Bluvo API access key.
      * @param sandbox
+     * @param dev
      * @private Use the static `createClient` method or the global `createClient` function instead.
      */
     private constructor(
         private readonly orgId: string,
         private readonly projectId: string,
         private readonly apiKey: string,
-        private readonly sandbox: boolean = false
+        private readonly sandbox: boolean = false,
+        private readonly dev: boolean = false
     ) {
     }
 
@@ -53,12 +55,13 @@ export class BluvoClient {
      *
      * @returns A fully configured BluvoClient instance ready for use.
      */
-    static createClient({orgId, projectId, apiKey, sandbox}: { orgId: string; projectId: string; apiKey: string, sandbox?: boolean }) {
+    static createClient({orgId, projectId, apiKey, sandbox,dev}: { orgId: string; projectId: string; apiKey: string, sandbox?: boolean, dev?: boolean }) {
         return new BluvoClient(
             orgId,
             projectId,
             apiKey,
-            sandbox
+            sandbox,
+            dev
         );
     }
 
@@ -526,10 +529,18 @@ export class BluvoClient {
      * @returns A fully configured API configuration object ready for use with API clients
      */
     private configuration(walletId?:string, ott?:string, idem?:string) {
+
+        const serverDev = new ServerConfiguration<{  }>("http://localhost:8787", {  })
+
+        const baseServer = this.sandbox ?
+            server2 :
+            this.dev ? serverDev : server1;
+
+        // TODO: delete concept of OTT at all
         if(!!ott) {
             return createConfiguration({
 
-                baseServer: this.sandbox ? server2 : server1,
+                baseServer: baseServer,
 
                 authMethods: {
                     bluvoOtt: ott,
@@ -544,7 +555,7 @@ export class BluvoClient {
 
 
         return createConfiguration({
-            baseServer: this.sandbox ? server2 : server1,
+            baseServer: baseServer,
 
             authMethods: {
                 bluvoApiKey: this.apiKey,

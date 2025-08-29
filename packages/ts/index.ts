@@ -61,6 +61,15 @@ export function createSandboxClient(
     });
 }
 
+export function createDevClient(
+    {orgId, projectId, apiKey}: { orgId: string; projectId: string; apiKey: string }
+) {
+    return BluvoClient.createClient({
+        orgId, projectId, apiKey,
+        dev: true
+    });
+}
+
 // createWebClient
 /**
  * Create a BluvoWebClient instance for browser-based applications.

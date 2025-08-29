@@ -301,6 +301,14 @@ export class BluvoWebClient {
                 }
                 if (failure) {
                     // handle better error
+                    if (data.error && typeof data.error === 'object') {
+                        // Create error with proper name and message from the error object
+                        const error = new Error(data.error.message || 'Withdraw funds flow failed');
+                        error.name = data.error.name || 'WithdrawError';
+                        // Preserve original error data for debugging
+                        (error as any).originalError = data.error;
+                        return options.onError?.(error);
+                    }
                     return options.onError?.(new Error(data.error || 'Withdraw funds flow failed'));
                 }
             }

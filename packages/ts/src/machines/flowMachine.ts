@@ -322,6 +322,51 @@ function flowTransition(
             error: new Error('Insufficient balance')
           };
         
+        case 'WITHDRAWAL_REQUIRES_2FA':
+          if (instance.withdrawalMachine) {
+            instance.withdrawalMachine.send({ type: 'REQUIRES_2FA' });
+            // Check the withdrawal machine state immediately after sending the action
+            const withdrawalState = instance.withdrawalMachine.getState();
+            if (withdrawalState.type === 'waitingFor2FA') {
+              return {
+                type: 'withdraw:error2FA',
+                context: state.context,
+                error: null
+              };
+            }
+          }
+          break;
+        
+        case 'WITHDRAWAL_REQUIRES_SMS':
+          if (instance.withdrawalMachine) {
+            instance.withdrawalMachine.send({ type: 'REQUIRES_SMS' });
+            // Check the withdrawal machine state immediately after sending the action
+            const withdrawalState = instance.withdrawalMachine.getState();
+            if (withdrawalState.type === 'waitingForSMS') {
+              return {
+                type: 'withdraw:errorSMS',
+                context: state.context,
+                error: null
+              };
+            }
+          }
+          break;
+        
+        case 'WITHDRAWAL_REQUIRES_KYC':
+          if (instance.withdrawalMachine) {
+            instance.withdrawalMachine.send({ type: 'REQUIRES_KYC' });
+            // Check the withdrawal machine state immediately after sending the action
+            const withdrawalState = instance.withdrawalMachine.getState();
+            if (withdrawalState.type === 'waitingForKYC') {
+              return {
+                type: 'withdraw:errorKYC',
+                context: state.context,
+                error: null
+              };
+            }
+          }
+          break;
+        
         case 'WITHDRAWAL_FATAL':
           return {
             type: 'withdraw:fatal',

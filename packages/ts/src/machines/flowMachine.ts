@@ -284,7 +284,10 @@ function flowTransition(
             });
             return {
               type: 'withdraw:processing',
-              context: state.context,
+              context: {
+                ...state.context,
+                invalid2FAAttempts: 0 // Reset invalid attempts when submitting new 2FA
+              },
               error: null
             };
           }
@@ -314,6 +317,16 @@ function flowTransition(
             };
           }
           break;
+        
+        case 'WITHDRAWAL_2FA_INVALID':
+          return {
+            type: 'withdraw:error2FA',
+            context: {
+              ...state.context,
+              invalid2FAAttempts: (state.context.invalid2FAAttempts || 0) + 1
+            },
+            error: new Error('Invalid 2FA code')
+          };
         
         case 'WITHDRAWAL_INSUFFICIENT_BALANCE':
           return {

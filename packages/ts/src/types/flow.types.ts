@@ -60,6 +60,7 @@ export interface FlowContext {
   maxRetryAttempts: number;
   idempotencyKey?: string;
   topicName?: string;
+  invalid2FAAttempts?: number;
 }
 
 export type FlowState = StateValue<FlowStateType> & {
@@ -95,6 +96,7 @@ export type FlowActionType =
   | { type: 'WITHDRAWAL_REQUIRES_2FA' }
   | { type: 'WITHDRAWAL_REQUIRES_SMS' }
   | { type: 'WITHDRAWAL_REQUIRES_KYC' }
+  | { type: 'WITHDRAWAL_2FA_INVALID' }
   | { type: 'WITHDRAWAL_INSUFFICIENT_BALANCE' }
   | { type: 'SUBMIT_2FA'; code: string }
   | { type: 'SUBMIT_SMS'; code: string }

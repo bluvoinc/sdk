@@ -353,6 +353,10 @@ export class BluvoFlowClient {
             this.flowMachine?.send({ type: 'WITHDRAWAL_REQUIRES_SMS' });
             return;
           
+          case ERROR_CODES.WITHDRAWAL_2FA_INVALID:
+            this.flowMachine?.send({ type: 'WITHDRAWAL_2FA_INVALID' });
+            return;
+          
           case ERROR_CODES.WITHDRAWAL_KYC_REQUIRED:
             this.flowMachine?.send({ type: 'WITHDRAWAL_REQUIRES_KYC' });
             return;

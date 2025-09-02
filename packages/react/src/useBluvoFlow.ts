@@ -108,6 +108,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
     requiresKYC: flow.state?.type === 'withdraw:errorKYC',
     hasInsufficientBalance: flow.state?.type === 'withdraw:errorBalance',
     canRetry: flow.state?.type === 'withdraw:retrying',
+    invalid2FAAttempts: flow.context?.invalid2FAAttempts || 0,
     
     // Data
     walletBalances: flow.context?.walletBalances || [],

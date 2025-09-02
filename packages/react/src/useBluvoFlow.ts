@@ -65,6 +65,11 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
     }
   }, [flowClient]);
 
+  // TEST METHOD - For testing withdrawal completion without real transactions
+  const testWithdrawalComplete = useCallback((transactionId?: string) => {
+    flowClient.testWithdrawalComplete(transactionId);
+  }, [flowClient]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -88,6 +93,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
     submitSMS,
     retryWithdrawal,
     cancel,
+    testWithdrawalComplete, // TEST METHOD
     
     // Computed state helpers
     isOAuthPending: flow.state?.type === 'oauth:waiting' || flow.state?.type === 'oauth:processing',

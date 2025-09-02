@@ -36,6 +36,6 @@ export type WithdrawalActionType =
   | { type: 'SUBMIT_2FA'; code: string }
   | { type: 'SUBMIT_SMS'; code: string }
   | { type: 'RETRY' }
-  | { type: 'SUCCESS'; transactionId: string }
+  | { type: 'SUCCESS'; transactionId?: string }
   | { type: 'BLOCKED'; reason: string }
   | { type: 'FAIL'; error: Error };

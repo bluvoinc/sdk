@@ -380,6 +380,15 @@ function flowTransition(
           }
           break;
         
+        case 'WITHDRAWAL_SUCCESS':
+          if (instance.withdrawalMachine) {
+            instance.withdrawalMachine.send({
+              type: 'SUCCESS',
+              transactionId: action.transactionId
+            });
+          }
+          break;
+        
         case 'WITHDRAWAL_FATAL':
           return {
             type: 'withdraw:fatal',

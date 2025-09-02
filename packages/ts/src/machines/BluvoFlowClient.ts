@@ -319,14 +319,36 @@ export class BluvoFlowClient {
       topicToken: this.options.topicToken,
       cacheName: this.options.cacheName,
       onWithdrawComplete: (message: any) => {
+        console.log("onWithdrawComplete received:", message);
+
+        // {
+        //     "type": "withdraw",
+        //     "success": true,
+        //     "walletId": "a57f3fd3-0660-438c-8e4d-e781b414acfa",
+        //     "step": "complete",
+        //     "stepIndex": 4,
+        //     "totalSteps": 4
+        // }
+
         if (message.success && message.type === WorkflowTypes.WithdrawFunds) {
-          // TODO: once u store transactions check for transactionId as well
-          // if (message.transactionId) {
-            this.flowMachine?.send({
-              type: 'WITHDRAWAL_COMPLETED',
-              transactionId: message.transactionId
-            });
-          // }
+          console.log("Withdrawal completed successfully, transitioning state machine");
+          console.log("Current flow machine state before completion:", this.flowMachine?.getState()?.type);
+          
+          // First, send success to update the withdrawal machine state
+          this.flowMachine?.send({
+            type: 'WITHDRAWAL_SUCCESS',
+            transactionId: message.transactionId || message.walletId || 'completed'
+          });
+          
+          // Then send completion action
+          this.flowMachine?.send({
+            type: 'WITHDRAWAL_COMPLETED',
+            transactionId: message.transactionId || message.walletId || 'completed'
+          });
+          
+          // Log current state after sending actions
+          const currentState = this.flowMachine?.getState();
+          console.log("Flow machine state after completion actions:", currentState?.type);
         }
       },
       onStep: (message: WorkflowMessageBody) => {
@@ -562,6 +584,44 @@ export class BluvoFlowClient {
     if (this.flowMachine) {
       this.flowMachine.dispose();
       this.flowMachine = undefined;
+    }
+  }
+
+  // TEST METHOD - For testing withdrawal completion without real transactions
+  testWithdrawalComplete(transactionId?: string) {
+    console.log("🧪 TEST: Simulating withdrawal completion");
+    
+    // Simulate the same message that would come from onWithdrawComplete
+    const mockMessage = {
+      type: "withdraw",
+      success: true,
+      walletId: "test-wallet-id-" + Date.now(),
+      step: "complete",
+      stepIndex: 4,
+      totalSteps: 4,
+      transactionId: transactionId || "test-transaction-" + Date.now()
+    };
+
+    // Execute the same logic as in onWithdrawComplete
+    if (mockMessage.success && mockMessage.type === "withdraw") {
+      console.log("🧪 TEST: Withdrawal completed successfully, transitioning state machine");
+      console.log("🧪 TEST: Current flow machine state before completion:", this.flowMachine?.getState()?.type);
+      
+      // First, send success to update the withdrawal machine state
+      this.flowMachine?.send({
+        type: 'WITHDRAWAL_SUCCESS',
+        transactionId: mockMessage.transactionId
+      });
+      
+      // Then send completion action
+      this.flowMachine?.send({
+        type: 'WITHDRAWAL_COMPLETED',
+        transactionId: mockMessage.transactionId
+      });
+      
+      // Log current state after sending actions
+      const currentState = this.flowMachine?.getState();
+      console.log("🧪 TEST: Flow machine state after completion actions:", currentState?.type);
     }
   }
 }

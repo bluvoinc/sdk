@@ -101,6 +101,7 @@ export type FlowActionType =
   | { type: 'SUBMIT_2FA'; code: string }
   | { type: 'SUBMIT_SMS'; code: string }
   | { type: 'RETRY_WITHDRAWAL' }
+  | { type: 'WITHDRAWAL_SUCCESS'; transactionId?: string }
   | { type: 'WITHDRAWAL_COMPLETED'; transactionId: string }
   | { type: 'WITHDRAWAL_BLOCKED'; reason: string }
   | { type: 'WITHDRAWAL_FATAL'; error: Error }

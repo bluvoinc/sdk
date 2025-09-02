@@ -4,7 +4,7 @@ import {Machine} from '../types/machine.types';
 import {FlowActionType, FlowState} from '../types/flow.types';
 import {TopicSubscribe} from '@gomomento/sdk-web';
 import {WithdrawFundsWorkflowMessageBody, WorkflowMessageBody, WorkflowTypes} from '../WorkflowTypes';
-import {WITHDRAWAL_EXECUTION_ERROR_TYPES, WITHDRAWAL_QUOTATION_ERROR_TYPES} from '../ErrorTypes';
+import {ERROR_CODES, WITHDRAWAL_EXECUTION_ERROR_TYPES, WITHDRAWAL_QUOTATION_ERROR_TYPES, extractErrorCode, isSerializedError} from '../ErrorTypes';
 import {
   Walletwithdrawbalancebalance200Response,
   Walletwithdrawquoteidexecutewithdraw200Response,
@@ -261,25 +261,32 @@ export class BluvoFlowClient {
         }, expiresIn);
       }
     } catch (error: any) {
-      const errorType = error.type || error.response?.data?.type;
+      // Extract error code from new format or legacy format
+      const errorCode = extractErrorCode(error) || error.code || error.type || error.response?.data?.type;
       let flowError = error;
 
-      if (errorType) {
-        switch (errorType) {
-          case WITHDRAWAL_QUOTATION_ERROR_TYPES.INSUFFICIENT_BALANCE:
-          case WITHDRAWAL_QUOTATION_ERROR_TYPES.INSUFFICIENT_BALANCE_CANNOT_COVER_FEE:
+      if (errorCode) {
+        switch (errorCode) {
+          case ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE:
+          case ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE:
+          case WITHDRAWAL_QUOTATION_ERROR_TYPES.INSUFFICIENT_BALANCE: // Legacy compatibility
+          case WITHDRAWAL_QUOTATION_ERROR_TYPES.INSUFFICIENT_BALANCE_CANNOT_COVER_FEE: // Legacy compatibility
             flowError = new Error('Insufficient balance');
             break;
-          case WITHDRAWAL_QUOTATION_ERROR_TYPES.AMOUNT_BELOW_MINIMUM:
+          case ERROR_CODES.WITHDRAWAL_AMOUNT_BELOW_MINIMUM:
+          case WITHDRAWAL_QUOTATION_ERROR_TYPES.AMOUNT_BELOW_MINIMUM: // Legacy compatibility
             flowError = new Error('Amount below minimum');
             break;
-          case WITHDRAWAL_QUOTATION_ERROR_TYPES.AMOUNT_ABOVE_MAXIMUM:
+          case ERROR_CODES.WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM:
+          case WITHDRAWAL_QUOTATION_ERROR_TYPES.AMOUNT_ABOVE_MAXIMUM: // Legacy compatibility
             flowError = new Error('Amount above maximum');
             break;
-          case WITHDRAWAL_QUOTATION_ERROR_TYPES.INVALID_ADDRESS:
+          case ERROR_CODES.WITHDRAWAL_INVALID_ADDRESS:
+          case WITHDRAWAL_QUOTATION_ERROR_TYPES.INVALID_ADDRESS: // Legacy compatibility
             flowError = new Error('Invalid destination address');
             break;
-          case WITHDRAWAL_QUOTATION_ERROR_TYPES.NETWORK_NOT_SUPPORTED:
+          case ERROR_CODES.WITHDRAWAL_NETWORK_NOT_SUPPORTED:
+          case WITHDRAWAL_QUOTATION_ERROR_TYPES.NETWORK_NOT_SUPPORTED: // Legacy compatibility
             flowError = new Error('Network not supported');
             break;
         }
@@ -333,40 +340,41 @@ export class BluvoFlowClient {
       },
       // on error should check if the error is recoverable (i.e. requires 2FA, SMS, KYC, etc)
       onError: (error) => {
-        if (error.name === 'TwoFaRequiredTOTPError') {
+        // Extract error code from new format or legacy format
+        const errorCode = extractErrorCode(error);
+        
+        // Handle new error codes
+        switch (errorCode) {
+          case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP:
             this.flowMachine?.send({ type: 'WITHDRAWAL_REQUIRES_2FA' });
             return;
-        }
-        if (error.name === 'TwoFaRequiredSMSError') {
+          
+          case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS:
             this.flowMachine?.send({ type: 'WITHDRAWAL_REQUIRES_SMS' });
             return;
-        }
-
-        if (error.name === 'KycRequiredError') {
+          
+          case ERROR_CODES.WITHDRAWAL_KYC_REQUIRED:
             this.flowMachine?.send({ type: 'WITHDRAWAL_REQUIRES_KYC' });
             return;
-        }
-
-        if (error.name === 'InsufficientBalanceError') {
+          
+          case ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE:
             this.flowMachine?.send({ type: 'WITHDRAWAL_INSUFFICIENT_BALANCE' });
             return;
-        }
-
-        // InvalidAddressError
-        if (error.name === 'InvalidAddressError') {
+          
+          case ERROR_CODES.WITHDRAWAL_INVALID_ADDRESS:
             this.flowMachine?.send({ type: 'WITHDRAWAL_FATAL', error: new Error('Invalid destination address') });
             return;
-        }
-        // AmountBelowMinimumError
-        if (error.name === 'AmountBelowMinimumError') {
+          
+          case ERROR_CODES.WITHDRAWAL_AMOUNT_BELOW_MINIMUM:
             this.flowMachine?.send({ type: 'WITHDRAWAL_FATAL', error: new Error('Amount below minimum') });
             return;
-        }
-
-        if (error.name === 'ResourceExhaustedError' || error.name === 'QuoteExpiredError') {
+          
+          case ERROR_CODES.QUOTE_EXPIRED:
             this.flowMachine?.send({ type: 'QUOTE_EXPIRED' });
             return;
         }
+
+        console.error("Unhandled withdrawal error", error);
 
         // Send WITHDRAWAL_FATAL to trigger the fatal state transition
         this.flowMachine?.send({
@@ -385,24 +393,31 @@ export class BluvoFlowClient {
         {}
       );
     } catch (error: any) {
-
-      // IMMEDIATE ERRROR HANDLING (i.e. wrong schema type, network error, etc)
+      // IMMEDIATE ERROR HANDLING (i.e. wrong schema type, network error, etc)
       console.error("executeWithdrawal error", error);
-      const errorType = error.type || error.response?.data?.type;
-      switch (errorType) {
-        case WITHDRAWAL_EXECUTION_ERROR_TYPES.TWO_FACTOR_REQUIRED:
+      
+      // Extract error code from new format or legacy format
+      const errorCode = extractErrorCode(error) || error.code || error.type || error.response?.data?.type;
+      
+      switch (errorCode) {
+        case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP:
+        case WITHDRAWAL_EXECUTION_ERROR_TYPES.TWO_FACTOR_REQUIRED: // Legacy compatibility
           this.flowMachine.send({ type: 'WITHDRAWAL_REQUIRES_2FA' });
           break;
-        case WITHDRAWAL_EXECUTION_ERROR_TYPES.SMS_CODE_REQUIRED:
+        case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS:
+        case WITHDRAWAL_EXECUTION_ERROR_TYPES.SMS_CODE_REQUIRED: // Legacy compatibility
           this.flowMachine.send({ type: 'WITHDRAWAL_REQUIRES_SMS' });
           break;
-        case WITHDRAWAL_EXECUTION_ERROR_TYPES.KYC_REQUIRED:
+        case ERROR_CODES.WITHDRAWAL_KYC_REQUIRED:
+        case WITHDRAWAL_EXECUTION_ERROR_TYPES.KYC_REQUIRED: // Legacy compatibility
           this.flowMachine.send({ type: 'WITHDRAWAL_REQUIRES_KYC' });
           break;
-        case WITHDRAWAL_EXECUTION_ERROR_TYPES.INSUFFICIENT_BALANCE:
+        case ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE:
+        case WITHDRAWAL_EXECUTION_ERROR_TYPES.INSUFFICIENT_BALANCE: // Legacy compatibility
           this.flowMachine.send({ type: 'WITHDRAWAL_INSUFFICIENT_BALANCE' });
           break;
-        case WITHDRAWAL_EXECUTION_ERROR_TYPES.RESOURCE_EXHAUSTED:
+        case ERROR_CODES.QUOTE_EXPIRED:
+        case WITHDRAWAL_EXECUTION_ERROR_TYPES.RESOURCE_EXHAUSTED: // Legacy compatibility
           this.flowMachine.send({ type: 'QUOTE_EXPIRED' });
           break;
         default:
@@ -489,22 +504,28 @@ export class BluvoFlowClient {
   }
 
   private handleWithdrawalError(error: any) {
-    const errorType = error.response?.data?.type;
+    // Extract error code from new format or legacy format
+    const errorCode = extractErrorCode(error) || error.code || error.response?.data?.type;
     
-    switch (errorType) {
-      case WITHDRAWAL_EXECUTION_ERROR_TYPES.TWO_FACTOR_REQUIRED:
+    switch (errorCode) {
+      case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP:
+      case WITHDRAWAL_EXECUTION_ERROR_TYPES.TWO_FACTOR_REQUIRED: // Legacy compatibility
         this.flowMachine?.send({ type: 'WITHDRAWAL_REQUIRES_2FA' });
         break;
-      case WITHDRAWAL_EXECUTION_ERROR_TYPES.SMS_CODE_REQUIRED:
+      case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS:
+      case WITHDRAWAL_EXECUTION_ERROR_TYPES.SMS_CODE_REQUIRED: // Legacy compatibility
         this.flowMachine?.send({ type: 'WITHDRAWAL_REQUIRES_SMS' });
         break;
-      case WITHDRAWAL_EXECUTION_ERROR_TYPES.KYC_REQUIRED:
+      case ERROR_CODES.WITHDRAWAL_KYC_REQUIRED:
+      case WITHDRAWAL_EXECUTION_ERROR_TYPES.KYC_REQUIRED: // Legacy compatibility
         this.flowMachine?.send({ type: 'WITHDRAWAL_REQUIRES_KYC' });
         break;
-      case WITHDRAWAL_EXECUTION_ERROR_TYPES.INSUFFICIENT_BALANCE:
+      case ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE:
+      case WITHDRAWAL_EXECUTION_ERROR_TYPES.INSUFFICIENT_BALANCE: // Legacy compatibility
         this.flowMachine?.send({ type: 'WITHDRAWAL_INSUFFICIENT_BALANCE' });
         break;
-      case WITHDRAWAL_EXECUTION_ERROR_TYPES.RESOURCE_EXHAUSTED:
+      case ERROR_CODES.QUOTE_EXPIRED:
+      case WITHDRAWAL_EXECUTION_ERROR_TYPES.RESOURCE_EXHAUSTED: // Legacy compatibility
         this.flowMachine?.send({ type: 'QUOTE_EXPIRED' });
         break;
       default:

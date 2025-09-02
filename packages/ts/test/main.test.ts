@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {createSandboxClient} from "../index";
 import sec from "../sec";
-import {WALLET_ERROR_TYPES} from "../src/ErrorTypes";
+import {ERROR_CODES} from "../src/ErrorTypes";
 
 describe('live HTTP calls tests', ()=> {
 
@@ -79,7 +79,7 @@ describe('live HTTP calls tests', ()=> {
 
             await expect(client.wallet.get(walletId))
                 .rejects
-                .toThrow(WALLET_ERROR_TYPES.NOT_FOUND);
+                .toThrow(ERROR_CODES.WALLET_NOT_FOUND);
         })
 
         it('GET /v0/cex/wallet/:walletId/transactions', async () => {

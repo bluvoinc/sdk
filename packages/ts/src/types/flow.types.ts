@@ -50,6 +50,11 @@ export interface FlowContext {
     amount: string;
     estimatedFee: string;
     estimatedTotal: string;
+
+    amountWithFeeInFiat: string;
+    amountNoFeeInFiat: string;
+    estimatedFeeInFiat: string;
+
     expiresAt: number;
   };
   withdrawal?: {

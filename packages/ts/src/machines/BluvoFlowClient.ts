@@ -200,7 +200,6 @@ export class BluvoFlowClient {
         balances: withdrawableBalanceInfo.balances.map(b => ({
           asset: b.asset,
           balance: String(b.amount),
-          balanceInFiat: "ciao",
           networks: b.networks,
 
           // if amountInFiat is present (including 0), include balanceInFiat

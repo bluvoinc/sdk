@@ -1,15 +1,13 @@
 export * from '../models/Oauth2exchangeurlgeturl200Response';
-export * from '../models/Ottgenerate200Response';
-export * from '../models/Ottgenerate200ResponseTopic';
 export * from '../models/Walletdelete200Response';
 export * from '../models/WalletexchangeconnectconnectwalletRequest';
 export * from '../models/Walletget200Response';
+export * from '../models/Walletget200ResponseCreatedAt';
 export * from '../models/Walletlistlistwallets200Response';
 export * from '../models/Walletlistlistwallets200ResponsePagination';
 export * from '../models/Walletlistlistwallets200ResponseWalletsInner';
 export * from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValue';
 export * from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
-export * from '../models/Walletlistlistwallets200ResponseWalletsInnerCreatedAt';
 export * from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 export * from '../models/Wallettransactionslisttransactions200Response';
 export * from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
@@ -28,17 +26,15 @@ export * from '../models/Workflowworkflowtypegetworkflowrunidget200Response';
 export * from '../models/Workflowworkflowtypegetworkflowrunidget200ResponseDetails';
 
 import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlgeturl200Response';
-import { Ottgenerate200Response } from '../models/Ottgenerate200Response';
-import { Ottgenerate200ResponseTopic } from '../models/Ottgenerate200ResponseTopic';
 import { Walletdelete200Response } from '../models/Walletdelete200Response';
 import { WalletexchangeconnectconnectwalletRequest } from '../models/WalletexchangeconnectconnectwalletRequest';
 import { Walletget200Response } from '../models/Walletget200Response';
+import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
 import { Walletlistlistwallets200ResponseWalletsInner } from '../models/Walletlistlistwallets200ResponseWalletsInner';
 import { Walletlistlistwallets200ResponseWalletsInnerBalancesValue } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValue';
 import { Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
-import { Walletlistlistwallets200ResponseWalletsInnerCreatedAt } from '../models/Walletlistlistwallets200ResponseWalletsInnerCreatedAt';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
 import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
@@ -78,17 +74,15 @@ let enumsMap: Set<string> = new Set<string>([
 
 let typeMap: {[index: string]: any} = {
     "Oauth2exchangeurlgeturl200Response": Oauth2exchangeurlgeturl200Response,
-    "Ottgenerate200Response": Ottgenerate200Response,
-    "Ottgenerate200ResponseTopic": Ottgenerate200ResponseTopic,
     "Walletdelete200Response": Walletdelete200Response,
     "WalletexchangeconnectconnectwalletRequest": WalletexchangeconnectconnectwalletRequest,
     "Walletget200Response": Walletget200Response,
+    "Walletget200ResponseCreatedAt": Walletget200ResponseCreatedAt,
     "Walletlistlistwallets200Response": Walletlistlistwallets200Response,
     "Walletlistlistwallets200ResponsePagination": Walletlistlistwallets200ResponsePagination,
     "Walletlistlistwallets200ResponseWalletsInner": Walletlistlistwallets200ResponseWalletsInner,
     "Walletlistlistwallets200ResponseWalletsInnerBalancesValue": Walletlistlistwallets200ResponseWalletsInnerBalancesValue,
     "Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf": Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf,
-    "Walletlistlistwallets200ResponseWalletsInnerCreatedAt": Walletlistlistwallets200ResponseWalletsInnerCreatedAt,
     "Walletlistlistwallets200ResponseWalletsInnerInvalidApi": Walletlistlistwallets200ResponseWalletsInnerInvalidApi,
     "Wallettransactionslisttransactions200Response": Wallettransactionslisttransactions200Response,
     "Wallettransactionslisttransactions200ResponseTransactionsInner": Wallettransactionslisttransactions200ResponseTransactionsInner,

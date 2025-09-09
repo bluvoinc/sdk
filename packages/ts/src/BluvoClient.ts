@@ -1,7 +1,6 @@
 import {
     APIKeysApi,
     createConfiguration, OAuth2Api,
-    OneTimeTokenApi,
     PromiseConfigurationOptions, server1, server2, ServerConfiguration,
     WalletsApi, WithdrawalsApi,
     WorkflowApi
@@ -462,52 +461,6 @@ export class BluvoClient {
         ) => {
             return new OAuth2Api(this.configuration(walletId, undefined, idem))
                 .oauth2exchangeurlgeturl(exchange, idem!, _options)
-        }
-    }
-
-    ott = {
-
-
-        /**
-         * Retrieve a one-time token (OTT) for secure, temporary access to Bluvo's API services.
-         *
-         * This method generates a one-time token that can be used to authenticate API requests without exposing your
-         * permanent API key. The token is valid for a limited time and can be used to perform specific actions like
-         * subscribing to services or accessing sensitive data.
-         *
-         * @param walletId Optional wallet identifier to scope the OTT to a specific wallet connection.
-         *                 If provided, the OTT will be tied to this wallet's permissions and access.
-         * @param wantOtt Optional flag indicating whether to generate a new OTT token. Defaults to true.
-         * @param wantSubscribe Optional flag indicating whether to subscribe the OTT for future use. Defaults to false.
-         *
-         * @returns A promise resolving to an object containing the generated OTT token and its expiration details.
-         */
-        get: (
-            walletId?: string,
-        ) => {
-            return new OneTimeTokenApi(this.configuration(walletId))
-                .ottgenerate(
-                    "true",
-                    "false",
-                )
-        },
-
-        getWithSubscribe: (
-            walletId?: string,
-        ) => {
-            return new OneTimeTokenApi(this.configuration(walletId))
-                .ottgenerate(
-                    "true",
-                    "true",
-                )
-        },
-
-        onlySubscribe: (walletId?: string) => {
-            return new OneTimeTokenApi(this.configuration(walletId))
-                .ottgenerate(
-                    "false",
-                    "true",
-                )
         }
     }
 

@@ -33,6 +33,7 @@ export interface FlowContext {
   walletBalances?: Array<{ 
     asset: string; 
     balance: string;
+    balanceInFiat?: string;
     networks?: Array<{
       'id': string;
       'name': string;
@@ -76,6 +77,7 @@ export type FlowActionType =
   | { type: 'WALLET_LOADED'; balances: Array<{
     asset: string;
     balance: string;
+    balanceInFiat?: string;
     networks?: Array<{
       'id': string;
       'name': string;

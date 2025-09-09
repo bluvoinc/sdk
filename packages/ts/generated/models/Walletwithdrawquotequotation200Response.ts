@@ -17,10 +17,13 @@ export class Walletwithdrawquotequotation200Response {
     'asset': string;
     'amountWithFee'?: number;
     'amountNoFee'?: number;
+    'estimatedFee'?: number;
+    'amountWithFeeInFiat'?: number;
+    'amountNoFeeInFiat'?: number;
+    'estimatedFeeInFiat'?: number;
     'destinationAddress': string;
     'network'?: string | null;
     'tag'?: string | null;
-    'estimatedFee'?: number;
     'estimatedTotal'?: number;
     'expiresAt': string;
 
@@ -54,6 +57,30 @@ export class Walletwithdrawquotequotation200Response {
             "format": ""
         },
         {
+            "name": "estimatedFee",
+            "baseName": "estimatedFee",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "amountWithFeeInFiat",
+            "baseName": "amountWithFeeInFiat",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "amountNoFeeInFiat",
+            "baseName": "amountNoFeeInFiat",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "estimatedFeeInFiat",
+            "baseName": "estimatedFeeInFiat",
+            "type": "number",
+            "format": ""
+        },
+        {
             "name": "destinationAddress",
             "baseName": "destinationAddress",
             "type": "string",
@@ -69,12 +96,6 @@ export class Walletwithdrawquotequotation200Response {
             "name": "tag",
             "baseName": "tag",
             "type": "string",
-            "format": ""
-        },
-        {
-            "name": "estimatedFee",
-            "baseName": "estimatedFee",
-            "type": "number",
             "format": ""
         },
         {

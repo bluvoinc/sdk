@@ -16,6 +16,7 @@ import { HttpFile } from '../http/http';
 export class Walletwithdrawbalancebalance200ResponseBalancesInner {
     'asset': string;
     'amount': number;
+    'amountInFiat'?: number;
     'networks': Array<Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner>;
 
     static readonly discriminator: string | undefined = undefined;
@@ -32,6 +33,12 @@ export class Walletwithdrawbalancebalance200ResponseBalancesInner {
         {
             "name": "amount",
             "baseName": "amount",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "amountInFiat",
+            "baseName": "amountInFiat",
             "type": "number",
             "format": ""
         },

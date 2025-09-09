@@ -10,17 +10,18 @@
  * Do not edit the class manually.
  */
 
+import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
 import { Walletlistlistwallets200ResponseWalletsInnerBalancesValue } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValue';
-import { Walletlistlistwallets200ResponseWalletsInnerCreatedAt } from '../models/Walletlistlistwallets200ResponseWalletsInnerCreatedAt';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 import { HttpFile } from '../http/http';
 
 export class Walletlistlistwallets200ResponseWalletsInner {
     'id': string;
     'projectId'?: string;
-    'createdAt': Walletlistlistwallets200ResponseWalletsInnerCreatedAt;
-    'updatedAt': Walletlistlistwallets200ResponseWalletsInnerCreatedAt;
-    'lastSyncAt': Walletlistlistwallets200ResponseWalletsInnerCreatedAt;
+    'createdAt'?: Walletget200ResponseCreatedAt;
+    'updatedAt'?: Walletget200ResponseCreatedAt;
+    'lastSyncAt'?: Walletget200ResponseCreatedAt;
+    'expiresAt'?: Walletget200ResponseCreatedAt;
     'exchange': string;
     'balances': { [key: string]: Walletlistlistwallets200ResponseWalletsInnerBalancesValue; };
     'ipPool'?: Array<string>;
@@ -46,19 +47,25 @@ export class Walletlistlistwallets200ResponseWalletsInner {
         {
             "name": "createdAt",
             "baseName": "createdAt",
-            "type": "Walletlistlistwallets200ResponseWalletsInnerCreatedAt",
+            "type": "Walletget200ResponseCreatedAt",
             "format": ""
         },
         {
             "name": "updatedAt",
             "baseName": "updatedAt",
-            "type": "Walletlistlistwallets200ResponseWalletsInnerCreatedAt",
+            "type": "Walletget200ResponseCreatedAt",
             "format": ""
         },
         {
             "name": "lastSyncAt",
             "baseName": "lastSyncAt",
-            "type": "Walletlistlistwallets200ResponseWalletsInnerCreatedAt",
+            "type": "Walletget200ResponseCreatedAt",
+            "format": ""
+        },
+        {
+            "name": "expiresAt",
+            "baseName": "expiresAt",
+            "type": "Walletget200ResponseCreatedAt",
             "format": ""
         },
         {

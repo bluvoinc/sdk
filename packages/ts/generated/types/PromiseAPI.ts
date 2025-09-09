@@ -3,17 +3,15 @@ import { Configuration, PromiseConfigurationOptions, wrapOptions } from '../conf
 import { PromiseMiddleware, Middleware, PromiseMiddlewareWrapper } from '../middleware';
 
 import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlgeturl200Response';
-import { Ottgenerate200Response } from '../models/Ottgenerate200Response';
-import { Ottgenerate200ResponseTopic } from '../models/Ottgenerate200ResponseTopic';
 import { Walletdelete200Response } from '../models/Walletdelete200Response';
 import { WalletexchangeconnectconnectwalletRequest } from '../models/WalletexchangeconnectconnectwalletRequest';
 import { Walletget200Response } from '../models/Walletget200Response';
+import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
 import { Walletlistlistwallets200ResponseWalletsInner } from '../models/Walletlistlistwallets200ResponseWalletsInner';
 import { Walletlistlistwallets200ResponseWalletsInnerBalancesValue } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValue';
 import { Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
-import { Walletlistlistwallets200ResponseWalletsInnerCreatedAt } from '../models/Walletlistlistwallets200ResponseWalletsInnerCreatedAt';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
 import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
@@ -110,49 +108,6 @@ export class PromiseOAuth2Api {
     public oauth2exchangeurlgeturl(exchange: 'coinbase' | 'kraken', idem: string, _options?: PromiseConfigurationOptions): Promise<Oauth2exchangeurlgeturl200Response> {
         const observableOptions = wrapOptions(_options);
         const result = this.api.oauth2exchangeurlgeturl(exchange, idem, observableOptions);
-        return result.toPromise();
-    }
-
-
-}
-
-
-
-import { ObservableOneTimeTokenApi } from './ObservableAPI';
-
-import { OneTimeTokenApiRequestFactory, OneTimeTokenApiResponseProcessor} from "../apis/OneTimeTokenApi";
-export class PromiseOneTimeTokenApi {
-    private api: ObservableOneTimeTokenApi
-
-    public constructor(
-        configuration: Configuration,
-        requestFactory?: OneTimeTokenApiRequestFactory,
-        responseProcessor?: OneTimeTokenApiResponseProcessor
-    ) {
-        this.api = new ObservableOneTimeTokenApi(configuration, requestFactory, responseProcessor);
-    }
-
-    /**
-     * Retrieve an OTT (One-Time Token) for accessing private endpoints. This endpoint requires authentication via a valid Bluvo API Key and accepts an optional \'x-bluvo-wallet-id\' header to tie the token to a specific wallet. The token can then be used for subsequent requests to OTT-enabled endpoints.
-     * Generate
-     * @param [wantOtt] Optional. If true, the response will include a One-Time Token (OTT) for accessing private endpoints.
-     * @param [wantSubscribe] Optional. If true, the response will include a subscription token for WebSocket streaming of workflow updates.
-     */
-    public ottgenerateWithHttpInfo(wantOtt?: 'true' | 'false', wantSubscribe?: 'true' | 'false', _options?: PromiseConfigurationOptions): Promise<HttpInfo<Ottgenerate200Response>> {
-        const observableOptions = wrapOptions(_options);
-        const result = this.api.ottgenerateWithHttpInfo(wantOtt, wantSubscribe, observableOptions);
-        return result.toPromise();
-    }
-
-    /**
-     * Retrieve an OTT (One-Time Token) for accessing private endpoints. This endpoint requires authentication via a valid Bluvo API Key and accepts an optional \'x-bluvo-wallet-id\' header to tie the token to a specific wallet. The token can then be used for subsequent requests to OTT-enabled endpoints.
-     * Generate
-     * @param [wantOtt] Optional. If true, the response will include a One-Time Token (OTT) for accessing private endpoints.
-     * @param [wantSubscribe] Optional. If true, the response will include a subscription token for WebSocket streaming of workflow updates.
-     */
-    public ottgenerate(wantOtt?: 'true' | 'false', wantSubscribe?: 'true' | 'false', _options?: PromiseConfigurationOptions): Promise<Ottgenerate200Response> {
-        const observableOptions = wrapOptions(_options);
-        const result = this.api.ottgenerate(wantOtt, wantSubscribe, observableOptions);
         return result.toPromise();
     }
 

@@ -7,6 +7,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
 
+    "complete-sync": "pnpm generate-sdk && pnpm --filter @bluvo/sdk-ts build && pnpm --filter @bluvo/react build",
+
     "generate-sdk": "pnpm sync-sdk-from-openapi && pnpm sync-sdk-from-openapi-cleanup && pnpm sync-sdk-from-openapi-inc-version",
     "sync-sdk-from-openapi": "docker run --rm \\\n    -v $PWD:/local openapitools/openapi-generator-cli generate \\\n    -i https://api-bluvo.com/api/v0/openapi \\\n    -g typescript \\\n    -o /local/packages/ts/generated",
     "sync-sdk-from-openapi-cleanup": "find ./packages/ts/generated -type f -name \"isomorphic-fetch.ts\" -exec sed -i '' '/import \"whatwg-fetch\";/d' {} \\;",

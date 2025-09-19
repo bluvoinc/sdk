@@ -4,7 +4,7 @@ import {Machine} from '../types/machine.types';
 import {FlowActionType, FlowState} from '../types/flow.types';
 import {TopicSubscribe} from '@gomomento/sdk-web';
 import {WithdrawFundsWorkflowMessageBody, WorkflowMessageBody, WorkflowTypes} from '../WorkflowTypes';
-import {ERROR_CODES, WITHDRAWAL_EXECUTION_ERROR_TYPES, WITHDRAWAL_QUOTATION_ERROR_TYPES, extractErrorCode, isSerializedError} from '../ErrorTypes';
+import {ERROR_CODES, WITHDRAWAL_EXECUTION_ERROR_TYPES, WITHDRAWAL_QUOTATION_ERROR_TYPES, extractErrorCode} from '../error-codes';
 import {
   Walletwithdrawbalancebalance200Response,
   Walletwithdrawquoteidexecutewithdraw200Response,

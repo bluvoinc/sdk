@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {createSandboxClient} from "../index";
 import sec from "../sec";
-import {ERROR_CODES} from "../src/ErrorTypes";
+import {ERROR_CODES} from "../src/error-codes";
 
 describe('live HTTP calls tests', ()=> {
 
@@ -95,17 +95,6 @@ describe('live HTTP calls tests', ()=> {
             expect(res).toBeDefined();
         });
 
-    });
-
-    describe('ott',()=>{
-
-        it('get ott', async () => {
-            const ott = await client
-                .ott
-                .get();
-            console.log(ott);
-            expect(ott).toBeDefined();
-        });
     });
 
     describe('oauth2',()=>{

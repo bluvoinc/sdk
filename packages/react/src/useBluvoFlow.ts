@@ -98,6 +98,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
     // Computed state helpers
     isOAuthPending: flow.state?.type === 'oauth:waiting' || flow.state?.type === 'oauth:processing',
     isOAuthComplete: flow.state?.type === 'oauth:completed',
+    isOAuthWindowBeenClosedByTheUser: flow.state?.type === 'oauth:window_closed_by_user',
     isWalletLoading: flow.state?.type === 'wallet:loading',
     isWalletReady: flow.state?.type === 'wallet:ready',
     isQuoteLoading: flow.state?.type === 'quote:requesting',

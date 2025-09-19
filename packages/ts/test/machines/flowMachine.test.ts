@@ -71,6 +71,29 @@ describe('FlowMachine', () => {
     expect(state.error).toBe(error);
   });
 
+  it('should handle OAuth window closed by user', () => {
+    const machine = createFlowMachine(defaultOptions);
+    
+    machine.send({
+      type: 'START_OAUTH',
+      exchange: 'coinbase',
+      walletId: 'wallet-123',
+      idem: 'oauth-456'
+    });
+    
+    machine.send({ type: 'OAUTH_WINDOW_OPENED' });
+    
+    const error = new Error('OAuth window closed by user');
+    machine.send({
+      type: 'OAUTH_WINDOW_CLOSED_BY_USER',
+      error
+    });
+    
+    const state = machine.getState();
+    expect(state.type).toBe('oauth:window_closed_by_user');
+    expect(state.error).toBe(error);
+  });
+
   it('should load wallet after OAuth', () => {
     const machine = createFlowMachine(defaultOptions);
     

@@ -126,7 +126,7 @@ export class BluvoFlowClient {
           const state = this.flowMachine?.getState();
           if (state?.type === 'oauth:processing') {
             this.flowMachine?.send({
-              type: 'OAUTH_FAILED',
+              type: 'OAUTH_WINDOW_CLOSED_BY_USER',
               error: new Error('OAuth window closed by user')
             });
           }

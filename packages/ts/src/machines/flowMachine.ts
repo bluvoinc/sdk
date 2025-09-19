@@ -86,6 +86,13 @@ function flowTransition(
             context: state.context,
             error: action.error
           };
+        
+        case 'OAUTH_WINDOW_CLOSED_BY_USER':
+          return {
+            type: 'oauth:window_closed_by_user',
+            context: state.context,
+            error: action.error
+          };
       }
       break;
 

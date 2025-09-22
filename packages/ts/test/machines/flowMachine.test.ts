@@ -41,6 +41,7 @@ describe('FlowMachine', () => {
     
     // OAuth completed
     machine.send({
+      exchange: 'coinbase',
       type: 'OAUTH_COMPLETED',
       walletId: 'wallet-123'
     });
@@ -106,6 +107,7 @@ describe('FlowMachine', () => {
     });
     machine.send({ type: 'OAUTH_WINDOW_OPENED' });
     machine.send({
+      exchange: 'coinbase',
       type: 'OAUTH_COMPLETED',
       walletId: 'wallet-123'
     });
@@ -141,7 +143,11 @@ describe('FlowMachine', () => {
       idem: 'oauth-456'
     });
     machine.send({ type: 'OAUTH_WINDOW_OPENED' });
-    machine.send({ type: 'OAUTH_COMPLETED', walletId: 'wallet-123' });
+    machine.send({
+      exchange: 'coinbase',
+      type: 'OAUTH_COMPLETED',
+      walletId: 'wallet-123'
+    });
     machine.send({ type: 'LOAD_WALLET' });
     machine.send({
       type: 'WALLET_LOADED',
@@ -167,7 +173,10 @@ describe('FlowMachine', () => {
       amount: '0.1',
       estimatedFee: '0.0001',
       estimatedTotal: '0.1001',
-      expiresAt: Date.now() + 300000
+      expiresAt: Date.now() + 300000,
+      amountWithFeeInFiat: '5000',
+      amountNoFeeInFiat: '4950',
+      estimatedFeeInFiat: '50',
     };
     
     machine.send({
@@ -191,7 +200,7 @@ describe('FlowMachine', () => {
       idem: 'oauth-456'
     });
     machine.send({ type: 'OAUTH_WINDOW_OPENED' });
-    machine.send({ type: 'OAUTH_COMPLETED', walletId: 'wallet-123' });
+    machine.send({ exchange:'coinbase', type: 'OAUTH_COMPLETED', walletId: 'wallet-123' });
     machine.send({ type: 'LOAD_WALLET' });
     machine.send({
       type: 'WALLET_LOADED',
@@ -212,7 +221,10 @@ describe('FlowMachine', () => {
         amount: '0.1',
         estimatedFee: '0.0001',
         estimatedTotal: '0.1001',
-        expiresAt: Date.now() + 300000
+        expiresAt: Date.now() + 300000,
+        amountWithFeeInFiat: '5000',
+        amountNoFeeInFiat: '4950',
+        estimatedFeeInFiat: '50',
       }
     });
     
@@ -276,7 +288,11 @@ describe('FlowMachine', () => {
       idem: 'oauth-456'
     });
     machine.send({ type: 'OAUTH_WINDOW_OPENED' });
-    machine.send({ type: 'OAUTH_COMPLETED', walletId: 'wallet-123' });
+    machine.send({
+      exchange: 'coinbase',
+      type: 'OAUTH_COMPLETED',
+      walletId: 'wallet-123'
+    });
     machine.send({ type: 'LOAD_WALLET' });
     machine.send({
       type: 'WALLET_LOADED',
@@ -297,7 +313,10 @@ describe('FlowMachine', () => {
         amount: '0.1',
         estimatedFee: '0.0001',
         estimatedTotal: '0.1001',
-        expiresAt: Date.now() + 300000
+        expiresAt: Date.now() + 300000,
+        amountWithFeeInFiat: '5000',
+        amountNoFeeInFiat: '4950',
+        estimatedFeeInFiat: '50',
       }
     });
     
@@ -319,7 +338,11 @@ describe('FlowMachine', () => {
     // Set up a withdrawal processing state
     machine.send({ type: 'START_OAUTH', exchange: 'coinbase', walletId: 'wallet-123', idem: 'oauth-456' });
     machine.send({ type: 'OAUTH_WINDOW_OPENED' });
-    machine.send({ type: 'OAUTH_COMPLETED', walletId: 'wallet-123' });
+    machine.send({
+      exchange: 'coinbase',
+      type: 'OAUTH_COMPLETED',
+      walletId: 'wallet-123'
+    });
     machine.send({ type: 'LOAD_WALLET' });
     machine.send({ type: 'WALLET_LOADED', balances: [{ asset: 'BTC', balance: '0.5' }] });
     machine.send({ type: 'REQUEST_QUOTE', asset: 'BTC', amount: '0.1', destinationAddress: '1A1zP...', network: 'bitcoin' });
@@ -331,7 +354,10 @@ describe('FlowMachine', () => {
         amount: '0.1', 
         estimatedFee: '0.0001', 
         estimatedTotal: '0.1001',
-        expiresAt: Date.now() + 5000
+        expiresAt: Date.now() + 5000,
+        amountWithFeeInFiat: '5000',
+        amountNoFeeInFiat: '4950',
+        estimatedFeeInFiat: '50',
       } 
     });
     machine.send({ type: 'START_WITHDRAWAL', quoteId: 'quote-789' });

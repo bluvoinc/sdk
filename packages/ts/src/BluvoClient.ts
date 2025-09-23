@@ -1,11 +1,8 @@
 import {
-    APIKeysApi,
     createConfiguration, OAuth2Api,
     PromiseConfigurationOptions, server1, server2, ServerConfiguration,
     WalletsApi, WithdrawalsApi,
-    WorkflowApi
 } from "../generated";
-import {ConnectWalletRequest} from "../generated/models/ConnectWalletRequest";
 
 type SupportedExchanges = 'ace' | 'ascendex' | 'bequant' | 'bigone' | 'binance' | 'coinbase' | 'binanceus' | 'bingx' | 'bit2c' | 'bitbank' | 'bitbns' | 'bitcoincom' | 'bitfinex' | 'bitflyer' | 'bitget' | 'bithumb' | 'bitmart' | 'bitmex' | 'bitopro' | 'bitpanda' | 'bitrue' | 'bitso' | 'bitstamp' | 'bitteam' | 'bitvavo' | 'bl3p' | 'blockchaincom' | 'blofin' | 'btcalpha' | 'btcbox' | 'btcmarkets' | 'btcturk' | 'cex' | 'coincheck' | 'coinex' | 'coinlist' | 'coinmate' | 'coinmetro' | 'coinone' | 'coinsph' | 'coinspot' | 'cryptocom' | 'delta' | 'deribit' | 'digifinex' | 'exmo' | 'fmfwio' | 'gate' | 'gateio' | 'gemini' | 'hashkey' | 'hitbtc' | 'hollaex' | 'htx' | 'huobi' | 'huobijp' | 'hyperliquid' | 'independentreserve' | 'indodax' | 'kraken' | 'krakenfutures' | 'kucoin' | 'kucoinfutures' | 'latoken' | 'lbank' | 'luno' | 'mercado' | 'mexc' | 'ndax' | 'novadax' | 'oceanex' | 'okcoin' | 'okx' | 'onetrading' | 'oxfun' | 'p2b' | 'paradex' | 'paymium' | 'phemex' | 'poloniex' | 'poloniexfutures' | 'probit' | 'timex' | 'tradeogre' | 'upbit' | 'vertex' | 'wavesexchange' | 'whitebit' | 'woo' | 'woofipro' | 'xt' | 'yobit' | 'zaif' | 'zonda'
 
@@ -65,51 +62,6 @@ export class BluvoClient {
     }
 
     wallet = {
-        /**
-         * Seamlessly connect an external cryptocurrency exchange account to your Bluvo project, enabling secure API-level
-         * access for automated trading, portfolio tracking, and exchange integrations.
-         *
-         * This method securely stores your exchange credentials and establishes a persistent connection that maintains
-         * synchronization between your Bluvo project and the exchange account. All credentials are encrypted at rest
-         * and in transit using industry-standard encryption protocols.
-         *
-         * @param exchange The identifier of the exchange to connect (e.g. 'binance', 'kraken'). Supports major exchanges
-         *                 including Binance, Coinbase, Kraken, Kucoin, and OKX with consistent API interfaces across all platforms.
-         * @param walletId A unique identifier for this wallet connection within your project. Use a descriptive ID that helps
-         *                 you easily identify this particular connection in your application logic.
-         * @param request
-         * @param _options
-         *               the operations you intend to perform (e.g., read-only for portfolio tracking, trading permissions for order execution).
-         *                  encryption on Bluvo servers.
-         *                      Consult your specific exchange's API documentation for requirements.
-         *               Refer to the exchange-specific documentation to determine if this is needed.
-         *
-         * @returns A promise that resolves to a confirmation object with connection status and wallet details.
-         *
-         * @example
-         * // Connect a Binance account
-         * const connection = await client.wallet.connect(
-         *   'binance',
-         *   'primary-trading-account',
-         *   'your-api-key',
-         *   'your-api-secret'
-         * );
-         */
-        connect: (
-            exchange: SupportedExchanges | string,
-            walletId: string,
-            idem: string,
-            request: ConnectWalletRequest,
-            _options?: PromiseConfigurationOptions
-        ) => {
-            return new APIKeysApi(this.configuration(walletId, undefined, idem))
-                .walletexchangeconnectconnectwallet(
-                    exchange as any,
-                    idem,
-                    request,
-                    _options
-                );
-        },
 
         /**
          * Retrieve comprehensive details about a connected exchange wallet, including balances, permissions, and connection status.
@@ -439,19 +391,6 @@ export class BluvoClient {
 
     }
 
-    workflow = {
-        get: (
-            workflowRunId: string,
-            workflowType: "connect" | "withdraw" | "oauth2",
-            _options?: PromiseConfigurationOptions) => {
-            return new WorkflowApi(this.configuration())
-                .workflowworkflowtypegetworkflowrunidget(
-                    workflowRunId,
-                    workflowType,
-                )
-        }
-    }
-
     oauth2 = {
         getLink : (
             exchange: 'coinbase' | 'kraken',
@@ -461,6 +400,23 @@ export class BluvoClient {
         ) => {
             return new OAuth2Api(this.configuration(walletId, undefined, idem))
                 .oauth2exchangeurlgeturl(exchange, idem!, _options)
+        },
+
+        listExchanges: async (
+            status?: 'live' | 'offline' | 'maintenance' | 'coming_soon',
+        ) => {
+            const res = await new OAuth2Api(this.configuration())
+                .oauth2exchangeslistexchanges();
+            if (res?.exchanges) {
+                if(!!status) {
+                    return res
+                        .exchanges
+                        .filter(r=>r.status === status);
+                }
+                return res
+                    .exchanges;
+            }
+            return [];
         }
     }
 

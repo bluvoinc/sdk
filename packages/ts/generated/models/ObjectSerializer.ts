@@ -1,7 +1,7 @@
+export * from '../models/Oauth2exchangeslistexchanges200Response';
+export * from '../models/Oauth2exchangeslistexchanges200ResponseExchangesInner';
 export * from '../models/Oauth2exchangeurlgeturl200Response';
 export * from '../models/Walletdelete200Response';
-export * from '../models/Walletexchangeconnectconnectwallet200Response';
-export * from '../models/WalletexchangeconnectconnectwalletRequest';
 export * from '../models/Walletget200Response';
 export * from '../models/Walletget200ResponseCreatedAt';
 export * from '../models/Walletget404Response';
@@ -22,19 +22,17 @@ export * from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 export * from '../models/Walletwithdrawquotequotation200Response';
 export * from '../models/Walletwithdrawquotequotation400Response';
 export * from '../models/WalletwithdrawquotequotationRequest';
-export * from '../models/Workflowworkflowtypegetworkflowrunidget200Response';
-export * from '../models/Workflowworkflowtypegetworkflowrunidget200ResponseDetails';
 
+import { Oauth2exchangeslistexchanges200Response } from '../models/Oauth2exchangeslistexchanges200Response';
+import { Oauth2exchangeslistexchanges200ResponseExchangesInner   , Oauth2exchangeslistexchanges200ResponseExchangesInnerStatusEnum   } from '../models/Oauth2exchangeslistexchanges200ResponseExchangesInner';
 import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlgeturl200Response';
 import { Walletdelete200Response } from '../models/Walletdelete200Response';
-import { Walletexchangeconnectconnectwallet200Response } from '../models/Walletexchangeconnectconnectwallet200Response';
-import { WalletexchangeconnectconnectwalletRequest } from '../models/WalletexchangeconnectconnectwalletRequest';
-import { Walletget200Response } from '../models/Walletget200Response';
+import { Walletget200Response, Walletget200ResponseExchangeEnum          } from '../models/Walletget200Response';
 import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
 import { Walletget404Response , Walletget404ResponseTypeEnum   } from '../models/Walletget404Response';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
-import { Walletlistlistwallets200ResponseWalletsInner } from '../models/Walletlistlistwallets200ResponseWalletsInner';
+import { Walletlistlistwallets200ResponseWalletsInner      , Walletlistlistwallets200ResponseWalletsInnerExchangeEnum      } from '../models/Walletlistlistwallets200ResponseWalletsInner';
 import { Walletlistlistwallets200ResponseWalletsInnerBalancesValue } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValue';
 import { Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
@@ -49,8 +47,6 @@ import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/Walletwit
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
 import { Walletwithdrawquotequotation400Response , Walletwithdrawquotequotation400ResponseTypeEnum   } from '../models/Walletwithdrawquotequotation400Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
-import { Workflowworkflowtypegetworkflowrunidget200Response } from '../models/Workflowworkflowtypegetworkflowrunidget200Response';
-import { Workflowworkflowtypegetworkflowrunidget200ResponseDetails, Workflowworkflowtypegetworkflowrunidget200ResponseDetailsStatusEnum    } from '../models/Workflowworkflowtypegetworkflowrunidget200ResponseDetails';
 
 /* tslint:disable:no-unused-variable */
 let primitives = [
@@ -65,18 +61,20 @@ let primitives = [
                  ];
 
 let enumsMap: Set<string> = new Set<string>([
+    "Oauth2exchangeslistexchanges200ResponseExchangesInnerStatusEnum",
+    "Walletget200ResponseExchangeEnum",
     "Walletget404ResponseTypeEnum",
+    "Walletlistlistwallets200ResponseWalletsInnerExchangeEnum",
     "Walletwithdrawquoteidexecutewithdraw200ResponseTypeEnum",
     "Walletwithdrawquoteidexecutewithdraw400ResponseTypeEnum",
     "Walletwithdrawquotequotation400ResponseTypeEnum",
-    "Workflowworkflowtypegetworkflowrunidget200ResponseDetailsStatusEnum",
 ]);
 
 let typeMap: {[index: string]: any} = {
+    "Oauth2exchangeslistexchanges200Response": Oauth2exchangeslistexchanges200Response,
+    "Oauth2exchangeslistexchanges200ResponseExchangesInner": Oauth2exchangeslistexchanges200ResponseExchangesInner,
     "Oauth2exchangeurlgeturl200Response": Oauth2exchangeurlgeturl200Response,
     "Walletdelete200Response": Walletdelete200Response,
-    "Walletexchangeconnectconnectwallet200Response": Walletexchangeconnectconnectwallet200Response,
-    "WalletexchangeconnectconnectwalletRequest": WalletexchangeconnectconnectwalletRequest,
     "Walletget200Response": Walletget200Response,
     "Walletget200ResponseCreatedAt": Walletget200ResponseCreatedAt,
     "Walletget404Response": Walletget404Response,
@@ -97,8 +95,6 @@ let typeMap: {[index: string]: any} = {
     "Walletwithdrawquotequotation200Response": Walletwithdrawquotequotation200Response,
     "Walletwithdrawquotequotation400Response": Walletwithdrawquotequotation400Response,
     "WalletwithdrawquotequotationRequest": WalletwithdrawquotequotationRequest,
-    "Workflowworkflowtypegetworkflowrunidget200Response": Workflowworkflowtypegetworkflowrunidget200Response,
-    "Workflowworkflowtypegetworkflowrunidget200ResponseDetails": Workflowworkflowtypegetworkflowrunidget200ResponseDetails,
 }
 
 type MimeTypeDescriptor = {

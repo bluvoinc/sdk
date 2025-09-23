@@ -12,7 +12,7 @@ Method | HTTP request | Description
 # **walletwithdrawbalancebalance**
 > Walletwithdrawbalancebalance200Response walletwithdrawbalancebalance()
 
-See withdrawable balance of a wallet, and the networks available for each asset given the exchange\'s withdrawal options.
+Get withdrawable balances and supported networks.
 
 ### Example
 
@@ -59,7 +59,7 @@ This endpoint does not need any parameter.
 # **walletwithdrawquoteidexecutewithdraw**
 > Walletwithdrawquoteidexecutewithdraw200Response walletwithdrawquoteidexecutewithdraw(walletwithdrawquoteidexecutewithdrawRequest)
 
-Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/wallet/withdraw\' route. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
+Execute a withdrawal using a quote ID.
 
 ### Example
 
@@ -72,7 +72,7 @@ const configuration = createConfiguration();
 const apiInstance = new WithdrawalsApi(configuration);
 
 const request: WithdrawalsApiWalletwithdrawquoteidexecutewithdrawRequest = {
-    // Any UUID. This is used to track the Withdrawal flow and can be used to subscribe to updates.
+    // UUID for tracking withdrawal flow.
   idem: "idem_example",
   
   quoteId: "quoteId_example",
@@ -93,7 +93,7 @@ console.log('API called successfully. Returned data:', data);
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **walletwithdrawquoteidexecutewithdrawRequest** | **WalletwithdrawquoteidexecutewithdrawRequest**|  |
- **idem** | [**string**] | Any UUID. This is used to track the Withdrawal flow and can be used to subscribe to updates. | defaults to undefined
+ **idem** | [**string**] | UUID for tracking withdrawal flow. | defaults to undefined
  **quoteId** | [**string**] |  | defaults to undefined
 
 
@@ -123,7 +123,7 @@ Name | Type | Description  | Notes
 # **walletwithdrawquotequotation**
 > Walletwithdrawquotequotation200Response walletwithdrawquotequotation(walletwithdrawquotequotationRequest)
 
-Get a quotation for a cryptocurrency withdrawal from an exchange wallet. The request returns a quote ID that can be used to execute the withdrawal later.
+Get withdrawal quote with fees and estimates.
 
 ### Example
 

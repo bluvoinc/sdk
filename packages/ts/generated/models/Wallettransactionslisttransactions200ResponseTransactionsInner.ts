@@ -24,6 +24,9 @@ export class Wallettransactionslisttransactions200ResponseTransactionsInner {
     'address'?: string | null;
     'feeCost'?: number | null;
     'feeCurrency'?: string | null;
+    'amountInFiat'?: number | null;
+    'feeInFiat'?: number | null;
+    'fiatCurrency'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -93,6 +96,24 @@ export class Wallettransactionslisttransactions200ResponseTransactionsInner {
         {
             "name": "feeCurrency",
             "baseName": "feeCurrency",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "amountInFiat",
+            "baseName": "amountInFiat",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "feeInFiat",
+            "baseName": "feeInFiat",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "fiatCurrency",
+            "baseName": "fiatCurrency",
             "type": "string",
             "format": ""
         }    ];

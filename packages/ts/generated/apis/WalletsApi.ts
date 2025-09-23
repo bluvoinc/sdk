@@ -20,7 +20,7 @@ import { Wallettransactionslisttransactions200Response } from '../models/Wallett
 export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
 
     /**
-     * Delete a connected exchange wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
+     * Delete a connected exchange wallet.
      * Delete
      */
     public async walletdelete(_options?: Configuration): Promise<RequestContext> {
@@ -65,7 +65,7 @@ export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
     }
 
     /**
-     * Retrieve basic information about a connected exchange wallet, including a simple dictionary of balances. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers.
+     * Get wallet information and balances.
      * Get
      */
     public async walletget(_options?: Configuration): Promise<RequestContext> {
@@ -110,17 +110,17 @@ export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
     }
 
     /**
-     * Retrieve a paginated list of connected exchange wallets. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers. Supports pagination, filtering, and field selection.
+     * List all connected exchange wallets.
      * List Wallets
-     * @param page Optional. Page number for pagination (0-indexed). Defaults to 0.
-     * @param limit Optional. Maximum number of wallets to return per page. Defaults to 10. Maximum value is 1000.
-     * @param exchange Optional. Filter wallets by exchange.
-     * @param createdSince Optional. Filter wallets created on or after this date (ISO format).
-     * @param createdBefore Optional. Filter wallets created before this date (ISO format).
-     * @param lastSyncSince Optional. Filter wallets synchronized on or after this date (ISO format).
-     * @param lastSyncBefore Optional. Filter wallets synchronized before this date (ISO format).
-     * @param invalidApi Optional. Filter wallets by API validity status.
-     * @param fields Optional. Comma-separated list of fields to include in the response. If not specified, all fields are included.
+     * @param page Page number (0-indexed).
+     * @param limit Number of wallets per page (max 1000).
+     * @param exchange Filter by exchange.
+     * @param createdSince Filter by creation date (from, ISO format).
+     * @param createdBefore Filter by creation date (before, ISO format).
+     * @param lastSyncSince Filter by last sync date (from, ISO format).
+     * @param lastSyncBefore Filter by last sync date (before, ISO format).
+     * @param invalidApi Filter by API validity status.
+     * @param fields Comma-separated list of fields to include.
      */
     public async walletlistlistwallets(page?: number, limit?: number, exchange?: 'ace' | 'ascendex' | 'bequant' | 'bigone' | 'binance' | 'coinbase' | 'binanceus' | 'bingx' | 'bit2c' | 'bitbank' | 'bitbns' | 'bitcoincom' | 'bitfinex' | 'bitflyer' | 'bitget' | 'bithumb' | 'bitmart' | 'bitmex' | 'bitopro' | 'bitpanda' | 'bitrue' | 'bitso' | 'bitstamp' | 'bitteam' | 'bitvavo' | 'bybit' | 'bl3p' | 'blockchaincom' | 'blofin' | 'btcalpha' | 'btcbox' | 'btcmarkets' | 'btcturk' | 'cex' | 'coincheck' | 'coinex' | 'coinlist' | 'coinmate' | 'coinmetro' | 'coinone' | 'coinsph' | 'coinspot' | 'cryptocom' | 'delta' | 'deribit' | 'digifinex' | 'exmo' | 'fmfwio' | 'gate' | 'gateio' | 'gemini' | 'hashkey' | 'hitbtc' | 'hollaex' | 'htx' | 'huobi' | 'huobijp' | 'hyperliquid' | 'independentreserve' | 'indodax' | 'kraken' | 'krakenfutures' | 'kucoin' | 'kucoinfutures' | 'latoken' | 'lbank' | 'luno' | 'mercado' | 'mexc' | 'ndax' | 'novadax' | 'oceanex' | 'okcoin' | 'okx' | 'onetrading' | 'oxfun' | 'p2b' | 'paradex' | 'paymium' | 'phemex' | 'poloniex' | 'poloniexfutures' | 'probit' | 'timex' | 'tradeogre' | 'upbit' | 'vertex' | 'wavesexchange' | 'whitebit' | 'woo' | 'woofipro' | 'xt' | 'yobit' | 'zaif' | 'zonda' | 'null', createdSince?: string, createdBefore?: string, lastSyncSince?: string, lastSyncBefore?: string, invalidApi?: 'true' | 'false' | 'null', fields?: string, _options?: Configuration): Promise<RequestContext> {
         let _config = _options || this.configuration;
@@ -213,16 +213,16 @@ export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
     }
 
     /**
-     * Retrieve a paginated list of transactions for a specific wallet. This endpoint requires authentication via a valid Bluvo API Key, which must be included in the request headers. Supports pagination, filtering by asset, type, date range, and status, as well as field selection to control which properties are returned in the response.
+     * List transactions for a wallet with filtering options.
      * List Transactions
-     * @param page Optional. Page number for pagination (0-indexed). Defaults to 0.
-     * @param limit Optional. Maximum number of transactions to return per page. Defaults to 10. Maximum value is 1000.
-     * @param asset Optional. Filter transactions by asset symbol.
-     * @param type Optional. Filter transactions by type (e.g., \&#39;deposit\&#39;, \&#39;withdrawal\&#39;).
-     * @param since Optional. Filter transactions created on or after this date (ISO format).
-     * @param before Optional. Filter transactions created before this date (ISO format).
-     * @param status Optional. Filter transactions by status (e.g., \&#39;completed\&#39;, \&#39;pending\&#39;).
-     * @param fields Optional. Comma-separated list of fields to include in the response. If not specified, all fields are included.
+     * @param page Page number (0-indexed).
+     * @param limit Number of transactions per page (max 1000).
+     * @param asset Filter by asset symbol.
+     * @param type Filter by transaction type.
+     * @param since Filter by creation date (from, ISO format).
+     * @param before Filter by creation date (before, ISO format).
+     * @param status Filter by transaction status.
+     * @param fields Comma-separated list of fields to include.
      */
     public async wallettransactionslisttransactions(page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: Configuration): Promise<RequestContext> {
         let _config = _options || this.configuration;

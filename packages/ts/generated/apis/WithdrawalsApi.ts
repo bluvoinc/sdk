@@ -23,7 +23,7 @@ import { WalletwithdrawquotequotationRequest } from '../models/Walletwithdrawquo
 export class WithdrawalsApiRequestFactory extends BaseAPIRequestFactory {
 
     /**
-     * See withdrawable balance of a wallet, and the networks available for each asset given the exchange\'s withdrawal options.
+     * Get withdrawable balances and supported networks.
      * Balance
      */
     public async walletwithdrawbalancebalance(_options?: Configuration): Promise<RequestContext> {
@@ -68,9 +68,9 @@ export class WithdrawalsApiRequestFactory extends BaseAPIRequestFactory {
     }
 
     /**
-     * Withdraw cryptocurrency from an exchange wallet to an external address. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/wallet/withdraw\' route. The request initiates an asynchronous withdrawal process and returns a workflow run ID that can be used to track the transaction status.
+     * Execute a withdrawal using a quote ID.
      * Withdraw
-     * @param idem Any UUID. This is used to track the Withdrawal flow and can be used to subscribe to updates.
+     * @param idem UUID for tracking withdrawal flow.
      * @param quoteId 
      * @param walletwithdrawquoteidexecutewithdrawRequest 
      */
@@ -151,7 +151,7 @@ export class WithdrawalsApiRequestFactory extends BaseAPIRequestFactory {
     }
 
     /**
-     * Get a quotation for a cryptocurrency withdrawal from an exchange wallet. The request returns a quote ID that can be used to execute the withdrawal later.
+     * Get withdrawal quote with fees and estimates.
      * Quotation
      * @param walletwithdrawquotequotationRequest 
      */

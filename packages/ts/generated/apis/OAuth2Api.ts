@@ -8,6 +8,7 @@ import {canConsumeForm, isCodeInRange} from '../util';
 import {SecurityAuthentication} from '../auth/auth';
 
 
+import { Oauth2exchangeslistexchanges200Response } from '../models/Oauth2exchangeslistexchanges200Response';
 import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlgeturl200Response';
 
 /**
@@ -16,10 +17,34 @@ import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlg
 export class OAuth2ApiRequestFactory extends BaseAPIRequestFactory {
 
     /**
-     * Get the url at which the user can do OAuth2 flow to grant access to their exchange account. The idem key, is the ID at which the OAuth2 flow will be linked to and can be listened either via polling using the \'/workflow/:workflowType/get/:workflowRunId\' endpoint (setting \'oauth2\' as workflowType or via Websocket streaming using the \'topic\' key in the response.
+     * List supported exchanges for OAuth2 connections.
+     * List Exchanges
+     */
+    public async oauth2exchangeslistexchanges(_options?: Configuration): Promise<RequestContext> {
+        let _config = _options || this.configuration;
+
+        // Path Params
+        const localVarPath = '/v0/oauth2/exchanges';
+
+        // Make Request Context
+        const requestContext = _config.baseServer.makeRequestContext(localVarPath, HttpMethod.GET);
+        requestContext.setHeaderParam("Accept", "application/json, */*;q=0.8")
+
+
+        
+        const defaultAuth: SecurityAuthentication | undefined = _config?.authMethods?.default
+        if (defaultAuth?.applySecurityAuthentication) {
+            await defaultAuth?.applySecurityAuthentication(requestContext);
+        }
+
+        return requestContext;
+    }
+
+    /**
+     * Get OAuth2 authorization URL for exchange connection.
      * Get URL
-     * @param exchange The identifier of the exchange to link (e.g. \&#39;coinbase\&#39;, \&#39;kraken\&#39;).
-     * @param idem The idem provided by OTT or used to identify the workflow run. This is used to track the OAuth2 flow and can be used to subscribe to updates.
+     * @param exchange Exchange identifier.
+     * @param idem Idempotency key.
      */
     public async oauth2exchangeurlgeturl(exchange: 'coinbase' | 'kraken', idem: string, _options?: Configuration): Promise<RequestContext> {
         let _config = _options || this.configuration;
@@ -83,6 +108,35 @@ export class OAuth2ApiRequestFactory extends BaseAPIRequestFactory {
 }
 
 export class OAuth2ApiResponseProcessor {
+
+    /**
+     * Unwraps the actual response sent by the server from the response context and deserializes the response content
+     * to the expected objects
+     *
+     * @params response Response returned by the server for a request to oauth2exchangeslistexchanges
+     * @throws ApiException if the response code was not in [200, 299]
+     */
+     public async oauth2exchangeslistexchangesWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Oauth2exchangeslistexchanges200Response >> {
+        const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
+        if (isCodeInRange("200", response.httpStatusCode)) {
+            const body: Oauth2exchangeslistexchanges200Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Oauth2exchangeslistexchanges200Response", ""
+            ) as Oauth2exchangeslistexchanges200Response;
+            return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
+        }
+
+        // Work around for missing responses in specification, e.g. for petstore.yaml
+        if (response.httpStatusCode >= 200 && response.httpStatusCode <= 299) {
+            const body: Oauth2exchangeslistexchanges200Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Oauth2exchangeslistexchanges200Response", ""
+            ) as Oauth2exchangeslistexchanges200Response;
+            return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
+        }
+
+        throw new ApiException<string | Blob | undefined>(response.httpStatusCode, "Unknown API Status Code!", await response.getBodyAsAny(), response.headers);
+    }
 
     /**
      * Unwraps the actual response sent by the server from the response context and deserializes the response content

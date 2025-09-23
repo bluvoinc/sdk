@@ -19,6 +19,9 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
     return new BluvoFlowClient(options);
   });
   const [flowMachine, setFlowMachine] = useState<Machine<FlowState, FlowActionType> | null>(null);
+  const [exchanges, setExchanges] = useState<Array<{ id: string; name: string; logoUrl: string; status: string; }>>([]);
+  const [exchangesLoading, setExchangesLoading] = useState(false);
+  const [exchangesError, setExchangesError] = useState<Error | null>(null);
   const closeOAuthWindowRef = useRef<(() => void) | null>(null);
   
   const flow = useFlowMachine(flowMachine);
@@ -56,6 +59,23 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
     await flowClient.retryWithdrawal();
   }, [flowClient]);
 
+  const listExchanges = useCallback(async (status?: 'live' | 'offline' | 'maintenance' | 'coming_soon') => {
+    setExchangesLoading(true);
+    setExchangesError(null);
+    
+    try {
+      const result = await flowClient.loadExchanges(status);
+      setExchanges(result);
+      return result;
+    } catch (error) {
+      const errorObj = error instanceof Error ? error : new Error('Failed to load exchanges');
+      setExchangesError(errorObj);
+      throw errorObj;
+    } finally {
+      setExchangesLoading(false);
+    }
+  }, [flowClient]);
+
   const cancel = useCallback(() => {
     flowClient.cancel();
     setFlowMachine(null);
@@ -85,6 +105,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
     ...flow,
     
     // Actions
+    listExchanges,
     startWithdrawalFlow,
     resumeWithdrawalFlow,
     requestQuote,
@@ -96,6 +117,9 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
     testWithdrawalComplete, // TEST METHOD
     
     // Computed state helpers
+    isExchangesLoading: exchangesLoading || flow.state?.type === 'exchanges:loading',
+    isExchangesReady: flow.state?.type === 'exchanges:ready' || exchanges.length > 0,
+    exchangesError: exchangesError || (flow.state?.type === 'exchanges:error' ? flow.error : null),
     isOAuthPending: flow.state?.type === 'oauth:waiting' || flow.state?.type === 'oauth:processing',
     isOAuthComplete: flow.state?.type === 'oauth:completed',
     isOAuthWindowBeenClosedByTheUser: flow.state?.type === 'oauth:window_closed_by_user',
@@ -118,6 +142,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
     invalid2FAAttempts: flow.context?.invalid2FAAttempts || 0,
     
     // Data
+    exchanges: flow.context?.exchanges || exchanges,
     walletBalances: flow.context?.walletBalances || [],
     quote: flow.context?.quote,
     withdrawal: flow.context?.withdrawal,

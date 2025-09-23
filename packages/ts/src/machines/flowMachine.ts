@@ -43,6 +43,51 @@ function flowTransition(
 ): FlowState {
   switch (state.type) {
     case 'idle':
+      switch (action.type) {
+        case 'LOAD_EXCHANGES':
+          return {
+            type: 'exchanges:loading',
+            context: state.context,
+            error: null
+          };
+        
+        case 'START_OAUTH':
+          return {
+            type: 'oauth:waiting',
+            context: {
+              ...state.context,
+              exchange: action.exchange,
+              walletId: action.walletId,
+              idempotencyKey: action.idem,
+              topicName: action.idem
+            },
+            error: null
+          };
+      }
+      break;
+
+    case 'exchanges:loading':
+      switch (action.type) {
+        case 'EXCHANGES_LOADED':
+          return {
+            type: 'exchanges:ready',
+            context: {
+              ...state.context,
+              exchanges: action.exchanges
+            },
+            error: null
+          };
+        
+        case 'EXCHANGES_FAILED':
+          return {
+            type: 'exchanges:error',
+            context: state.context,
+            error: action.error
+          };
+      }
+      break;
+
+    case 'exchanges:ready':
       if (action.type === 'START_OAUTH') {
         return {
           type: 'oauth:waiting',

@@ -18,6 +18,7 @@ export interface BluvoFlowClientOptions {
   topicToken?: string;
   cacheName?: string;
   // API function callbacks (to be implemented by the consumer)
+  listExchangesFn: (status?: 'live' | 'offline' | 'maintenance' | 'coming_soon') => Promise<Array<{ id: string; name: string; logoUrl: string; status: string; }>>;
   fetchWithdrawableBalanceFn: (walletId: string) => Promise<Walletwithdrawbalancebalance200Response>;
   requestQuotationFn: (walletId: string, params: {
     asset: string;
@@ -73,6 +74,34 @@ export class BluvoFlowClient {
       projectId: options.projectId
     });
     this.generateId = options.mkUUIDFn || (() => crypto.randomUUID());
+  }
+
+  async loadExchanges(status?: 'live' | 'offline' | 'maintenance' | 'coming_soon') {
+    if (!this.flowMachine) {
+      // Create flow machine if it doesn't exist
+      this.flowMachine = createFlowMachine({
+        orgId: this.options.orgId,
+        projectId: this.options.projectId,
+        maxRetryAttempts: this.options.maxRetryAttempts
+      });
+    }
+
+    this.flowMachine.send({ type: 'LOAD_EXCHANGES' });
+
+    try {
+      const exchanges = await this.options.listExchangesFn(status);
+      this.flowMachine.send({
+        type: 'EXCHANGES_LOADED',
+        exchanges
+      });
+      return exchanges;
+    } catch (error) {
+      this.flowMachine.send({
+        type: 'EXCHANGES_FAILED',
+        error: error instanceof Error ? error : new Error('Failed to load exchanges')
+      });
+      throw error;
+    }
   }
 
   async startWithdrawalFlow(flowOptions: WithdrawalFlowOptions) {

@@ -2,6 +2,9 @@ import { StateValue } from './machine.types';
 
 export type FlowStateType = 
   | 'idle'
+  | 'exchanges:loading'
+  | 'exchanges:ready'
+  | 'exchanges:error'
   | 'oauth:waiting'
   | 'oauth:processing'
   | 'oauth:completed'
@@ -29,6 +32,12 @@ export type FlowStateType =
 export interface FlowContext {
   orgId: string;
   projectId: string;
+  exchanges?: Array<{
+    id: string;
+    name: string;
+    logoUrl: string;
+    status: string;
+  }>;
   exchange?: string;
   walletId?: string;
   walletBalances?: Array<{ 
@@ -75,6 +84,9 @@ export type FlowState = StateValue<FlowStateType> & {
 };
 
 export type FlowActionType =
+  | { type: 'LOAD_EXCHANGES' }
+  | { type: 'EXCHANGES_LOADED'; exchanges: Array<{ id: string; name: string; logoUrl: string; status: string; }> }
+  | { type: 'EXCHANGES_FAILED'; error: Error }
   | { type: 'START_OAUTH'; exchange: string; walletId: string; idem: string }
   | { type: 'OAUTH_WINDOW_OPENED' }
   | { type: 'OAUTH_COMPLETED'; walletId: string; exchange: string }

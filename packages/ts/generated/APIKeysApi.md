@@ -8,7 +8,7 @@ Method | HTTP request | Description
 
 
 # **walletexchangeconnectconnectwallet**
-> Walletwithdrawquoteidexecutewithdraw200Response walletexchangeconnectconnectwallet(walletexchangeconnectconnectwalletRequest)
+> Walletexchangeconnectconnectwallet200Response walletexchangeconnectconnectwallet(walletexchangeconnectconnectwalletRequest)
 
 Connect an external cryptocurrency exchange account to your Bluvo project. This endpoint supports both API Key authentication and OTT (One-Time Token) authentication. When using OTT authentication, this endpoint can be accessed via the \'/ott/connect/:exchange\' route. The connection is established using the exchange API credentials provided in the request body. It returns a unique workflow run ID that can be used to track the connection process.
 
@@ -55,7 +55,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Walletwithdrawquoteidexecutewithdraw200Response**
+**Walletexchangeconnectconnectwallet200Response**
 
 ### Authorization
 

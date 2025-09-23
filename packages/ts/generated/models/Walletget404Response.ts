@@ -12,9 +12,9 @@
 
 import { HttpFile } from '../http/http';
 
-export class Walletwithdrawquotequotation400Response {
+export class Walletget404Response {
     'error': string;
-    'type': Walletwithdrawquotequotation400ResponseTypeEnum;
+    'type': Walletget404ResponseTypeEnum;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -30,27 +30,19 @@ export class Walletwithdrawquotequotation400Response {
         {
             "name": "type",
             "baseName": "type",
-            "type": "Walletwithdrawquotequotation400ResponseTypeEnum",
+            "type": "Walletget404ResponseTypeEnum",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return Walletwithdrawquotequotation400Response.attributeTypeMap;
+        return Walletget404Response.attributeTypeMap;
     }
 
     public constructor() {
     }
 }
 
-export enum Walletwithdrawquotequotation400ResponseTypeEnum {
-    QuoteExpired = 'QUOTE_EXPIRED',
-    QuoteNotFound = 'QUOTE_NOT_FOUND',
-    WithdrawalInsufficientBalance = 'WITHDRAWAL_INSUFFICIENT_BALANCE',
-    WithdrawalInvalidAddress = 'WITHDRAWAL_INVALID_ADDRESS',
-    WithdrawalAmountBelowMinimum = 'WITHDRAWAL_AMOUNT_BELOW_MINIMUM',
-    WithdrawalAmountAboveMaximum = 'WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM',
-    WithdrawalAssetNotSupported = 'WITHDRAWAL_ASSET_NOT_SUPPORTED',
-    GenericNotFound = 'GENERIC_NOT_FOUND',
-    GenericInternalServerError = 'GENERIC_INTERNAL_SERVER_ERROR'
+export enum Walletget404ResponseTypeEnum {
+    WalletNotFound = 'WALLET_NOT_FOUND'
 }
 

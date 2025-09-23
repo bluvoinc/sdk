@@ -17,15 +17,15 @@ import { HttpFile } from '../http/http';
 
 export class Walletlistlistwallets200ResponseWalletsInner {
     'id': string;
-    'projectId'?: string;
-    'createdAt'?: Walletget200ResponseCreatedAt;
-    'updatedAt'?: Walletget200ResponseCreatedAt;
-    'lastSyncAt'?: Walletget200ResponseCreatedAt;
-    'expiresAt'?: Walletget200ResponseCreatedAt;
+    'projectId'?: string | null;
+    'createdAt'?: Walletget200ResponseCreatedAt | null;
+    'updatedAt'?: Walletget200ResponseCreatedAt | null;
+    'lastSyncAt'?: Walletget200ResponseCreatedAt | null;
+    'expiresAt'?: Walletget200ResponseCreatedAt | null;
     'exchange': string;
     'balances': { [key: string]: Walletlistlistwallets200ResponseWalletsInnerBalancesValue; };
-    'ipPool'?: Array<string>;
-    'invalidApi'?: Walletlistlistwallets200ResponseWalletsInnerInvalidApi;
+    'ipPool'?: Array<string> | null;
+    'invalidApi'?: Walletlistlistwallets200ResponseWalletsInnerInvalidApi | null;
 
     static readonly discriminator: string | undefined = undefined;
 

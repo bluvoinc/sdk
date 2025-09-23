@@ -8,8 +8,8 @@ import {canConsumeForm, isCodeInRange} from '../util';
 import {SecurityAuthentication} from '../auth/auth';
 
 
+import { Walletexchangeconnectconnectwallet200Response } from '../models/Walletexchangeconnectconnectwallet200Response';
 import { WalletexchangeconnectconnectwalletRequest } from '../models/WalletexchangeconnectconnectwalletRequest';
-import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
 
 /**
  * no description
@@ -115,22 +115,22 @@ export class APIKeysApiResponseProcessor {
      * @params response Response returned by the server for a request to walletexchangeconnectconnectwallet
      * @throws ApiException if the response code was not in [200, 299]
      */
-     public async walletexchangeconnectconnectwalletWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Walletwithdrawquoteidexecutewithdraw200Response >> {
+     public async walletexchangeconnectconnectwalletWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Walletexchangeconnectconnectwallet200Response >> {
         const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
         if (isCodeInRange("200", response.httpStatusCode)) {
-            const body: Walletwithdrawquoteidexecutewithdraw200Response = ObjectSerializer.deserialize(
+            const body: Walletexchangeconnectconnectwallet200Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "Walletwithdrawquoteidexecutewithdraw200Response", ""
-            ) as Walletwithdrawquoteidexecutewithdraw200Response;
+                "Walletexchangeconnectconnectwallet200Response", ""
+            ) as Walletexchangeconnectconnectwallet200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml
         if (response.httpStatusCode >= 200 && response.httpStatusCode <= 299) {
-            const body: Walletwithdrawquoteidexecutewithdraw200Response = ObjectSerializer.deserialize(
+            const body: Walletexchangeconnectconnectwallet200Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "Walletwithdrawquoteidexecutewithdraw200Response", ""
-            ) as Walletwithdrawquoteidexecutewithdraw200Response;
+                "Walletexchangeconnectconnectwallet200Response", ""
+            ) as Walletexchangeconnectconnectwallet200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
 

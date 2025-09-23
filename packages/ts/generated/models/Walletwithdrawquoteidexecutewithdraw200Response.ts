@@ -13,7 +13,10 @@
 import { HttpFile } from '../http/http';
 
 export class Walletwithdrawquoteidexecutewithdraw200Response {
-    'workflowRunId': string;
+    'success': boolean;
+    'error'?: string;
+    'type'?: Walletwithdrawquoteidexecutewithdraw200ResponseTypeEnum;
+    'result'?: any | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -21,9 +24,27 @@ export class Walletwithdrawquoteidexecutewithdraw200Response {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "workflowRunId",
-            "baseName": "workflowRunId",
+            "name": "success",
+            "baseName": "success",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "error",
+            "baseName": "error",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "type",
+            "baseName": "type",
+            "type": "Walletwithdrawquoteidexecutewithdraw200ResponseTypeEnum",
+            "format": ""
+        },
+        {
+            "name": "result",
+            "baseName": "result",
+            "type": "any",
             "format": ""
         }    ];
 
@@ -34,3 +55,33 @@ export class Walletwithdrawquoteidexecutewithdraw200Response {
     public constructor() {
     }
 }
+
+export enum Walletwithdrawquoteidexecutewithdraw200ResponseTypeEnum {
+    GenericNotFound = 'GENERIC_NOT_FOUND',
+    GenericUnauthorized = 'GENERIC_UNAUTHORIZED',
+    GenericInternalServerError = 'GENERIC_INTERNAL_SERVER_ERROR',
+    GenericValidationError = 'GENERIC_VALIDATION_ERROR',
+    GenericInvalidRequest = 'GENERIC_INVALID_REQUEST',
+    WalletNotFound = 'WALLET_NOT_FOUND',
+    WalletInvalidCredentials = 'WALLET_INVALID_CREDENTIALS',
+    QuoteNotFound = 'QUOTE_NOT_FOUND',
+    QuoteExpired = 'QUOTE_EXPIRED',
+    WithdrawalInsufficientBalance = 'WITHDRAWAL_INSUFFICIENT_BALANCE',
+    WithdrawalInsufficientBalanceForFee = 'WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE',
+    WithdrawalInvalidAddress = 'WITHDRAWAL_INVALID_ADDRESS',
+    WithdrawalNetworkNotSupported = 'WITHDRAWAL_NETWORK_NOT_SUPPORTED',
+    WithdrawalAmountBelowMinimum = 'WITHDRAWAL_AMOUNT_BELOW_MINIMUM',
+    WithdrawalAmountAboveMaximum = 'WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM',
+    WithdrawalAssetNotSupported = 'WITHDRAWAL_ASSET_NOT_SUPPORTED',
+    Withdrawal2FaRequiredTotp = 'WITHDRAWAL_2FA_REQUIRED_TOTP',
+    Withdrawal2FaRequiredSms = 'WITHDRAWAL_2FA_REQUIRED_SMS',
+    Withdrawal2FaRequiredYubikey = 'WITHDRAWAL_2FA_REQUIRED_YUBIKEY',
+    Withdrawal2FaRequiredPassphrase = 'WITHDRAWAL_2FA_REQUIRED_PASSPHRASE',
+    Withdrawal2FaInvalid = 'WITHDRAWAL_2FA_INVALID',
+    WithdrawalKycRequired = 'WITHDRAWAL_KYC_REQUIRED',
+    WithdrawalEmailUnverified = 'WITHDRAWAL_EMAIL_UNVERIFIED',
+    OauthAuthorizationFailed = 'OAUTH_AUTHORIZATION_FAILED',
+    OauthTokenExchangeFailed = 'OAUTH_TOKEN_EXCHANGE_FAILED',
+    OauthInvalidState = 'OAUTH_INVALID_STATE'
+}
+

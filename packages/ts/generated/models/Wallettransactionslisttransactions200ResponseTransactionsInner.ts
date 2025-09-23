@@ -20,10 +20,10 @@ export class Wallettransactionslisttransactions200ResponseTransactionsInner {
     'amount': number;
     'timestamp': number;
     'status': string;
-    'txid'?: string;
-    'address'?: string;
-    'feeCost'?: number;
-    'feeCurrency'?: string;
+    'txid'?: string | null;
+    'address'?: string | null;
+    'feeCost'?: number | null;
+    'feeCurrency'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 

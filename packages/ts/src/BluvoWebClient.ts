@@ -114,6 +114,8 @@ export class BluvoWebClient {
                 title?: string;
                 width?: number;
                 height?: number;
+                left?: number;
+                top?: number;
             },
             windowRef?: Window | undefined
         ) {
@@ -146,10 +148,29 @@ export class BluvoWebClient {
             const windowWidth = popupOptions?.width || 500;
             const windowHeight = popupOptions?.height || 600;
             
+            // Calculate position: use provided values or center the window
+            let left: number;
+            let top: number;
+            
+            if (popupOptions?.left !== undefined && popupOptions?.top !== undefined) {
+                // Use provided position
+                left = popupOptions.left;
+                top = popupOptions.top;
+            } else {
+                // Center the window on the screen
+                const screenLeft = windowRef.screenLeft || windowRef.screenX || 0;
+                const screenTop = windowRef.screenTop || windowRef.screenY || 0;
+                const screenWidth = windowRef.screen.width;
+                const screenHeight = windowRef.screen.height;
+                
+                left = screenLeft + (screenWidth - windowWidth) / 2;
+                top = screenTop + (screenHeight - windowHeight) / 2;
+            }
+            
             const newWindow = windowRef.open(
                 url,
                 windowTitle,
-                `width=${windowWidth},height=${windowHeight},status=yes,scrollbars=yes,resizable=yes`
+                `width=${windowWidth},height=${windowHeight},left=${left},top=${top},status=yes,scrollbars=yes,resizable=yes`
             );
             
             if (!newWindow) {

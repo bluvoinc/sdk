@@ -16,12 +16,12 @@ import { HttpFile } from '../http/http';
 export class Walletget200Response {
     'exchange': string;
     'balances': { [key: string]: number; };
-    'ipPool'?: Array<string>;
-    'invalidApi'?: boolean;
-    'createdAt'?: Walletget200ResponseCreatedAt;
-    'updatedAt'?: Walletget200ResponseCreatedAt;
-    'lastSyncAt'?: Walletget200ResponseCreatedAt;
-    'expiresAt'?: Walletget200ResponseCreatedAt;
+    'ipPool'?: Array<string> | null;
+    'invalidApi'?: boolean | null;
+    'createdAt'?: Walletget200ResponseCreatedAt | null;
+    'updatedAt'?: Walletget200ResponseCreatedAt | null;
+    'lastSyncAt'?: Walletget200ResponseCreatedAt | null;
+    'expiresAt'?: Walletget200ResponseCreatedAt | null;
 
     static readonly discriminator: string | undefined = undefined;
 

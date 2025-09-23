@@ -15,12 +15,12 @@ import { HttpFile } from '../http/http';
 export class Walletwithdrawquotequotation200Response {
     'id': string;
     'asset': string;
-    'amountWithFee'?: number;
-    'amountNoFee'?: number;
-    'estimatedFee'?: number;
-    'amountWithFeeInFiat'?: number;
-    'amountNoFeeInFiat'?: number;
-    'estimatedFeeInFiat'?: number;
+    'amountWithFee'?: number | null;
+    'amountNoFee'?: number | null;
+    'estimatedFee'?: number | null;
+    'amountWithFeeInFiat'?: number | null;
+    'amountNoFeeInFiat'?: number | null;
+    'estimatedFeeInFiat'?: number | null;
     'destinationAddress': string;
     'network'?: string | null;
     'tag'?: string | null;

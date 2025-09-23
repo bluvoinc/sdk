@@ -19,7 +19,7 @@ export class Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner {
     'minWithdrawal': string;
     'maxWithdrawal': string;
     'assetName': string;
-    'addressRegex'?: string;
+    'addressRegex'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 

@@ -8,14 +8,13 @@ import {canConsumeForm, isCodeInRange} from '../util';
 import {SecurityAuthentication} from '../auth/auth';
 
 
+import { Walletget404Response } from '../models/Walletget404Response';
 import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
-import { Walletwithdrawbalancebalance404Response } from '../models/Walletwithdrawbalancebalance404Response';
 import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
 import { Walletwithdrawquoteidexecutewithdraw400Response } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
 import { Walletwithdrawquotequotation400Response } from '../models/Walletwithdrawquotequotation400Response';
-import { Walletwithdrawquotequotation404Response } from '../models/Walletwithdrawquotequotation404Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
 
 /**
@@ -235,11 +234,11 @@ export class WithdrawalsApiResponseProcessor {
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
         if (isCodeInRange("404", response.httpStatusCode)) {
-            const body: Walletwithdrawbalancebalance404Response = ObjectSerializer.deserialize(
+            const body: Walletget404Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "Walletwithdrawbalancebalance404Response", ""
-            ) as Walletwithdrawbalancebalance404Response;
-            throw new ApiException<Walletwithdrawbalancebalance404Response>(response.httpStatusCode, "Not Found", body, response.headers);
+                "Walletget404Response", ""
+            ) as Walletget404Response;
+            throw new ApiException<Walletget404Response>(response.httpStatusCode, "Not Found", body, response.headers);
         }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml
@@ -278,11 +277,11 @@ export class WithdrawalsApiResponseProcessor {
             throw new ApiException<Walletwithdrawquoteidexecutewithdraw400Response>(response.httpStatusCode, "Bad Request", body, response.headers);
         }
         if (isCodeInRange("404", response.httpStatusCode)) {
-            const body: Walletwithdrawquotequotation404Response = ObjectSerializer.deserialize(
+            const body: Walletwithdrawquoteidexecutewithdraw400Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "Walletwithdrawquotequotation404Response", ""
-            ) as Walletwithdrawquotequotation404Response;
-            throw new ApiException<Walletwithdrawquotequotation404Response>(response.httpStatusCode, "Not Found", body, response.headers);
+                "Walletwithdrawquoteidexecutewithdraw400Response", ""
+            ) as Walletwithdrawquoteidexecutewithdraw400Response;
+            throw new ApiException<Walletwithdrawquoteidexecutewithdraw400Response>(response.httpStatusCode, "Not Found", body, response.headers);
         }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml
@@ -321,11 +320,11 @@ export class WithdrawalsApiResponseProcessor {
             throw new ApiException<Walletwithdrawquotequotation400Response>(response.httpStatusCode, "Bad Request", body, response.headers);
         }
         if (isCodeInRange("404", response.httpStatusCode)) {
-            const body: Walletwithdrawquotequotation404Response = ObjectSerializer.deserialize(
+            const body: Walletget404Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "Walletwithdrawquotequotation404Response", ""
-            ) as Walletwithdrawquotequotation404Response;
-            throw new ApiException<Walletwithdrawquotequotation404Response>(response.httpStatusCode, "Not Found", body, response.headers);
+                "Walletget404Response", ""
+            ) as Walletget404Response;
+            throw new ApiException<Walletget404Response>(response.httpStatusCode, "Not Found", body, response.headers);
         }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml

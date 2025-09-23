@@ -38,6 +38,13 @@ export interface BluvoFlowClientOptions {
 export interface WithdrawalFlowOptions {
   exchange: string;
   walletId: string;
+  popupOptions?: {
+    title?: string;
+    width?: number;
+    height?: number;
+    left?: number;
+    top?: number;
+  };
 }
 
 export interface ResumeWithdrawalFlowOptions {
@@ -131,7 +138,8 @@ export class BluvoFlowClient {
             });
           }
         }
-      }
+      },
+      flowOptions.popupOptions
     );
 
     this.flowMachine.send({ type: 'OAUTH_WINDOW_OPENED' });
@@ -200,7 +208,16 @@ export class BluvoFlowClient {
         balances: withdrawableBalanceInfo.balances.map(b => ({
           asset: b.asset,
           balance: String(b.amount),
-          networks: b.networks,
+          networks: b.networks.map(n => ({
+            id: n.id,
+            name: n.name,
+            displayName: n.displayName,
+            minWithdrawal: n.minWithdrawal,
+            maxWithdrawal: n.maxWithdrawal,
+            assetName: n.assetName,
+            // Convert null to undefined for addressRegex
+            ...(n.addressRegex !== null ? { addressRegex: n.addressRegex } : {})
+          })),
 
           // if amountInFiat is present (including 0), include balanceInFiat
           ...(b.amountInFiat !== undefined ? {

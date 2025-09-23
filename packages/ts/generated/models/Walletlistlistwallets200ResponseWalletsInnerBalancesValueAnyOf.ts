@@ -13,9 +13,9 @@
 import { HttpFile } from '../http/http';
 
 export class Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf {
-    'free'?: number;
-    'used'?: number;
-    'total'?: number;
+    'free'?: number | null;
+    'used'?: number | null;
+    'total'?: number | null;
     'info'?: any | null;
 
     static readonly discriminator: string | undefined = undefined;

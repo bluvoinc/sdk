@@ -6,13 +6,113 @@ import type {
   QuoteRequestOptions,
   Machine,
   FlowState,
-  FlowActionType
+  FlowActionType,
+  FlowContext,
 } from '@bluvo/sdk-ts';
 import { useFlowMachine } from './useFlowMachine';
+import type { BluvoFlowClient } from '@bluvo/sdk-ts';
 
 export interface UseBluvoFlowOptions extends BluvoFlowClientOptions {}
 
-export function useBluvoFlow(options: UseBluvoFlowOptions) {
+type Exchange = {
+  id: string;
+  name: string;
+  logoUrl: string;
+  status: string;
+};
+
+type WalletBalance = {
+  asset: string;
+  balance: string;
+  balanceInFiat?: string;
+  networks?: Array<{
+    id: string;
+    name: string;
+    displayName: string;
+    minWithdrawal: string;
+    maxWithdrawal: string;
+    assetName: string;
+    addressRegex?: string;
+  }>;
+};
+
+type Quote = {
+  id: string;
+  asset: string;
+  amount: string;
+  estimatedFee: string;
+  estimatedTotal: string;
+  amountWithFeeInFiat: string;
+  amountNoFeeInFiat: string;
+  estimatedFeeInFiat: string;
+  expiresAt: number;
+};
+
+type Withdrawal = {
+  id: string;
+  status: string;
+  transactionId?: string;
+};
+
+type WithdrawalFlowResult = {
+  machine: Machine<FlowState, FlowActionType>;
+  closeOAuthWindow?: () => void;
+};
+
+export interface UseBluvoFlowHook {
+  // State from useFlowMachine
+  state: FlowState | null;
+  send: (action: FlowActionType) => void;
+  isInState: (stateType: FlowState['type']) => boolean;
+  hasError: boolean;
+  error: Error | null | undefined;
+  context: FlowContext | null | undefined;
+  
+  // Actions
+  listExchanges: (status?: 'live' | 'offline' | 'maintenance' | 'coming_soon') => Promise<Exchange[]>;
+  startWithdrawalFlow: (flowOptions: WithdrawalFlowOptions) => Promise<WithdrawalFlowResult>;
+  resumeWithdrawalFlow: (flowOptions: ResumeWithdrawalFlowOptions) => Promise<WithdrawalFlowResult>;
+  requestQuote: (options: QuoteRequestOptions) => Promise<void>;
+  executeWithdrawal: (quoteId: string) => Promise<void>;
+  submit2FA: (code: string) => Promise<void>;
+  submitSMS: (code: string) => Promise<void>;
+  retryWithdrawal: () => Promise<void>;
+  cancel: () => void;
+  testWithdrawalComplete: (transactionId?: string) => void;
+  
+  // Computed state helpers
+  isExchangesLoading: boolean;
+  isExchangesReady: boolean;
+  exchangesError: Error | null;
+  isOAuthPending: boolean;
+  isOAuthComplete: boolean;
+  isOAuthWindowBeenClosedByTheUser: boolean;
+  isWalletLoading: boolean;
+  isWalletReady: boolean;
+  isQuoteLoading: boolean;
+  isQuoteReady: boolean;
+  isQuoteExpired: boolean;
+  isWithdrawing: boolean;
+  isWithdrawalComplete: boolean;
+  hasFatalError: boolean;
+  requires2FA: boolean;
+  requiresSMS: boolean;
+  requiresKYC: boolean;
+  hasInsufficientBalance: boolean;
+  canRetry: boolean;
+  invalid2FAAttempts: number;
+  
+  // Data
+  exchanges: Exchange[];
+  walletBalances: WalletBalance[];
+  quote: Quote | undefined;
+  withdrawal: Withdrawal | undefined;
+  
+  // Client instance (for advanced use)
+  client: BluvoFlowClient;
+}
+
+export function useBluvoFlow(options: UseBluvoFlowOptions): UseBluvoFlowHook {
   const [flowClient] = useState(() => {
     // Lazy import to avoid SSR issues
     const { BluvoFlowClient } = require('@bluvo/sdk-ts');
@@ -119,7 +219,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
     // Computed state helpers
     isExchangesLoading: exchangesLoading || flow.state?.type === 'exchanges:loading',
     isExchangesReady: flow.state?.type === 'exchanges:ready' || exchanges.length > 0,
-    exchangesError: exchangesError || (flow.state?.type === 'exchanges:error' ? flow.error : null),
+    exchangesError: exchangesError || (flow.state?.type === 'exchanges:error' ? flow.error || null : null),
     isOAuthPending: flow.state?.type === 'oauth:waiting' || flow.state?.type === 'oauth:processing',
     isOAuthComplete: flow.state?.type === 'oauth:completed',
     isOAuthWindowBeenClosedByTheUser: flow.state?.type === 'oauth:window_closed_by_user',

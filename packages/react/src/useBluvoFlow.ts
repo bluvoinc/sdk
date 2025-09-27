@@ -96,6 +96,7 @@ export interface UseBluvoFlowHook {
   isWithdrawalComplete: boolean;
   hasFatalError: boolean;
   requires2FA: boolean;
+  requiresValid2FAMethod: boolean; // i.e. some exchanges support TOTP and SMS only, instead of Passkey/Yubikey
   requiresSMS: boolean;
   requiresKYC: boolean;
   hasInsufficientBalance: boolean;
@@ -107,6 +108,7 @@ export interface UseBluvoFlowHook {
   walletBalances: WalletBalance[];
   quote: Quote | undefined;
   withdrawal: Withdrawal | undefined;
+  valid2FAMethods: string[] | undefined;
   
   // Client instance (for advanced use)
   client: BluvoFlowClient;
@@ -235,6 +237,8 @@ export function useBluvoFlow(options: UseBluvoFlowOptions): UseBluvoFlowHook {
     isWithdrawalComplete: flow.state?.type === 'withdraw:completed',
     hasFatalError: flow.state?.type === 'withdraw:fatal',
     requires2FA: flow.state?.type === 'withdraw:error2FA',
+    requiresValid2FAMethod: (flow.state?.type === 'withdraw:fatal' && 
+                            flow.error?.message?.includes('Two-factor authentication method not supported')) || false,
     requiresSMS: flow.state?.type === 'withdraw:errorSMS',
     requiresKYC: flow.state?.type === 'withdraw:errorKYC',
     hasInsufficientBalance: flow.state?.type === 'withdraw:errorBalance',
@@ -246,6 +250,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions): UseBluvoFlowHook {
     walletBalances: flow.context?.walletBalances || [],
     quote: flow.context?.quote,
     withdrawal: flow.context?.withdrawal,
+    valid2FAMethods: flow.context?.errorDetails?.valid2FAMethods,
     
     // Client instance (for advanced use)
     client: flowClient

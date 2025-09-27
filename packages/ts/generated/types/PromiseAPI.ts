@@ -16,6 +16,7 @@ import { Walletlistlistwallets200ResponseWalletsInnerBalancesValue } from '../mo
 import { Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
+import { Wallettransactionslisttransactions200ResponsePagination } from '../models/Wallettransactionslisttransactions200ResponsePagination';
 import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
 import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
 import { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
@@ -182,38 +183,30 @@ export class PromiseWalletsApi {
     }
 
     /**
-     * List transactions for a wallet with filtering options.
+     * List transactions for a specific wallet or all wallets with filtering options.
      * List Transactions
+     * @param [walletId] The wallet ID to list transactions for. If not provided, returns transactions for all wallets.
      * @param [page] Page number (0-indexed).
      * @param [limit] Number of transactions per page (max 1000).
-     * @param [asset] Filter by asset symbol.
-     * @param [type] Filter by transaction type.
-     * @param [since] Filter by creation date (from, ISO format).
-     * @param [before] Filter by creation date (before, ISO format).
-     * @param [status] Filter by transaction status.
-     * @param [fields] Comma-separated list of fields to include.
+     * @param [sinceDate] Filter transactions after this date (ISO format).
      */
-    public wallettransactionslisttransactionsWithHttpInfo(page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: PromiseConfigurationOptions): Promise<HttpInfo<Wallettransactionslisttransactions200Response>> {
+    public wallettransactionslisttransactionsWithHttpInfo(walletId?: string, page?: number, limit?: number, sinceDate?: string, _options?: PromiseConfigurationOptions): Promise<HttpInfo<Wallettransactionslisttransactions200Response>> {
         const observableOptions = wrapOptions(_options);
-        const result = this.api.wallettransactionslisttransactionsWithHttpInfo(page, limit, asset, type, since, before, status, fields, observableOptions);
+        const result = this.api.wallettransactionslisttransactionsWithHttpInfo(walletId, page, limit, sinceDate, observableOptions);
         return result.toPromise();
     }
 
     /**
-     * List transactions for a wallet with filtering options.
+     * List transactions for a specific wallet or all wallets with filtering options.
      * List Transactions
+     * @param [walletId] The wallet ID to list transactions for. If not provided, returns transactions for all wallets.
      * @param [page] Page number (0-indexed).
      * @param [limit] Number of transactions per page (max 1000).
-     * @param [asset] Filter by asset symbol.
-     * @param [type] Filter by transaction type.
-     * @param [since] Filter by creation date (from, ISO format).
-     * @param [before] Filter by creation date (before, ISO format).
-     * @param [status] Filter by transaction status.
-     * @param [fields] Comma-separated list of fields to include.
+     * @param [sinceDate] Filter transactions after this date (ISO format).
      */
-    public wallettransactionslisttransactions(page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: PromiseConfigurationOptions): Promise<Wallettransactionslisttransactions200Response> {
+    public wallettransactionslisttransactions(walletId?: string, page?: number, limit?: number, sinceDate?: string, _options?: PromiseConfigurationOptions): Promise<Wallettransactionslisttransactions200Response> {
         const observableOptions = wrapOptions(_options);
-        const result = this.api.wallettransactionslisttransactions(page, limit, asset, type, since, before, status, fields, observableOptions);
+        const result = this.api.wallettransactionslisttransactions(walletId, page, limit, sinceDate, observableOptions);
         return result.toPromise();
     }
 

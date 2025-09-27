@@ -4,7 +4,7 @@ import {Machine} from '../types/machine.types';
 import {FlowActionType, FlowState} from '../types/flow.types';
 import {TopicSubscribe} from '@gomomento/sdk-web';
 import {WithdrawFundsWorkflowMessageBody, WorkflowMessageBody, WorkflowTypes} from '../WorkflowTypes';
-import {ERROR_CODES, WITHDRAWAL_EXECUTION_ERROR_TYPES, WITHDRAWAL_QUOTATION_ERROR_TYPES, extractErrorCode} from '../error-codes';
+import {ERROR_CODES, WITHDRAWAL_EXECUTION_ERROR_TYPES, WITHDRAWAL_QUOTATION_ERROR_TYPES, extractErrorCode, extractErrorResult} from '../error-codes';
 import {
   Walletwithdrawbalancebalance200Response,
   Walletwithdrawquoteidexecutewithdraw200Response,
@@ -454,6 +454,13 @@ export class BluvoFlowClient {
           case ERROR_CODES.QUOTE_EXPIRED:
             this.flowMachine?.send({ type: 'QUOTE_EXPIRED' });
             return;
+          
+          case ERROR_CODES.WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED:
+            this.flowMachine?.send({ 
+              type: 'WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED',
+              result: extractErrorResult(error)
+            });
+            return;
         }
 
         console.error("Unhandled withdrawal error", error);
@@ -501,6 +508,12 @@ export class BluvoFlowClient {
         case ERROR_CODES.QUOTE_EXPIRED:
         case WITHDRAWAL_EXECUTION_ERROR_TYPES.RESOURCE_EXHAUSTED: // Legacy compatibility
           this.flowMachine.send({ type: 'QUOTE_EXPIRED' });
+          break;
+        case ERROR_CODES.WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED:
+          this.flowMachine.send({ 
+            type: 'WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED',
+            result: extractErrorResult(error)
+          });
           break;
         default:
           this.flowMachine.send({
@@ -609,6 +622,12 @@ export class BluvoFlowClient {
       case ERROR_CODES.QUOTE_EXPIRED:
       case WITHDRAWAL_EXECUTION_ERROR_TYPES.RESOURCE_EXHAUSTED: // Legacy compatibility
         this.flowMachine?.send({ type: 'QUOTE_EXPIRED' });
+        break;
+      case ERROR_CODES.WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED:
+        this.flowMachine?.send({ 
+          type: 'WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED',
+          result: extractErrorResult(error)
+        });
         break;
       default:
         this.flowMachine?.send({

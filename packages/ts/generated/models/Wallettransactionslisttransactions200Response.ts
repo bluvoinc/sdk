@@ -10,13 +10,13 @@
  * Do not edit the class manually.
  */
 
-import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
+import { Wallettransactionslisttransactions200ResponsePagination } from '../models/Wallettransactionslisttransactions200ResponsePagination';
 import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
 import { HttpFile } from '../http/http';
 
 export class Wallettransactionslisttransactions200Response {
     'transactions': Array<Wallettransactionslisttransactions200ResponseTransactionsInner>;
-    'pagination': Walletlistlistwallets200ResponsePagination;
+    'pagination': Wallettransactionslisttransactions200ResponsePagination;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -32,7 +32,7 @@ export class Wallettransactionslisttransactions200Response {
         {
             "name": "pagination",
             "baseName": "pagination",
-            "type": "Walletlistlistwallets200ResponsePagination",
+            "type": "Wallettransactionslisttransactions200ResponsePagination",
             "format": ""
         }    ];
 

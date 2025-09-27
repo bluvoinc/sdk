@@ -15,6 +15,7 @@ import { HttpFile } from '../http/http';
 export class Walletget404Response {
     'error': string;
     'type': Walletget404ResponseTypeEnum;
+    'result'?: any | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -31,6 +32,12 @@ export class Walletget404Response {
             "name": "type",
             "baseName": "type",
             "type": "Walletget404ResponseTypeEnum",
+            "format": ""
+        },
+        {
+            "name": "result",
+            "baseName": "result",
+            "type": "any",
             "format": ""
         }    ];
 

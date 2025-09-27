@@ -15,6 +15,7 @@ import { HttpFile } from '../http/http';
 export class Walletwithdrawquotequotation400Response {
     'error': string;
     'type': Walletwithdrawquotequotation400ResponseTypeEnum;
+    'result'?: any | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -31,6 +32,12 @@ export class Walletwithdrawquotequotation400Response {
             "name": "type",
             "baseName": "type",
             "type": "Walletwithdrawquotequotation400ResponseTypeEnum",
+            "format": ""
+        },
+        {
+            "name": "result",
+            "baseName": "result",
+            "type": "any",
             "format": ""
         }    ];
 

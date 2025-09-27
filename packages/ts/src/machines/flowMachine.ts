@@ -12,6 +12,25 @@ import {
 } from '../types/withdrawal.types';
 import { Machine } from '../types/machine.types';
 
+function generate2FAMethodErrorMessage(valid2FAMethods?: string[]): string {
+  if (!valid2FAMethods || valid2FAMethods.length === 0) {
+    return 'Please make sure your Exchange account has 2FA enabled.';
+  }
+  
+  if (valid2FAMethods.length === 1) {
+    return `${valid2FAMethods[0]} is the only supported two-factor authentication method.`;
+  }
+  
+  if (valid2FAMethods.length === 2) {
+    return `${valid2FAMethods[0]} and ${valid2FAMethods[1]} are the only supported two-factor authentication methods.`;
+  }
+  
+  // For 3 or more methods: "X, Y, ..., and Z are the only supported methods"
+  const lastMethod = valid2FAMethods[valid2FAMethods.length - 1];
+  const otherMethods = valid2FAMethods.slice(0, -1).join(', ');
+  return `${otherMethods}, and ${lastMethod} are the only supported two-factor authentication methods.`;
+}
+
 interface FlowMachineOptions {
   orgId: string;
   projectId: string;
@@ -431,6 +450,20 @@ function flowTransition(
             }
           }
           break;
+        
+        case 'WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED':
+          const valid2FAMethods = action.result?.valid2FAMethods;
+          const errorMessage = generate2FAMethodErrorMessage(valid2FAMethods);
+          return {
+            type: 'withdraw:fatal',
+            context: {
+              ...state.context,
+              errorDetails: {
+                valid2FAMethods
+              }
+            },
+            error: new Error(errorMessage)
+          };
         
         case 'WITHDRAWAL_SUCCESS':
           if (instance.withdrawalMachine) {

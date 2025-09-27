@@ -10,23 +10,28 @@
  * Do not edit the class manually.
  */
 
+import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
 import { HttpFile } from '../http/http';
 
 export class Wallettransactionslisttransactions200ResponseTransactionsInner {
     'id': string;
     'walletId': string;
-    'asset': string;
-    'type': string;
+    'createdAt'?: Walletget200ResponseCreatedAt | null;
+    'updatedAt'?: Walletget200ResponseCreatedAt | null;
+    'timestamp'?: Walletget200ResponseCreatedAt | null;
+    'type': Wallettransactionslisttransactions200ResponseTransactionsInnerTypeEnum;
     'amount': number;
-    'timestamp': number;
-    'status': string;
-    'txid'?: string | null;
-    'address'?: string | null;
+    'currency': string;
+    'direction'?: Wallettransactionslisttransactions200ResponseTransactionsInnerDirectionEnum | null;
     'feeCost'?: number | null;
     'feeCurrency'?: string | null;
     'amountInFiat'?: number | null;
     'feeInFiat'?: number | null;
-    'fiatCurrency'?: string | null;
+    'fiatCurrency'?: Wallettransactionslisttransactions200ResponseTransactionsInnerFiatCurrencyEnum | null;
+    'status': Wallettransactionslisttransactions200ResponseTransactionsInnerStatusEnum;
+    'addressTo'?: string | null;
+    'network'?: string | null;
+    'addressFrom'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -46,15 +51,27 @@ export class Wallettransactionslisttransactions200ResponseTransactionsInner {
             "format": ""
         },
         {
-            "name": "asset",
-            "baseName": "asset",
-            "type": "string",
+            "name": "createdAt",
+            "baseName": "createdAt",
+            "type": "Walletget200ResponseCreatedAt",
+            "format": ""
+        },
+        {
+            "name": "updatedAt",
+            "baseName": "updatedAt",
+            "type": "Walletget200ResponseCreatedAt",
+            "format": ""
+        },
+        {
+            "name": "timestamp",
+            "baseName": "timestamp",
+            "type": "Walletget200ResponseCreatedAt",
             "format": ""
         },
         {
             "name": "type",
             "baseName": "type",
-            "type": "string",
+            "type": "Wallettransactionslisttransactions200ResponseTransactionsInnerTypeEnum",
             "format": ""
         },
         {
@@ -64,27 +81,15 @@ export class Wallettransactionslisttransactions200ResponseTransactionsInner {
             "format": ""
         },
         {
-            "name": "timestamp",
-            "baseName": "timestamp",
-            "type": "number",
-            "format": ""
-        },
-        {
-            "name": "status",
-            "baseName": "status",
+            "name": "currency",
+            "baseName": "currency",
             "type": "string",
             "format": ""
         },
         {
-            "name": "txid",
-            "baseName": "txid",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "address",
-            "baseName": "address",
-            "type": "string",
+            "name": "direction",
+            "baseName": "direction",
+            "type": "Wallettransactionslisttransactions200ResponseTransactionsInnerDirectionEnum",
             "format": ""
         },
         {
@@ -114,6 +119,30 @@ export class Wallettransactionslisttransactions200ResponseTransactionsInner {
         {
             "name": "fiatCurrency",
             "baseName": "fiatCurrency",
+            "type": "Wallettransactionslisttransactions200ResponseTransactionsInnerFiatCurrencyEnum",
+            "format": ""
+        },
+        {
+            "name": "status",
+            "baseName": "status",
+            "type": "Wallettransactionslisttransactions200ResponseTransactionsInnerStatusEnum",
+            "format": ""
+        },
+        {
+            "name": "addressTo",
+            "baseName": "addressTo",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "network",
+            "baseName": "network",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "addressFrom",
+            "baseName": "addressFrom",
             "type": "string",
             "format": ""
         }    ];
@@ -125,3 +154,24 @@ export class Wallettransactionslisttransactions200ResponseTransactionsInner {
     public constructor() {
     }
 }
+
+export enum Wallettransactionslisttransactions200ResponseTransactionsInnerTypeEnum {
+    Deposit = 'deposit',
+    Withdrawal = 'withdrawal',
+    Transaction = 'transaction'
+}
+export enum Wallettransactionslisttransactions200ResponseTransactionsInnerDirectionEnum {
+    In = 'in',
+    Out = 'out'
+}
+export enum Wallettransactionslisttransactions200ResponseTransactionsInnerFiatCurrencyEnum {
+    Usd = 'USD',
+    Eur = 'EUR'
+}
+export enum Wallettransactionslisttransactions200ResponseTransactionsInnerStatusEnum {
+    Pending = 'pending',
+    Ok = 'ok',
+    Failed = 'failed',
+    Canceled = 'canceled'
+}
+

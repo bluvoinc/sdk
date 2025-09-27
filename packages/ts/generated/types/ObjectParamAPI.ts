@@ -16,6 +16,7 @@ import { Walletlistlistwallets200ResponseWalletsInnerBalancesValue } from '../mo
 import { Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
+import { Wallettransactionslisttransactions200ResponsePagination } from '../models/Wallettransactionslisttransactions200ResponsePagination';
 import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
 import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
 import { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
@@ -176,6 +177,13 @@ export interface WalletsApiWalletlistlistwalletsRequest {
 
 export interface WalletsApiWallettransactionslisttransactionsRequest {
     /**
+     * The wallet ID to list transactions for. If not provided, returns transactions for all wallets.
+     * Defaults to: undefined
+     * @type string
+     * @memberof WalletsApiwallettransactionslisttransactions
+     */
+    walletId?: string
+    /**
      * Page number (0-indexed).
      * Minimum: 0
      * Maximum: 1000
@@ -194,47 +202,12 @@ export interface WalletsApiWallettransactionslisttransactionsRequest {
      */
     limit?: number
     /**
-     * Filter by asset symbol.
+     * Filter transactions after this date (ISO format).
      * Defaults to: undefined
      * @type string
      * @memberof WalletsApiwallettransactionslisttransactions
      */
-    asset?: string
-    /**
-     * Filter by transaction type.
-     * Defaults to: undefined
-     * @type string
-     * @memberof WalletsApiwallettransactionslisttransactions
-     */
-    type?: string
-    /**
-     * Filter by creation date (from, ISO format).
-     * Defaults to: undefined
-     * @type string
-     * @memberof WalletsApiwallettransactionslisttransactions
-     */
-    since?: string
-    /**
-     * Filter by creation date (before, ISO format).
-     * Defaults to: undefined
-     * @type string
-     * @memberof WalletsApiwallettransactionslisttransactions
-     */
-    before?: string
-    /**
-     * Filter by transaction status.
-     * Defaults to: undefined
-     * @type string
-     * @memberof WalletsApiwallettransactionslisttransactions
-     */
-    status?: string
-    /**
-     * Comma-separated list of fields to include.
-     * Defaults to: undefined
-     * @type string
-     * @memberof WalletsApiwallettransactionslisttransactions
-     */
-    fields?: string
+    sinceDate?: string
 }
 
 export class ObjectWalletsApi {
@@ -299,21 +272,21 @@ export class ObjectWalletsApi {
     }
 
     /**
-     * List transactions for a wallet with filtering options.
+     * List transactions for a specific wallet or all wallets with filtering options.
      * List Transactions
      * @param param the request object
      */
     public wallettransactionslisttransactionsWithHttpInfo(param: WalletsApiWallettransactionslisttransactionsRequest = {}, options?: ConfigurationOptions): Promise<HttpInfo<Wallettransactionslisttransactions200Response>> {
-        return this.api.wallettransactionslisttransactionsWithHttpInfo(param.page, param.limit, param.asset, param.type, param.since, param.before, param.status, param.fields,  options).toPromise();
+        return this.api.wallettransactionslisttransactionsWithHttpInfo(param.walletId, param.page, param.limit, param.sinceDate,  options).toPromise();
     }
 
     /**
-     * List transactions for a wallet with filtering options.
+     * List transactions for a specific wallet or all wallets with filtering options.
      * List Transactions
      * @param param the request object
      */
     public wallettransactionslisttransactions(param: WalletsApiWallettransactionslisttransactionsRequest = {}, options?: ConfigurationOptions): Promise<Wallettransactionslisttransactions200Response> {
-        return this.api.wallettransactionslisttransactions(param.page, param.limit, param.asset, param.type, param.since, param.before, param.status, param.fields,  options).toPromise();
+        return this.api.wallettransactionslisttransactions(param.walletId, param.page, param.limit, param.sinceDate,  options).toPromise();
     }
 
 }

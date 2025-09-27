@@ -12,6 +12,7 @@ export * from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesVal
 export * from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf'
 export * from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi'
 export * from '../models/Wallettransactionslisttransactions200Response'
+export * from '../models/Wallettransactionslisttransactions200ResponsePagination'
 export * from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner'
 export * from '../models/Walletwithdrawbalancebalance200Response'
 export * from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner'

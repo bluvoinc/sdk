@@ -246,9 +246,13 @@ export class BluvoClient {
              * );
              */
 
-            list: (walletId: string, page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: PromiseConfigurationOptions) => {
+            list: (
+                walletId?: string, page?: number, limit?: number, sinceDate?: string, _options?: PromiseConfigurationOptions
+            ) => {
                 return new WalletsApi(this.configuration(walletId))
-                    .wallettransactionslisttransactions(page, limit, asset, type, since, before, status, fields, _options);
+                    .wallettransactionslisttransactions(
+                        walletId, page, limit, sinceDate, _options
+                    );
             },
 
             /**

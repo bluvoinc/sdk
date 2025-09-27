@@ -78,6 +78,7 @@ export enum Walletwithdrawquoteidexecutewithdraw200ResponseTypeEnum {
     Withdrawal2FaRequiredYubikey = 'WITHDRAWAL_2FA_REQUIRED_YUBIKEY',
     Withdrawal2FaRequiredPassphrase = 'WITHDRAWAL_2FA_REQUIRED_PASSPHRASE',
     Withdrawal2FaInvalid = 'WITHDRAWAL_2FA_INVALID',
+    Withdrawal2FaMethodNotSupported = 'WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED',
     WithdrawalKycRequired = 'WITHDRAWAL_KYC_REQUIRED',
     WithdrawalEmailUnverified = 'WITHDRAWAL_EMAIL_UNVERIFIED',
     OauthAuthorizationFailed = 'OAUTH_AUTHORIZATION_FAILED',

@@ -213,23 +213,15 @@ export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
     }
 
     /**
-     * List transactions for a wallet with filtering options.
+     * List transactions for a specific wallet or all wallets with filtering options.
      * List Transactions
+     * @param walletId The wallet ID to list transactions for. If not provided, returns transactions for all wallets.
      * @param page Page number (0-indexed).
      * @param limit Number of transactions per page (max 1000).
-     * @param asset Filter by asset symbol.
-     * @param type Filter by transaction type.
-     * @param since Filter by creation date (from, ISO format).
-     * @param before Filter by creation date (before, ISO format).
-     * @param status Filter by transaction status.
-     * @param fields Comma-separated list of fields to include.
+     * @param sinceDate Filter transactions after this date (ISO format).
      */
-    public async wallettransactionslisttransactions(page?: number, limit?: number, asset?: string, type?: string, since?: string, before?: string, status?: string, fields?: string, _options?: Configuration): Promise<RequestContext> {
+    public async wallettransactionslisttransactions(walletId?: string, page?: number, limit?: number, sinceDate?: string, _options?: Configuration): Promise<RequestContext> {
         let _config = _options || this.configuration;
-
-
-
-
 
 
 
@@ -243,6 +235,11 @@ export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
         requestContext.setHeaderParam("Accept", "application/json, */*;q=0.8")
 
         // Query Params
+        if (walletId !== undefined) {
+            requestContext.setQueryParam("walletId", ObjectSerializer.serialize(walletId, "string", ""));
+        }
+
+        // Query Params
         if (page !== undefined) {
             requestContext.setQueryParam("page", ObjectSerializer.serialize(page, "number", ""));
         }
@@ -253,33 +250,8 @@ export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
         }
 
         // Query Params
-        if (asset !== undefined) {
-            requestContext.setQueryParam("asset", ObjectSerializer.serialize(asset, "string", ""));
-        }
-
-        // Query Params
-        if (type !== undefined) {
-            requestContext.setQueryParam("type", ObjectSerializer.serialize(type, "string", ""));
-        }
-
-        // Query Params
-        if (since !== undefined) {
-            requestContext.setQueryParam("since", ObjectSerializer.serialize(since, "string", ""));
-        }
-
-        // Query Params
-        if (before !== undefined) {
-            requestContext.setQueryParam("before", ObjectSerializer.serialize(before, "string", ""));
-        }
-
-        // Query Params
-        if (status !== undefined) {
-            requestContext.setQueryParam("status", ObjectSerializer.serialize(status, "string", ""));
-        }
-
-        // Query Params
-        if (fields !== undefined) {
-            requestContext.setQueryParam("fields", ObjectSerializer.serialize(fields, "string", ""));
+        if (sinceDate !== undefined) {
+            requestContext.setQueryParam("sinceDate", ObjectSerializer.serialize(sinceDate, "string", ""));
         }
 
 
@@ -296,11 +268,6 @@ export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
         }
         // Apply auth methods
         authMethod = _config.authMethods["bluvoProjectId"]
-        if (authMethod?.applySecurityAuthentication) {
-            await authMethod?.applySecurityAuthentication(requestContext);
-        }
-        // Apply auth methods
-        authMethod = _config.authMethods["bluvoWalletId"]
         if (authMethod?.applySecurityAuthentication) {
             await authMethod?.applySecurityAuthentication(requestContext);
         }

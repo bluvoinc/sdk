@@ -77,6 +77,9 @@ export interface FlowContext {
   idempotencyKey?: string;
   topicName?: string;
   invalid2FAAttempts?: number;
+  errorDetails?: {
+    valid2FAMethods?: string[];
+  };
 }
 
 export type FlowState = StateValue<FlowStateType> & {
@@ -119,6 +122,7 @@ export type FlowActionType =
   | { type: 'WITHDRAWAL_REQUIRES_KYC' }
   | { type: 'WITHDRAWAL_2FA_INVALID' }
   | { type: 'WITHDRAWAL_INSUFFICIENT_BALANCE' }
+  | { type: 'WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED'; result?: { valid2FAMethods?: string[] } }
   | { type: 'SUBMIT_2FA'; code: string }
   | { type: 'SUBMIT_SMS'; code: string }
   | { type: 'RETRY_WITHDRAWAL' }

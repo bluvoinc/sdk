@@ -12,6 +12,7 @@ export * from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesVal
 export * from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
 export * from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 export * from '../models/Wallettransactionslisttransactions200Response';
+export * from '../models/Wallettransactionslisttransactions200ResponsePagination';
 export * from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
 export * from '../models/Walletwithdrawbalancebalance200Response';
 export * from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
@@ -29,7 +30,7 @@ import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlg
 import { Walletdelete200Response } from '../models/Walletdelete200Response';
 import { Walletget200Response, Walletget200ResponseExchangeEnum          } from '../models/Walletget200Response';
 import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
-import { Walletget404Response , Walletget404ResponseTypeEnum   } from '../models/Walletget404Response';
+import { Walletget404Response , Walletget404ResponseTypeEnum    } from '../models/Walletget404Response';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
 import { Walletlistlistwallets200ResponseWalletsInner      , Walletlistlistwallets200ResponseWalletsInnerExchangeEnum      } from '../models/Walletlistlistwallets200ResponseWalletsInner';
@@ -37,15 +38,16 @@ import { Walletlistlistwallets200ResponseWalletsInnerBalancesValue } from '../mo
 import { Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
-import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
+import { Wallettransactionslisttransactions200ResponsePagination } from '../models/Wallettransactionslisttransactions200ResponsePagination';
+import { Wallettransactionslisttransactions200ResponseTransactionsInner     , Wallettransactionslisttransactions200ResponseTransactionsInnerTypeEnum    , Wallettransactionslisttransactions200ResponseTransactionsInnerDirectionEnum      , Wallettransactionslisttransactions200ResponseTransactionsInnerFiatCurrencyEnum  , Wallettransactionslisttransactions200ResponseTransactionsInnerStatusEnum      } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
 import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
 import { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
 import { Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
 import { Walletwithdrawquoteidexecutewithdraw200Response  , Walletwithdrawquoteidexecutewithdraw200ResponseTypeEnum    } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
-import { Walletwithdrawquoteidexecutewithdraw400Response , Walletwithdrawquoteidexecutewithdraw400ResponseTypeEnum   } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
+import { Walletwithdrawquoteidexecutewithdraw400Response , Walletwithdrawquoteidexecutewithdraw400ResponseTypeEnum    } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
-import { Walletwithdrawquotequotation400Response , Walletwithdrawquotequotation400ResponseTypeEnum   } from '../models/Walletwithdrawquotequotation400Response';
+import { Walletwithdrawquotequotation400Response , Walletwithdrawquotequotation400ResponseTypeEnum    } from '../models/Walletwithdrawquotequotation400Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
 
 /* tslint:disable:no-unused-variable */
@@ -65,6 +67,10 @@ let enumsMap: Set<string> = new Set<string>([
     "Walletget200ResponseExchangeEnum",
     "Walletget404ResponseTypeEnum",
     "Walletlistlistwallets200ResponseWalletsInnerExchangeEnum",
+    "Wallettransactionslisttransactions200ResponseTransactionsInnerTypeEnum",
+    "Wallettransactionslisttransactions200ResponseTransactionsInnerDirectionEnum",
+    "Wallettransactionslisttransactions200ResponseTransactionsInnerFiatCurrencyEnum",
+    "Wallettransactionslisttransactions200ResponseTransactionsInnerStatusEnum",
     "Walletwithdrawquoteidexecutewithdraw200ResponseTypeEnum",
     "Walletwithdrawquoteidexecutewithdraw400ResponseTypeEnum",
     "Walletwithdrawquotequotation400ResponseTypeEnum",
@@ -85,6 +91,7 @@ let typeMap: {[index: string]: any} = {
     "Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf": Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf,
     "Walletlistlistwallets200ResponseWalletsInnerInvalidApi": Walletlistlistwallets200ResponseWalletsInnerInvalidApi,
     "Wallettransactionslisttransactions200Response": Wallettransactionslisttransactions200Response,
+    "Wallettransactionslisttransactions200ResponsePagination": Wallettransactionslisttransactions200ResponsePagination,
     "Wallettransactionslisttransactions200ResponseTransactionsInner": Wallettransactionslisttransactions200ResponseTransactionsInner,
     "Walletwithdrawbalancebalance200Response": Walletwithdrawbalancebalance200Response,
     "Walletwithdrawbalancebalance200ResponseBalancesInner": Walletwithdrawbalancebalance200ResponseBalancesInner,

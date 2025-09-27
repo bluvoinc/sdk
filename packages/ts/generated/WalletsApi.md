@@ -184,7 +184,7 @@ Name | Type | Description  | Notes
 # **wallettransactionslisttransactions**
 > Wallettransactionslisttransactions200Response wallettransactionslisttransactions()
 
-List transactions for a wallet with filtering options.
+List transactions for a specific wallet or all wallets with filtering options.
 
 ### Example
 
@@ -197,22 +197,14 @@ const configuration = createConfiguration();
 const apiInstance = new WalletsApi(configuration);
 
 const request: WalletsApiWallettransactionslisttransactionsRequest = {
+    // The wallet ID to list transactions for. If not provided, returns transactions for all wallets. (optional)
+  walletId: "walletId_example",
     // Page number (0-indexed). (optional)
   page: 0,
     // Number of transactions per page (max 1000). (optional)
   limit: 1,
-    // Filter by asset symbol. (optional)
-  asset: "asset_example",
-    // Filter by transaction type. (optional)
-  type: "type_example",
-    // Filter by creation date (from, ISO format). (optional)
-  since: "since_example",
-    // Filter by creation date (before, ISO format). (optional)
-  before: "before_example",
-    // Filter by transaction status. (optional)
-  status: "status_example",
-    // Comma-separated list of fields to include. (optional)
-  fields: "fields_example",
+    // Filter transactions after this date (ISO format). (optional)
+  sinceDate: "sinceDate_example",
 };
 
 const data = await apiInstance.wallettransactionslisttransactions(request);
@@ -224,14 +216,10 @@ console.log('API called successfully. Returned data:', data);
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **walletId** | [**string**] | The wallet ID to list transactions for. If not provided, returns transactions for all wallets. | (optional) defaults to undefined
  **page** | [**number**] | Page number (0-indexed). | (optional) defaults to undefined
  **limit** | [**number**] | Number of transactions per page (max 1000). | (optional) defaults to undefined
- **asset** | [**string**] | Filter by asset symbol. | (optional) defaults to undefined
- **type** | [**string**] | Filter by transaction type. | (optional) defaults to undefined
- **since** | [**string**] | Filter by creation date (from, ISO format). | (optional) defaults to undefined
- **before** | [**string**] | Filter by creation date (before, ISO format). | (optional) defaults to undefined
- **status** | [**string**] | Filter by transaction status. | (optional) defaults to undefined
- **fields** | [**string**] | Comma-separated list of fields to include. | (optional) defaults to undefined
+ **sinceDate** | [**string**] | Filter transactions after this date (ISO format). | (optional) defaults to undefined
 
 
 ### Return type
@@ -240,7 +228,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey), [bluvoProjectId](README.md#bluvoProjectId), [bluvoWalletId](README.md#bluvoWalletId)
+[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey), [bluvoProjectId](README.md#bluvoProjectId)
 
 ### HTTP request headers
 

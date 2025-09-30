@@ -217,7 +217,7 @@ export class BluvoFlowClient {
     }
 
     // Load wallet immediately
-    await this.loadWallet(flowOptions.walletId);
+    this.loadWallet(flowOptions.walletId);
 
     return {
       machine: this.flowMachine

@@ -26,13 +26,13 @@ type WalletBalance = {
   balance: string;
   balanceInFiat?: string;
   networks?: Array<{
-    id: string;
-    name: string;
-    displayName: string;
-    minWithdrawal: string;
-    maxWithdrawal: string;
-    assetName: string;
-    addressRegex?: string;
+    'id': string;
+    'name': string;
+    'displayName': string;
+    'minWithdrawal': string;
+    'maxWithdrawal'?: string;
+    'assetName': string;
+    'addressRegex'?: string | null;
   }>;
 };
 

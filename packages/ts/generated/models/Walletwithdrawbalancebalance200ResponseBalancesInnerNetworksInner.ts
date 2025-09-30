@@ -17,7 +17,7 @@ export class Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner {
     'name': string;
     'displayName': string;
     'minWithdrawal': string;
-    'maxWithdrawal': string;
+    'maxWithdrawal'?: string;
     'assetName': string;
     'addressRegex'?: string | null;
 

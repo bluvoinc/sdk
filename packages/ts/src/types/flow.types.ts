@@ -49,9 +49,9 @@ export interface FlowContext {
       'name': string;
       'displayName': string;
       'minWithdrawal': string;
-      'maxWithdrawal': string;
+      'maxWithdrawal'?: string;
       'assetName': string;
-      'addressRegex'?: string;
+      'addressRegex'?: string | null;
     }>;
   }>;
   quote?: {
@@ -105,9 +105,9 @@ export type FlowActionType =
       'name': string;
       'displayName': string;
       'minWithdrawal': string;
-      'maxWithdrawal': string;
+      'maxWithdrawal'?: string;
       'assetName': string;
-      'addressRegex'?: string;
+      'addressRegex'?: string | null;
     }>;
   }> }
   | { type: 'WALLET_FAILED'; error: Error }

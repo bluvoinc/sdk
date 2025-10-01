@@ -32,6 +32,7 @@ export interface BluvoFlowClientOptions {
     twofa?: string;
     smsCode?: string;
   }) => Promise<Walletwithdrawquoteidexecutewithdraw200Response>;
+  getWalletByIdFn: (walletId: string) => Promise<{ id: string; exchange: string; } | null>;
   mkUUIDFn?: () => string;
   onWalletConnectedFn?: (walletId: string, exchange: string) => any;
 }
@@ -105,6 +106,21 @@ export class BluvoFlowClient {
   }
 
   async startWithdrawalFlow(flowOptions: WithdrawalFlowOptions) {
+    // Check if wallet already exists
+    try {
+      const existingWallet = await this.options.getWalletByIdFn(flowOptions.walletId);
+      if (existingWallet) {
+        // Wallet exists, redirect to resumeWithdrawalFlow
+        return this.resumeWithdrawalFlow({
+          exchange: existingWallet.exchange,
+          walletId: flowOptions.walletId
+        });
+      }
+    } catch (error) {
+      // If getWalletByIdFn fails, continue with normal flow
+      console.warn('Error checking wallet existence:', error);
+    }
+
     // Dispose any existing flow
     this.dispose();
 

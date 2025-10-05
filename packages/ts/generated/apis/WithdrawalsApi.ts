@@ -70,18 +70,11 @@ export class WithdrawalsApiRequestFactory extends BaseAPIRequestFactory {
     /**
      * Execute a withdrawal using a quote ID.
      * Withdraw
-     * @param idem UUID for tracking withdrawal flow.
      * @param quoteId 
      * @param walletwithdrawquoteidexecutewithdrawRequest 
      */
-    public async walletwithdrawquoteidexecutewithdraw(idem: string, quoteId: string, walletwithdrawquoteidexecutewithdrawRequest: WalletwithdrawquoteidexecutewithdrawRequest, _options?: Configuration): Promise<RequestContext> {
+    public async walletwithdrawquoteidexecutewithdraw(quoteId: string, walletwithdrawquoteidexecutewithdrawRequest: WalletwithdrawquoteidexecutewithdrawRequest, _options?: Configuration): Promise<RequestContext> {
         let _config = _options || this.configuration;
-
-        // verify required parameter 'idem' is not null or undefined
-        if (idem === null || idem === undefined) {
-            throw new RequiredError("WithdrawalsApi", "walletwithdrawquoteidexecutewithdraw", "idem");
-        }
-
 
         // verify required parameter 'quoteId' is not null or undefined
         if (quoteId === null || quoteId === undefined) {
@@ -102,11 +95,6 @@ export class WithdrawalsApiRequestFactory extends BaseAPIRequestFactory {
         // Make Request Context
         const requestContext = _config.baseServer.makeRequestContext(localVarPath, HttpMethod.PUT);
         requestContext.setHeaderParam("Accept", "application/json, */*;q=0.8")
-
-        // Query Params
-        if (idem !== undefined) {
-            requestContext.setQueryParam("idem", ObjectSerializer.serialize(idem, "string", ""));
-        }
 
 
         // Body Params

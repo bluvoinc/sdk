@@ -25,6 +25,7 @@ import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walle
 import { Walletwithdrawquoteidexecutewithdraw400Response } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
+import { Walletwithdrawquotequotation200ResponseFeeDetailsInner } from '../models/Walletwithdrawquotequotation200ResponseFeeDetailsInner';
 import { Walletwithdrawquotequotation400Response } from '../models/Walletwithdrawquotequotation400Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
 
@@ -299,13 +300,6 @@ export interface WithdrawalsApiWalletwithdrawbalancebalanceRequest {
 
 export interface WithdrawalsApiWalletwithdrawquoteidexecutewithdrawRequest {
     /**
-     * UUID for tracking withdrawal flow.
-     * Defaults to: undefined
-     * @type string
-     * @memberof WithdrawalsApiwalletwithdrawquoteidexecutewithdraw
-     */
-    idem: string
-    /**
      * 
      * Defaults to: undefined
      * @type string
@@ -360,7 +354,7 @@ export class ObjectWithdrawalsApi {
      * @param param the request object
      */
     public walletwithdrawquoteidexecutewithdrawWithHttpInfo(param: WithdrawalsApiWalletwithdrawquoteidexecutewithdrawRequest, options?: ConfigurationOptions): Promise<HttpInfo<Walletwithdrawquoteidexecutewithdraw200Response>> {
-        return this.api.walletwithdrawquoteidexecutewithdrawWithHttpInfo(param.idem, param.quoteId, param.walletwithdrawquoteidexecutewithdrawRequest,  options).toPromise();
+        return this.api.walletwithdrawquoteidexecutewithdrawWithHttpInfo(param.quoteId, param.walletwithdrawquoteidexecutewithdrawRequest,  options).toPromise();
     }
 
     /**
@@ -369,7 +363,7 @@ export class ObjectWithdrawalsApi {
      * @param param the request object
      */
     public walletwithdrawquoteidexecutewithdraw(param: WithdrawalsApiWalletwithdrawquoteidexecutewithdrawRequest, options?: ConfigurationOptions): Promise<Walletwithdrawquoteidexecutewithdraw200Response> {
-        return this.api.walletwithdrawquoteidexecutewithdraw(param.idem, param.quoteId, param.walletwithdrawquoteidexecutewithdrawRequest,  options).toPromise();
+        return this.api.walletwithdrawquoteidexecutewithdraw(param.quoteId, param.walletwithdrawquoteidexecutewithdrawRequest,  options).toPromise();
     }
 
     /**

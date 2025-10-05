@@ -72,8 +72,6 @@ const configuration = createConfiguration();
 const apiInstance = new WithdrawalsApi(configuration);
 
 const request: WithdrawalsApiWalletwithdrawquoteidexecutewithdrawRequest = {
-    // UUID for tracking withdrawal flow.
-  idem: "idem_example",
   
   quoteId: "quoteId_example",
   
@@ -93,7 +91,6 @@ console.log('API called successfully. Returned data:', data);
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **walletwithdrawquoteidexecutewithdrawRequest** | **WalletwithdrawquoteidexecutewithdrawRequest**|  |
- **idem** | [**string**] | UUID for tracking withdrawal flow. | defaults to undefined
  **quoteId** | [**string**] |  | defaults to undefined
 
 

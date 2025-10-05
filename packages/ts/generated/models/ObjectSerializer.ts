@@ -21,6 +21,7 @@ export * from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
 export * from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 export * from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 export * from '../models/Walletwithdrawquotequotation200Response';
+export * from '../models/Walletwithdrawquotequotation200ResponseFeeDetailsInner';
 export * from '../models/Walletwithdrawquotequotation400Response';
 export * from '../models/WalletwithdrawquotequotationRequest';
 
@@ -47,6 +48,7 @@ import { Walletwithdrawquoteidexecutewithdraw200Response  , Walletwithdrawquotei
 import { Walletwithdrawquoteidexecutewithdraw400Response , Walletwithdrawquoteidexecutewithdraw400ResponseTypeEnum    } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
+import { Walletwithdrawquotequotation200ResponseFeeDetailsInner, Walletwithdrawquotequotation200ResponseFeeDetailsInnerCategoryEnum       } from '../models/Walletwithdrawquotequotation200ResponseFeeDetailsInner';
 import { Walletwithdrawquotequotation400Response , Walletwithdrawquotequotation400ResponseTypeEnum    } from '../models/Walletwithdrawquotequotation400Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
 
@@ -73,6 +75,7 @@ let enumsMap: Set<string> = new Set<string>([
     "Wallettransactionslisttransactions200ResponseTransactionsInnerStatusEnum",
     "Walletwithdrawquoteidexecutewithdraw200ResponseTypeEnum",
     "Walletwithdrawquoteidexecutewithdraw400ResponseTypeEnum",
+    "Walletwithdrawquotequotation200ResponseFeeDetailsInnerCategoryEnum",
     "Walletwithdrawquotequotation400ResponseTypeEnum",
 ]);
 
@@ -100,6 +103,7 @@ let typeMap: {[index: string]: any} = {
     "Walletwithdrawquoteidexecutewithdraw400Response": Walletwithdrawquoteidexecutewithdraw400Response,
     "WalletwithdrawquoteidexecutewithdrawRequest": WalletwithdrawquoteidexecutewithdrawRequest,
     "Walletwithdrawquotequotation200Response": Walletwithdrawquotequotation200Response,
+    "Walletwithdrawquotequotation200ResponseFeeDetailsInner": Walletwithdrawquotequotation200ResponseFeeDetailsInner,
     "Walletwithdrawquotequotation400Response": Walletwithdrawquotequotation400Response,
     "WalletwithdrawquotequotationRequest": WalletwithdrawquotequotationRequest,
 }
@@ -232,13 +236,16 @@ export class ObjectSerializer {
             }
             return transformedData;
         } else if (type === "Date") {
+            if (!(data instanceof Date)) {
+                return data;
+            }
             if (format == "date") {
                 let month = data.getMonth()+1
-                month = month < 10 ? "0" + month.toString() : month.toString()
+                let monthStr = month < 10 ? "0" + month.toString() : month.toString()
                 let day = data.getDate();
-                day = day < 10 ? "0" + day.toString() : day.toString();
+                let dayStr = day < 10 ? "0" + day.toString() : day.toString();
 
-                return data.getFullYear() + "-" + month + "-" + day;
+                return data.getFullYear() + "-" + monthStr + "-" + dayStr;
             } else {
                 return data.toISOString();
             }

@@ -25,6 +25,7 @@ import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walle
 import { Walletwithdrawquoteidexecutewithdraw400Response } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
+import { Walletwithdrawquotequotation200ResponseFeeDetailsInner } from '../models/Walletwithdrawquotequotation200ResponseFeeDetailsInner';
 import { Walletwithdrawquotequotation400Response } from '../models/Walletwithdrawquotequotation400Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
 import { ObservableOAuth2Api } from './ObservableAPI';
@@ -252,26 +253,24 @@ export class PromiseWithdrawalsApi {
     /**
      * Execute a withdrawal using a quote ID.
      * Withdraw
-     * @param idem UUID for tracking withdrawal flow.
      * @param quoteId
      * @param walletwithdrawquoteidexecutewithdrawRequest
      */
-    public walletwithdrawquoteidexecutewithdrawWithHttpInfo(idem: string, quoteId: string, walletwithdrawquoteidexecutewithdrawRequest: WalletwithdrawquoteidexecutewithdrawRequest, _options?: PromiseConfigurationOptions): Promise<HttpInfo<Walletwithdrawquoteidexecutewithdraw200Response>> {
+    public walletwithdrawquoteidexecutewithdrawWithHttpInfo(quoteId: string, walletwithdrawquoteidexecutewithdrawRequest: WalletwithdrawquoteidexecutewithdrawRequest, _options?: PromiseConfigurationOptions): Promise<HttpInfo<Walletwithdrawquoteidexecutewithdraw200Response>> {
         const observableOptions = wrapOptions(_options);
-        const result = this.api.walletwithdrawquoteidexecutewithdrawWithHttpInfo(idem, quoteId, walletwithdrawquoteidexecutewithdrawRequest, observableOptions);
+        const result = this.api.walletwithdrawquoteidexecutewithdrawWithHttpInfo(quoteId, walletwithdrawquoteidexecutewithdrawRequest, observableOptions);
         return result.toPromise();
     }
 
     /**
      * Execute a withdrawal using a quote ID.
      * Withdraw
-     * @param idem UUID for tracking withdrawal flow.
      * @param quoteId
      * @param walletwithdrawquoteidexecutewithdrawRequest
      */
-    public walletwithdrawquoteidexecutewithdraw(idem: string, quoteId: string, walletwithdrawquoteidexecutewithdrawRequest: WalletwithdrawquoteidexecutewithdrawRequest, _options?: PromiseConfigurationOptions): Promise<Walletwithdrawquoteidexecutewithdraw200Response> {
+    public walletwithdrawquoteidexecutewithdraw(quoteId: string, walletwithdrawquoteidexecutewithdrawRequest: WalletwithdrawquoteidexecutewithdrawRequest, _options?: PromiseConfigurationOptions): Promise<Walletwithdrawquoteidexecutewithdraw200Response> {
         const observableOptions = wrapOptions(_options);
-        const result = this.api.walletwithdrawquoteidexecutewithdraw(idem, quoteId, walletwithdrawquoteidexecutewithdrawRequest, observableOptions);
+        const result = this.api.walletwithdrawquoteidexecutewithdraw(quoteId, walletwithdrawquoteidexecutewithdrawRequest, observableOptions);
         return result.toPromise();
     }
 

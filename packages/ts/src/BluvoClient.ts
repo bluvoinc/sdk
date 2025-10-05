@@ -1,6 +1,7 @@
 import {
     createConfiguration, OAuth2Api,
-    PromiseConfigurationOptions, server1, server2, ServerConfiguration,
+    PromiseConfigurationOptions, server1, server2,
+    ServerConfiguration,
     WalletsApi, WithdrawalsApi,
 } from "../generated";
 
@@ -384,7 +385,6 @@ export class BluvoClient {
             ) => {
                 return new WithdrawalsApi(this.configuration(walletId))
                     .walletwithdrawquoteidexecutewithdraw(
-                        idem,
                         quotationId,
                         {
                             twofa: args?.twofa!,

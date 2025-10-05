@@ -17,7 +17,7 @@ export class Walletlistlistwallets200ResponseWalletsInnerBalancesValue {
     'free'?: number;
     'used'?: number;
     'total'?: number;
-    'info'?: any | null;
+    'info'?: any;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -45,7 +45,7 @@ export class Walletlistlistwallets200ResponseWalletsInnerBalancesValue {
         {
             "name": "info",
             "baseName": "info",
-            "type": "any",
+            "type": "Null",
             "format": ""
         }    ];
 

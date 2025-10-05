@@ -178,35 +178,64 @@ export class BluvoWebClient {
             }
             
             newWindow.focus();
-            
+
             // Set up window close detection
             if (hooks?.onWindowClose) {
-                const CHECK_INTERVAL = 500;
-                const intervalId = setInterval(() => {
-                    if (newWindow.closed) {
-                        clearInterval(intervalId);
-                        hooks.onWindowClose!();
+                const CHECK_INTERVAL = 1000;
+                let hasCalledClose = false;
+
+                const checkWindowClosed = () => {
+                    try {
+                        // Check if window is closed or null
+                        if (!newWindow || newWindow.closed) {
+                            if (!hasCalledClose) {
+                                hasCalledClose = true;
+                                clearInterval(intervalId);
+                                hooks.onWindowClose!();
+                            }
+                            return true;
+                        }
+
+                        // Additional check: try to access a property
+                        // This will throw if window is in a different origin or closed
+                        try {
+                            // Just checking the location object existence
+                            void newWindow.location.href;
+                        } catch (e) {
+                            // Cross-origin error is expected and fine - window is still open
+                            // Only SecurityError or similar is expected here
+                        }
+
+                        return false;
+                    } catch (e) {
+                        // If we can't even check .closed, the window is definitely closed
+                        if (!hasCalledClose) {
+                            hasCalledClose = true;
+                            clearInterval(intervalId);
+                            hooks.onWindowClose!();
+                        }
+                        return true;
                     }
-                }, CHECK_INTERVAL);
-                
+                };
+
+                const intervalId = setInterval(checkWindowClosed, CHECK_INTERVAL);
+
                 // Return cleanup function
                 return () => {
                     clearInterval(intervalId);
-                    if (!newWindow.closed) {
+                    if (newWindow && !newWindow.closed) {
                         try {
-                            newWindow.location.href = 'about:blank';
+                            newWindow.close();
                         } catch {}
-                        newWindow.close();
                     }
                 };
             }
-            
+
             return () => {
-                if (!newWindow.closed) {
+                if (newWindow && !newWindow.closed) {
                     try {
-                        newWindow.location.href = 'about:blank';
+                        newWindow.close();
                     } catch {}
-                    newWindow.close();
                 }
             };
         },

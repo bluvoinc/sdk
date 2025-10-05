@@ -40,6 +40,7 @@ models/Walletwithdrawquoteidexecutewithdraw200Response.ts
 models/Walletwithdrawquoteidexecutewithdraw400Response.ts
 models/WalletwithdrawquoteidexecutewithdrawRequest.ts
 models/Walletwithdrawquotequotation200Response.ts
+models/Walletwithdrawquotequotation200ResponseFeeDetailsInner.ts
 models/Walletwithdrawquotequotation400Response.ts
 models/WalletwithdrawquotequotationRequest.ts
 models/all.ts

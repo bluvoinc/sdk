@@ -141,7 +141,6 @@ export class BluvoOttActionIdAuthentication implements SecurityAuthentication {
     }
 }
 
-
 export type AuthMethods = {
     "default"?: SecurityAuthentication,
     "bluvoOrgId"?: SecurityAuthentication,

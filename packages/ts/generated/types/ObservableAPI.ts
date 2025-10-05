@@ -26,6 +26,7 @@ import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walle
 import { Walletwithdrawquoteidexecutewithdraw400Response } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
+import { Walletwithdrawquotequotation200ResponseFeeDetailsInner } from '../models/Walletwithdrawquotequotation200ResponseFeeDetailsInner';
 import { Walletwithdrawquotequotation400Response } from '../models/Walletwithdrawquotequotation400Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
 
@@ -338,14 +339,13 @@ export class ObservableWithdrawalsApi {
     /**
      * Execute a withdrawal using a quote ID.
      * Withdraw
-     * @param idem UUID for tracking withdrawal flow.
      * @param quoteId
      * @param walletwithdrawquoteidexecutewithdrawRequest
      */
-    public walletwithdrawquoteidexecutewithdrawWithHttpInfo(idem: string, quoteId: string, walletwithdrawquoteidexecutewithdrawRequest: WalletwithdrawquoteidexecutewithdrawRequest, _options?: ConfigurationOptions): Observable<HttpInfo<Walletwithdrawquoteidexecutewithdraw200Response>> {
+    public walletwithdrawquoteidexecutewithdrawWithHttpInfo(quoteId: string, walletwithdrawquoteidexecutewithdrawRequest: WalletwithdrawquoteidexecutewithdrawRequest, _options?: ConfigurationOptions): Observable<HttpInfo<Walletwithdrawquoteidexecutewithdraw200Response>> {
         const _config = mergeConfiguration(this.configuration, _options);
 
-        const requestContextPromise = this.requestFactory.walletwithdrawquoteidexecutewithdraw(idem, quoteId, walletwithdrawquoteidexecutewithdrawRequest, _config);
+        const requestContextPromise = this.requestFactory.walletwithdrawquoteidexecutewithdraw(quoteId, walletwithdrawquoteidexecutewithdrawRequest, _config);
         // build promise chain
         let middlewarePreObservable = from<RequestContext>(requestContextPromise);
         for (const middleware of _config.middleware) {
@@ -365,12 +365,11 @@ export class ObservableWithdrawalsApi {
     /**
      * Execute a withdrawal using a quote ID.
      * Withdraw
-     * @param idem UUID for tracking withdrawal flow.
      * @param quoteId
      * @param walletwithdrawquoteidexecutewithdrawRequest
      */
-    public walletwithdrawquoteidexecutewithdraw(idem: string, quoteId: string, walletwithdrawquoteidexecutewithdrawRequest: WalletwithdrawquoteidexecutewithdrawRequest, _options?: ConfigurationOptions): Observable<Walletwithdrawquoteidexecutewithdraw200Response> {
-        return this.walletwithdrawquoteidexecutewithdrawWithHttpInfo(idem, quoteId, walletwithdrawquoteidexecutewithdrawRequest, _options).pipe(map((apiResponse: HttpInfo<Walletwithdrawquoteidexecutewithdraw200Response>) => apiResponse.data));
+    public walletwithdrawquoteidexecutewithdraw(quoteId: string, walletwithdrawquoteidexecutewithdrawRequest: WalletwithdrawquoteidexecutewithdrawRequest, _options?: ConfigurationOptions): Observable<Walletwithdrawquoteidexecutewithdraw200Response> {
+        return this.walletwithdrawquoteidexecutewithdrawWithHttpInfo(quoteId, walletwithdrawquoteidexecutewithdrawRequest, _options).pipe(map((apiResponse: HttpInfo<Walletwithdrawquoteidexecutewithdraw200Response>) => apiResponse.data));
     }
 
     /**

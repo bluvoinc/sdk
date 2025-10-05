@@ -189,14 +189,13 @@ export class BluvoFlowClient {
             },
             {
                 onWindowClose: () => {
-                    console.log('tracked closed window')
-                    const state = this.flowMachine?.getState();
-                    if (state?.type === 'oauth:processing') {
-                        this.flowMachine?.send({
-                            type: 'OAUTH_WINDOW_CLOSED_BY_USER',
-                            error: new Error('OAuth window closed by user')
-                        });
-                    }
+                    // const state = this.flowMachine?.getState();
+                    // if (state?.type === 'oauth:processing') {
+                    //     this.flowMachine?.send({
+                    //         type: 'OAUTH_WINDOW_CLOSED_BY_USER',
+                    //         error: new Error('OAuth window closed by user')
+                    //     });
+                    // }
                 }
             },
             flowOptions.popupOptions

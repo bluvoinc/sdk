@@ -180,6 +180,7 @@ export class BluvoWebClient {
             newWindow.focus();
 
             // Set up window close detection
+            // FIXME: this is not working for all browsers for some we give false-positives
             if (hooks?.onWindowClose) {
                 const CHECK_INTERVAL = 1000;
                 let hasCalledClose = false;

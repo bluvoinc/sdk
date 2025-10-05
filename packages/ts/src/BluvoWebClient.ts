@@ -120,7 +120,7 @@ export class BluvoWebClient {
             windowRef?: Window | undefined
         ) {
 
-            if(typeof windowRef === 'undefined') {
+            if (typeof windowRef === 'undefined') {
                 if (typeof window === 'undefined') {
                     throw new Error('This method can only be called in a browser environment');
                 }
@@ -147,11 +147,11 @@ export class BluvoWebClient {
             const windowTitle = popupOptions?.title || `${exchange} OAuth`;
             const windowWidth = popupOptions?.width || 500;
             const windowHeight = popupOptions?.height || 600;
-            
+
             // Calculate position: use provided values or center the window
             let left: number;
             let top: number;
-            
+
             if (popupOptions?.left !== undefined && popupOptions?.top !== undefined) {
                 // Use provided position
                 left = popupOptions.left;
@@ -162,33 +162,34 @@ export class BluvoWebClient {
                 const screenTop = windowRef.screenTop || windowRef.screenY || 0;
                 const screenWidth = windowRef.screen.width;
                 const screenHeight = windowRef.screen.height;
-                
+
                 left = screenLeft + (screenWidth - windowWidth) / 2;
                 top = screenTop + (screenHeight - windowHeight) / 2;
             }
-            
+
             const newWindow = windowRef.open(
                 url,
                 windowTitle,
                 `width=${windowWidth},height=${windowHeight},left=${left},top=${top},status=yes,scrollbars=yes,resizable=yes`
             );
-            
+
             if (!newWindow) {
                 throw new Error('Failed to open OAuth2 window. Please allow pop-ups for this site.');
             }
-            
+
             newWindow.focus();
 
             // Set up window close detection
             // FIXME: this is not working for all browsers for some we give false-positives
+            // Set up window close detection
             if (hooks?.onWindowClose) {
-                const CHECK_INTERVAL = 1000;
+                const CHECK_INTERVAL = 500;
                 let hasCalledClose = false;
 
                 const checkWindowClosed = () => {
                     try {
-                        // Check if window is closed or null
-                        if (!newWindow || newWindow.closed) {
+                        // Check if window is explicitly closed
+                        if (newWindow.closed) {
                             if (!hasCalledClose) {
                                 hasCalledClose = true;
                                 clearInterval(intervalId);
@@ -196,20 +197,15 @@ export class BluvoWebClient {
                             }
                             return true;
                         }
-
-                        // Additional check: try to access a property
-                        // This will throw if window is in a different origin or closed
-                        try {
-                            // Just checking the location object existence
-                            void newWindow.location.href;
-                        } catch (e) {
-                            // Cross-origin error is expected and fine - window is still open
-                            // Only SecurityError or similar is expected here
-                        }
-
+                        // Attempt to access a property to confirm state
+                        void newWindow.location.href;
                         return false;
-                    } catch (e) {
-                        // If we can't even check .closed, the window is definitely closed
+                    } catch (e:any) {
+                        // SecurityError or DOMException code 18: window is open but cross-origin
+                        if (e.name === 'SecurityError' || (e instanceof DOMException && e.code === 18)) {
+                            return false;
+                        }
+                        // Other errors (e.g., TypeError) indicate the window is closed
                         if (!hasCalledClose) {
                             hasCalledClose = true;
                             clearInterval(intervalId);
@@ -224,21 +220,30 @@ export class BluvoWebClient {
                 // Return cleanup function
                 return () => {
                     clearInterval(intervalId);
-                    if (newWindow && !newWindow.closed) {
+                    if (!hasCalledClose) {
                         try {
-                            newWindow.close();
-                        } catch {}
+                            if (newWindow && !newWindow.closed) {
+                                newWindow.close();
+                            }
+                        } catch (e) {
+                            // Suppress cross-origin errors on close attempt
+                            console.warn('Failed to close OAuth window:', e);
+                        }
                     }
                 };
             }
 
+// Default cleanup if no hooks provided
             return () => {
-                if (newWindow && !newWindow.closed) {
-                    try {
+                try {
+                    if (newWindow && !newWindow.closed) {
                         newWindow.close();
-                    } catch {}
+                    }
+                } catch (e) {
+                    // Suppress cross-origin errors
+                    console.warn('Failed to close OAuth window:', e);
                 }
-            };
+            }
         },
 
         /**

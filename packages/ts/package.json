@@ -18,7 +18,7 @@
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc && tsc --module esnext --outDir dist/esm && mv dist/esm/index.js dist/index.esm.js && rm -rf dist/esm",
-    "test": "vitest run",
+    "test": "vitest run && pnpm test:browser",
     "test:browser": "vitest run --config vitest.browser.config.ts",
     "test:browser:ui": "vitest run --config vitest.browser.config.ts --ui",
     "test:browser:chromium": "vitest run --config vitest.browser.config.ts --browser=chromium",

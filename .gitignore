@@ -5,6 +5,8 @@ CLAUDE.md
 *usage*
 test-open-window
 
+
+
 one-time
 
 gen-cmd.txt
@@ -45,3 +47,4 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+/packages/ts/test/browser/__screenshots__/

@@ -19,6 +19,11 @@
     "dev": "tsc --watch",
     "build": "tsc && tsc --module esnext --outDir dist/esm && mv dist/esm/index.js dist/index.esm.js && rm -rf dist/esm",
     "test": "vitest run",
+    "test:browser": "vitest run --config vitest.browser.config.ts",
+    "test:browser:ui": "vitest run --config vitest.browser.config.ts --ui",
+    "test:browser:chromium": "vitest run --config vitest.browser.config.ts --browser=chromium",
+    "test:browser:firefox": "vitest run --config vitest.browser.config.ts --browser=firefox",
+    "test:browser:webkit": "vitest run --config vitest.browser.config.ts --browser=webkit",
     "prepublishOnly": "pnpm build"
   },
   "publishConfig": {
@@ -35,8 +40,10 @@
     "@gomomento/sdk-web": "^1.113.0"
   },
   "devDependencies": {
+    "@vitest/browser": "^3.2.4",
+    "playwright": "^1.56.0",
     "typescript": "^5.0.0",
-    "vitest": "^3.1.1"
+    "vitest": "^3.2.4"
   },
   "files": [
     "dist/**/*",

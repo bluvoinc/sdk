@@ -74,14 +74,8 @@ export class BluvoWebClient {
          *
          * @param exchange The exchange to authenticate with (currently supports 'coinbase').
          * @param options OAuth2 flow configuration options:
-         *   @param walletId - A unique identifier for this wallet connection
-         *   @param idem - A unique identifier for this specific OAuth2 flow instance
          * @param hooks Optional callback hooks:
-         *   @param onWindowClose - Called when the OAuth window is closed by the user
          * @param popupOptions Optional window customization:
-         *   @param title - Window title (defaults to '{exchange}OAuth')
-         *   @param width - Window width in pixels (defaults to 500)
-         *   @param height - Window height in pixels (defaults to 600)
          * @param windowRef Optional window reference (defaults to global window)
          *
          * @example
@@ -140,7 +134,7 @@ export class BluvoWebClient {
                 );
 
             if (!success) {
-                throw new Error('Failed to generate OAuth2 link');
+                throw new Error('Failed to generate OAuth2 URL');
             }
 
             // Set default window options

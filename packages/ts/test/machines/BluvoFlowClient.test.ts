@@ -1,964 +1,965 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { BluvoFlowClient } from '../../src/machines';
-import { ERROR_CODES, WITHDRAWAL_QUOTATION_ERROR_TYPES, WITHDRAWAL_EXECUTION_ERROR_TYPES } from '../../src/error-codes';
-import { 
-  Walletwithdrawbalancebalance200Response,
-  Walletwithdrawquotequotation200Response,
+import {describe, it, expect, vi, beforeEach} from 'vitest';
+import {BluvoFlowClient} from '../../src/machines';
+import {ERROR_CODES, WITHDRAWAL_QUOTATION_ERROR_TYPES, WITHDRAWAL_EXECUTION_ERROR_TYPES} from '../../src/error-codes';
+import {
+    Walletwithdrawbalancebalance200Response,
+    Walletwithdrawquotequotation200Response,
 } from '../../generated';
 
 // Mock the BluvoWebClient module
 vi.mock('../../src/BluvoWebClient', () => {
-  return {
-    BluvoWebClient: {
-      createClient: vi.fn(() => ({
-        listen: vi.fn().mockResolvedValue({ topicName: 'test-topic' }),
-        unsubscribe: vi.fn().mockResolvedValue(undefined),
-        oauth2: {
-          openWindow: vi.fn().mockResolvedValue(() => {})
+    return {
+        BluvoWebClient: {
+            createClient: vi.fn(() => ({
+                listen: vi.fn().mockResolvedValue({topicName: 'test-topic'}),
+                unsubscribe: vi.fn().mockResolvedValue(undefined),
+                oauth2: {openWindow: vi.fn().mockResolvedValue(() => {})}
+            }))
         }
-      }))
-    }
-  };
+    };
 });
 
 describe('BluvoFlowClient Error Handling', () => {
-  const defaultOptions = {
-    orgId: 'test-org',
-    projectId: 'test-project',
-    fetchWithdrawableBalanceFn: vi.fn(),
-    requestQuotationFn: vi.fn(),
-    executeWithdrawalFn: vi.fn(),
-    mkUUIDFn: () => 'test-uuid-123'
-  };
+    const defaultOptions = {
+        orgId: 'test-org',
+        projectId: 'test-project',
+        fetchWithdrawableBalanceFn: vi.fn(),
+        requestQuotationFn: vi.fn(),
+        executeWithdrawalFn: vi.fn(),
 
-  const mockBalanceResponse: Walletwithdrawbalancebalance200Response = {
-    lastSyncAt: new Date().toISOString(),
-    balances: [{
-      asset: 'BTC',
-      amount: 1.5,
-      networks: [{
-        id: 'bitcoin',
-        name: 'Bitcoin',
-        displayName: 'Bitcoin',
-        minWithdrawal: '0.0001',
-        maxWithdrawal: '10',
-        assetName: 'BTC'
-      }],
-      amountInFiat: 45000
-    }]
-  };
+        getWalletByIdFn: vi.fn(),
+        listExchangesFn: vi.fn(),
+        mkUUIDFn: () => 'test-uuid-123'
+    };
 
-  const mockQuoteResponse: Walletwithdrawquotequotation200Response = {
-    id: 'quote-123',
-    asset: 'BTC',
-    amountNoFee: 1.0,
-    estimatedFee: 0.001,
-    estimatedTotal: 1.001,
-    amountWithFeeInFiat: 30030,
-    amountNoFeeInFiat: 30000,
-    estimatedFeeInFiat: 30,
-    expiresAt: new Date(Date.now() + 300000).toISOString(), // 5 minutes from now
-    destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
-  };
+    const mockBalanceResponse: Walletwithdrawbalancebalance200Response = {
+        lastSyncAt: new Date().toISOString(),
+        balances: [{
+            asset: 'BTC',
+            amount: 1.5,
+            networks: [{
+                id: 'bitcoin',
+                name: 'Bitcoin',
+                displayName: 'Bitcoin',
+                minWithdrawal: '0.0001',
+                maxWithdrawal: '10',
+                assetName: 'BTC'
+            }],
+            amountInFiat: 45000
+        }]
+    };
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  describe('fetchWithdrawableBalance error handling', () => {
-    it('should handle generic error in fetchWithdrawableBalance using resumeWithdrawalFlow', async () => {
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockRejectedValue(new Error('Network error'))
-      });
-
-      // Use resumeWithdrawalFlow which calls loadWallet immediately
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
-
-      // Wait for the async loadWallet to complete
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      const state = machine.getState();
-      expect(state.type).toBe('wallet:error');
-      expect(state.error?.message).toBe('Network error');
-    });
-
-    it('should handle wallet not found error using resumeWithdrawalFlow', async () => {
-      const error = new Error('Wallet not found');
-      (error as any).errorCode = ERROR_CODES.WALLET_NOT_FOUND;
-
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockRejectedValue(error)
-      });
-
-      // Use resumeWithdrawalFlow which calls loadWallet immediately
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
-
-      // Wait for the async loadWallet to complete
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      const state = machine.getState();
-      expect(state.type).toBe('wallet:error');
-      expect(state.error?.message).toBe('Wallet not found');
-    });
-  });
-
-  describe('requestQuotation error handling - Insufficient Balance', () => {
-    it('should handle WITHDRAWAL_INSUFFICIENT_BALANCE error', async () => {
-      const error = new Error('Insufficient balance');
-      (error as any).errorCode = ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE;
-
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockRejectedValue(error)
-      });
-
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
-
-      // Request quote that will fail
-      await client.requestQuote({
+    const mockQuoteResponse: Walletwithdrawquotequotation200Response = {
+        id: 'quote-123',
         asset: 'BTC',
-        amount: '2.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
-
-      const state = machine.getState();
-      expect(state.type).toBe('quote:error');
-      expect(state.error?.message).toBe('Insufficient balance');
-    });
-
-    it('should handle WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE error', async () => {
-      const error = new Error('Insufficient balance for fee');
-      (error as any).errorCode = ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE;
-
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockRejectedValue(error)
-      });
-
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
-
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.5',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
-
-      const state = machine.getState();
-      expect(state.type).toBe('quote:error');
-      expect(state.error?.message).toBe('Insufficient balance');
-    });
-
-    it('should handle legacy INSUFFICIENT_BALANCE error type', async () => {
-      const error = new Error('Legacy insufficient balance');
-      (error as any).type = WITHDRAWAL_QUOTATION_ERROR_TYPES.INSUFFICIENT_BALANCE;
-
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockRejectedValue(error)
-      });
-
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
-
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '2.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
-
-      const state = machine.getState();
-      expect(state.type).toBe('quote:error');
-      expect(state.error?.message).toBe('Insufficient balance');
-    });
-
-    it('should handle legacy INSUFFICIENT_BALANCE_CANNOT_COVER_FEE error type', async () => {
-      const error = new Error('Legacy insufficient balance for fee');
-      (error as any).code = WITHDRAWAL_QUOTATION_ERROR_TYPES.INSUFFICIENT_BALANCE_CANNOT_COVER_FEE;
-
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockRejectedValue(error)
-      });
-
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
-
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.5',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
-
-      const state = machine.getState();
-      expect(state.type).toBe('quote:error');
-      expect(state.error?.message).toBe('Insufficient balance');
-    });
-  });
-
-  describe('requestQuotation error handling - Amount Validation', () => {
-    it('should handle WITHDRAWAL_AMOUNT_BELOW_MINIMUM error', async () => {
-      const error = new Error('Amount too small');
-      (error as any).errorCode = ERROR_CODES.WITHDRAWAL_AMOUNT_BELOW_MINIMUM;
-
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockRejectedValue(error)
-      });
-
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
-
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '0.00001',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
-
-      const state = machine.getState();
-      expect(state.type).toBe('quote:error');
-      expect(state.error?.message).toBe('Amount below minimum');
-    });
-
-    it('should handle WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM error', async () => {
-      const error = new Error('Amount too large');
-      (error as any).errorCode = ERROR_CODES.WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM;
-
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockRejectedValue(error)
-      });
-
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
-
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1000',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
-
-      const state = machine.getState();
-      expect(state.type).toBe('quote:error');
-      expect(state.error?.message).toBe('Amount above maximum');
-    });
-
-    it('should handle legacy amount validation error types', async () => {
-      const error = new Error('Legacy amount error');
-      (error as any).response = {
-        data: {
-          type: WITHDRAWAL_QUOTATION_ERROR_TYPES.AMOUNT_BELOW_MINIMUM
-        }
-      };
-
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockRejectedValue(error)
-      });
-
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
-
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '0.00001',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
-
-      const state = machine.getState();
-      expect(state.type).toBe('quote:error');
-      expect(state.error?.message).toBe('Amount below minimum');
-    });
-  });
-
-  describe('requestQuotation error handling - Address and Network', () => {
-    it('should handle WITHDRAWAL_INVALID_ADDRESS error', async () => {
-      const error = new Error('Invalid address format');
-      (error as any).errorCode = ERROR_CODES.WITHDRAWAL_INVALID_ADDRESS;
-
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockRejectedValue(error)
-      });
-
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
-
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: 'invalid-address'
-      });
-
-      const state = machine.getState();
-      expect(state.type).toBe('quote:error');
-      expect(state.error?.message).toBe('Invalid destination address');
-    });
-
-    it('should handle WITHDRAWAL_NETWORK_NOT_SUPPORTED error', async () => {
-      const error = new Error('Network not supported');
-      (error as any).errorCode = ERROR_CODES.WITHDRAWAL_NETWORK_NOT_SUPPORTED;
-
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockRejectedValue(error)
-      });
-
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
-
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
+        amountNoFee: 1.0,
+        estimatedFee: 0.001,
+        estimatedTotal: 1.001,
+        amountWithFeeInFiat: 30030,
+        amountNoFeeInFiat: 30000,
+        estimatedFeeInFiat: 30,
+        expiresAt: new Date(Date.now() + 300000).toISOString(), // 5 minutes from now
         destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
-        network: 'unsupported-network'
-      });
+    };
 
-      const state = machine.getState();
-      expect(state.type).toBe('quote:error');
-      expect(state.error?.message).toBe('Network not supported');
-    });
-  });
-
-  describe('executeWithdrawal error handling - 2FA Errors', () => {
     beforeEach(() => {
-      defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
-      defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
+        vi.clearAllMocks();
     });
 
-    it('should handle WITHDRAWAL_2FA_REQUIRED_TOTP error', async () => {
-      const error = new Error('TOTP required');
-      (error as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP;
+    describe('fetchWithdrawableBalance error handling', () => {
+        it('should handle generic error in fetchWithdrawableBalance using resumeWithdrawalFlow', async () => {
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockRejectedValue(new Error('Network error'))
+            });
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        executeWithdrawalFn: vi.fn().mockRejectedValue(error)
-      });
+            // Use resumeWithdrawalFlow which calls loadWallet immediately
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            // Wait for the async loadWallet to complete
+            await new Promise(resolve => setTimeout(resolve, 300));
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            const state = machine.getState();
+            expect(state.type).toBe('wallet:error');
+            expect(state.error?.message).toBe('Network error');
+        });
 
-      await client.executeWithdrawal('quote-123');
+        it('should handle wallet not found error using resumeWithdrawalFlow', async () => {
+            const error = new Error('Wallet not found');
+            (error as any).errorCode = ERROR_CODES.WALLET_NOT_FOUND;
 
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockRejectedValue(error)
+            });
 
-      const state = machine.getState();
-      expect(state.type).toBe('withdraw:error2FA');
+            // Use resumeWithdrawalFlow which calls loadWallet immediately
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            // Wait for the async loadWallet to complete
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            const state = machine.getState();
+            expect(state.type).toBe('wallet:error');
+            expect(state.error?.message).toBe('Wallet not found');
+        });
     });
 
-    it('should handle WITHDRAWAL_2FA_REQUIRED_SMS error', async () => {
-      const error = new Error('SMS code required');
-      (error as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS;
+    describe('requestQuotation error handling - Insufficient Balance', () => {
+        it('should handle WITHDRAWAL_INSUFFICIENT_BALANCE error', async () => {
+            const error = new Error('Insufficient balance');
+            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE;
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        executeWithdrawalFn: vi.fn().mockRejectedValue(error)
-      });
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockRejectedValue(error)
+            });
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            // Request quote that will fail
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '2.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
 
-      await client.executeWithdrawal('quote-123');
+            const state = machine.getState();
+            expect(state.type).toBe('quote:error');
+            expect(state.error?.message).toBe('Insufficient balance');
+        });
 
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
+        it('should handle WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE error', async () => {
+            const error = new Error('Insufficient balance for fee');
+            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE;
 
-      const state = machine.getState();
-      expect(state.type).toBe('withdraw:errorSMS');
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockRejectedValue(error)
+            });
+
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.5',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
+
+            const state = machine.getState();
+            expect(state.type).toBe('quote:error');
+            expect(state.error?.message).toBe('Insufficient balance');
+        });
+
+        it('should handle legacy INSUFFICIENT_BALANCE error type', async () => {
+            const error = new Error('Legacy insufficient balance');
+            (error as any).type = WITHDRAWAL_QUOTATION_ERROR_TYPES.INSUFFICIENT_BALANCE;
+
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockRejectedValue(error)
+            });
+
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '2.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
+
+            const state = machine.getState();
+            expect(state.type).toBe('quote:error');
+            expect(state.error?.message).toBe('Insufficient balance');
+        });
+
+        it('should handle legacy INSUFFICIENT_BALANCE_CANNOT_COVER_FEE error type', async () => {
+            const error = new Error('Legacy insufficient balance for fee');
+            (error as any).code = WITHDRAWAL_QUOTATION_ERROR_TYPES.INSUFFICIENT_BALANCE_CANNOT_COVER_FEE;
+
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockRejectedValue(error)
+            });
+
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.5',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
+
+            const state = machine.getState();
+            expect(state.type).toBe('quote:error');
+            expect(state.error?.message).toBe('Insufficient balance');
+        });
     });
 
-    it('should handle legacy TWO_FACTOR_REQUIRED error type', async () => {
-      const error = new Error('Legacy 2FA required');
-      (error as any).type = WITHDRAWAL_EXECUTION_ERROR_TYPES.TWO_FACTOR_REQUIRED;
+    describe('requestQuotation error handling - Amount Validation', () => {
+        it('should handle WITHDRAWAL_AMOUNT_BELOW_MINIMUM error', async () => {
+            const error = new Error('Amount too small');
+            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_AMOUNT_BELOW_MINIMUM;
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        executeWithdrawalFn: vi.fn().mockRejectedValue(error)
-      });
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockRejectedValue(error)
+            });
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '0.00001',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
 
-      await client.executeWithdrawal('quote-123');
+            const state = machine.getState();
+            expect(state.type).toBe('quote:error');
+            expect(state.error?.message).toBe('Amount below minimum');
+        });
 
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
+        it('should handle WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM error', async () => {
+            const error = new Error('Amount too large');
+            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM;
 
-      const state = machine.getState();
-      expect(state.type).toBe('withdraw:error2FA');
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockRejectedValue(error)
+            });
+
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1000',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
+
+            const state = machine.getState();
+            expect(state.type).toBe('quote:error');
+            expect(state.error?.message).toBe('Amount above maximum');
+        });
+
+        it('should handle legacy amount validation error types', async () => {
+            const error = new Error('Legacy amount error');
+            (error as any).response = {
+                data: {
+                    type: WITHDRAWAL_QUOTATION_ERROR_TYPES.AMOUNT_BELOW_MINIMUM
+                }
+            };
+
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockRejectedValue(error)
+            });
+
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '0.00001',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
+
+            const state = machine.getState();
+            expect(state.type).toBe('quote:error');
+            expect(state.error?.message).toBe('Amount below minimum');
+        });
     });
 
-    it('should handle legacy SMS_CODE_REQUIRED error type', async () => {
-      const error = new Error('Legacy SMS required');
-      (error as any).code = WITHDRAWAL_EXECUTION_ERROR_TYPES.SMS_CODE_REQUIRED;
+    describe('requestQuotation error handling - Address and Network', () => {
+        it('should handle WITHDRAWAL_INVALID_ADDRESS error', async () => {
+            const error = new Error('Invalid address format');
+            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_INVALID_ADDRESS;
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        executeWithdrawalFn: vi.fn().mockRejectedValue(error)
-      });
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockRejectedValue(error)
+            });
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: 'invalid-address'
+            });
 
-      await client.executeWithdrawal('quote-123');
+            const state = machine.getState();
+            expect(state.type).toBe('quote:error');
+            expect(state.error?.message).toBe('Invalid destination address');
+        });
 
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
+        it('should handle WITHDRAWAL_NETWORK_NOT_SUPPORTED error', async () => {
+            const error = new Error('Network not supported');
+            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_NETWORK_NOT_SUPPORTED;
 
-      const state = machine.getState();
-      expect(state.type).toBe('withdraw:errorSMS');
-    });
-  });
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockRejectedValue(error)
+            });
 
-  describe('executeWithdrawal error handling - KYC and Balance', () => {
-    beforeEach(() => {
-      defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
-      defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
-    });
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-    it('should handle WITHDRAWAL_KYC_REQUIRED error', async () => {
-      const error = new Error('KYC verification required');
-      (error as any).errorCode = ERROR_CODES.WITHDRAWAL_KYC_REQUIRED;
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+                network: 'unsupported-network'
+            });
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        executeWithdrawalFn: vi.fn().mockRejectedValue(error)
-      });
-
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
-
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
-
-      await client.executeWithdrawal('quote-123');
-
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      const state = machine.getState();
-      expect(state.type).toBe('withdraw:errorKYC');
+            const state = machine.getState();
+            expect(state.type).toBe('quote:error');
+            expect(state.error?.message).toBe('Network not supported');
+        });
     });
 
-    it('should handle WITHDRAWAL_INSUFFICIENT_BALANCE during execution', async () => {
-      const error = new Error('Balance changed - insufficient funds');
-      (error as any).errorCode = ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE;
+    describe('executeWithdrawal error handling - 2FA Errors', () => {
+        beforeEach(() => {
+            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
+            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
+        });
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        executeWithdrawalFn: vi.fn().mockRejectedValue(error)
-      });
+        it('should handle WITHDRAWAL_2FA_REQUIRED_TOTP error', async () => {
+            const error = new Error('TOTP required');
+            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP;
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+            });
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      await client.executeWithdrawal('quote-123');
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
 
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
+            await client.executeWithdrawal('quote-123');
 
-      const state = machine.getState();
-      expect(state.type).toBe('withdraw:errorBalance');
+            // Wait for async operations
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            const state = machine.getState();
+            expect(state.type).toBe('withdraw:error2FA');
+        });
+
+        it('should handle WITHDRAWAL_2FA_REQUIRED_SMS error', async () => {
+            const error = new Error('SMS code required');
+            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS;
+
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+            });
+
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
+
+            await client.executeWithdrawal('quote-123');
+
+            // Wait for async operations
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            const state = machine.getState();
+            expect(state.type).toBe('withdraw:errorSMS');
+        });
+
+        it('should handle legacy TWO_FACTOR_REQUIRED error type', async () => {
+            const error = new Error('Legacy 2FA required');
+            (error as any).type = WITHDRAWAL_EXECUTION_ERROR_TYPES.TWO_FACTOR_REQUIRED;
+
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+            });
+
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
+
+            await client.executeWithdrawal('quote-123');
+
+            // Wait for async operations
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            const state = machine.getState();
+            expect(state.type).toBe('withdraw:error2FA');
+        });
+
+        it('should handle legacy SMS_CODE_REQUIRED error type', async () => {
+            const error = new Error('Legacy SMS required');
+            (error as any).code = WITHDRAWAL_EXECUTION_ERROR_TYPES.SMS_CODE_REQUIRED;
+
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+            });
+
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
+
+            await client.executeWithdrawal('quote-123');
+
+            // Wait for async operations
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            const state = machine.getState();
+            expect(state.type).toBe('withdraw:errorSMS');
+        });
     });
 
-    it('should handle legacy KYC_REQUIRED error type', async () => {
-      const error = new Error('Legacy KYC required');
-      (error as any).response = {
-        data: {
-          type: WITHDRAWAL_EXECUTION_ERROR_TYPES.KYC_REQUIRED
-        }
-      };
+    describe('executeWithdrawal error handling - KYC and Balance', () => {
+        beforeEach(() => {
+            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
+            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
+        });
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        executeWithdrawalFn: vi.fn().mockRejectedValue(error)
-      });
+        it('should handle WITHDRAWAL_KYC_REQUIRED error', async () => {
+            const error = new Error('KYC verification required');
+            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_KYC_REQUIRED;
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+            });
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      await client.executeWithdrawal('quote-123');
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
 
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
+            await client.executeWithdrawal('quote-123');
 
-      const state = machine.getState();
-      expect(state.type).toBe('withdraw:errorKYC');
-    });
-  });
+            // Wait for async operations
+            await new Promise(resolve => setTimeout(resolve, 100));
 
-  describe('executeWithdrawal error handling - Quote Expired', () => {
-    beforeEach(() => {
-      defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
-      defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
-    });
+            const state = machine.getState();
+            expect(state.type).toBe('withdraw:errorKYC');
+        });
 
-    it('should handle QUOTE_EXPIRED error', async () => {
-      const error = new Error('Quote has expired');
-      (error as any).errorCode = ERROR_CODES.QUOTE_EXPIRED;
+        it('should handle WITHDRAWAL_INSUFFICIENT_BALANCE during execution', async () => {
+            const error = new Error('Balance changed - insufficient funds');
+            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE;
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        executeWithdrawalFn: vi.fn().mockRejectedValue(error)
-      });
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+            });
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
 
-      await client.executeWithdrawal('quote-123');
+            await client.executeWithdrawal('quote-123');
 
-      // Wait longer for async operations and state machine transition
-      await new Promise(resolve => setTimeout(resolve, 300));
+            // Wait for async operations
+            await new Promise(resolve => setTimeout(resolve, 100));
 
-      const state = machine.getState();
-      // The state machine might be in processing or expired, both are valid for immediate errors
-      expect(['quote:expired', 'withdraw:processing']).toContain(state.type);
-    });
+            const state = machine.getState();
+            expect(state.type).toBe('withdraw:errorBalance');
+        });
 
-    it('should handle legacy RESOURCE_EXHAUSTED error type', async () => {
-      const error = new Error('Legacy quote expired');
-      (error as any).type = WITHDRAWAL_EXECUTION_ERROR_TYPES.RESOURCE_EXHAUSTED;
+        it('should handle legacy KYC_REQUIRED error type', async () => {
+            const error = new Error('Legacy KYC required');
+            (error as any).response = {
+                data: {
+                    type: WITHDRAWAL_EXECUTION_ERROR_TYPES.KYC_REQUIRED
+                }
+            };
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        executeWithdrawalFn: vi.fn().mockRejectedValue(error)
-      });
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+            });
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
 
-      await client.executeWithdrawal('quote-123');
+            await client.executeWithdrawal('quote-123');
 
-      // Wait longer for async operations and state machine transition
-      await new Promise(resolve => setTimeout(resolve, 300));
+            // Wait for async operations
+            await new Promise(resolve => setTimeout(resolve, 100));
 
-      const state = machine.getState();
-      // The state machine might be in processing or expired, both are valid for immediate errors
-      expect(['quote:expired', 'withdraw:processing']).toContain(state.type);
-    });
-  });
-
-  describe('executeWithdrawal error handling - Fatal Errors', () => {
-    beforeEach(() => {
-      defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
-      defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
+            const state = machine.getState();
+            expect(state.type).toBe('withdraw:errorKYC');
+        });
     });
 
-    it('should handle unknown error as fatal', async () => {
-      const error = new Error('Unknown error occurred');
+    describe('executeWithdrawal error handling - Quote Expired', () => {
+        beforeEach(() => {
+            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
+            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
+        });
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        executeWithdrawalFn: vi.fn().mockRejectedValue(error)
-      });
+        it('should handle QUOTE_EXPIRED error', async () => {
+            const error = new Error('Quote has expired');
+            (error as any).errorCode = ERROR_CODES.QUOTE_EXPIRED;
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+            });
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      await client.executeWithdrawal('quote-123');
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
 
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
+            await client.executeWithdrawal('quote-123');
 
-      const state = machine.getState();
-      expect(state.type).toBe('withdraw:fatal');
-      expect(state.error?.message).toBe('Unknown error occurred');
+            // Wait longer for async operations and state machine transition
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            const state = machine.getState();
+            // The state machine might be in processing or expired, both are valid for immediate errors
+            expect(['quote:expired', 'withdraw:processing']).toContain(state.type);
+        });
+
+        it('should handle legacy RESOURCE_EXHAUSTED error type', async () => {
+            const error = new Error('Legacy quote expired');
+            (error as any).type = WITHDRAWAL_EXECUTION_ERROR_TYPES.RESOURCE_EXHAUSTED;
+
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+            });
+
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
+
+            await client.executeWithdrawal('quote-123');
+
+            // Wait longer for async operations and state machine transition
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            const state = machine.getState();
+            // The state machine might be in processing or expired, both are valid for immediate errors
+            expect(['quote:expired', 'withdraw:processing']).toContain(state.type);
+        });
     });
 
-    it('should handle non-Error objects as fatal', async () => {
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        executeWithdrawalFn: vi.fn().mockRejectedValue('String error')
-      });
+    describe('executeWithdrawal error handling - Fatal Errors', () => {
+        beforeEach(() => {
+            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
+            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
+        });
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+        it('should handle unknown error as fatal', async () => {
+            const error = new Error('Unknown error occurred');
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+            });
 
-      await client.executeWithdrawal('quote-123');
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
 
-      const state = machine.getState();
-      expect(state.type).toBe('withdraw:fatal');
-      expect(state.error?.message).toBe('Failed to execute withdrawal');
-    });
-  });
+            await client.executeWithdrawal('quote-123');
 
-  describe('Error handling in submit2FA and submitSMS', () => {
-    beforeEach(() => {
-      defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
-      defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
-    });
+            // Wait for async operations
+            await new Promise(resolve => setTimeout(resolve, 100));
 
-    it('should handle invalid 2FA code error in submit2FA', async () => {
-      const initialError = new Error('2FA required');
-      (initialError as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP;
+            const state = machine.getState();
+            expect(state.type).toBe('withdraw:fatal');
+            expect(state.error?.message).toBe('Unknown error occurred');
+        });
 
-      const invalidCodeError = new Error('Invalid 2FA code');
-      (invalidCodeError as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_INVALID;
+        it('should handle non-Error objects as fatal', async () => {
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                executeWithdrawalFn: vi.fn().mockRejectedValue('String error')
+            });
 
-      const executeWithdrawalFn = vi.fn()
-        .mockRejectedValueOnce(initialError)
-        .mockRejectedValueOnce(invalidCodeError);
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        executeWithdrawalFn
-      });
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            await client.executeWithdrawal('quote-123');
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            // Wait for async operations
+            await new Promise(resolve => setTimeout(resolve, 100));
 
-      await client.executeWithdrawal('quote-123');
-
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      expect(machine.getState().type).toBe('withdraw:error2FA');
-
-      // Submit invalid 2FA code
-      await client.submit2FA('123456');
-
-      // Wait longer for async operations
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      const state = machine.getState();
-      // The error could result in either error2FAInvalid or fatal state
-      expect(['withdraw:error2FAInvalid', 'withdraw:fatal']).toContain(state.type);
+            const state = machine.getState();
+            expect(state.type).toBe('withdraw:fatal');
+            expect(state.error?.message).toBe('Failed to execute withdrawal');
+        });
     });
 
-    it('should handle error in submitSMS and transition correctly', async () => {
-      const initialError = new Error('SMS required');
-      (initialError as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS;
+    describe('Error handling in submit2FA and submitSMS', () => {
+        beforeEach(() => {
+            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
+            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
+        });
 
-      const kycError = new Error('KYC required after SMS');
-      (kycError as any).errorCode = ERROR_CODES.WITHDRAWAL_KYC_REQUIRED;
+        it('should handle invalid 2FA code error in submit2FA', async () => {
+            const initialError = new Error('2FA required');
+            (initialError as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP;
 
-      const executeWithdrawalFn = vi.fn()
-        .mockRejectedValueOnce(initialError)
-        .mockRejectedValueOnce(kycError);
+            const invalidCodeError = new Error('Invalid 2FA code');
+            (invalidCodeError as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_INVALID;
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        executeWithdrawalFn
-      });
+            const executeWithdrawalFn = vi.fn()
+                .mockRejectedValueOnce(initialError)
+                .mockRejectedValueOnce(invalidCodeError);
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                executeWithdrawalFn
+            });
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      await client.executeWithdrawal('quote-123');
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
 
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
+            await client.executeWithdrawal('quote-123');
 
-      expect(machine.getState().type).toBe('withdraw:errorSMS');
+            // Wait for async operations
+            await new Promise(resolve => setTimeout(resolve, 200));
 
-      // Submit SMS code
-      await client.submitSMS('654321');
+            expect(machine.getState().type).toBe('withdraw:error2FA');
 
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
+            // Submit invalid 2FA code
+            await client.submit2FA('123456');
 
-      const state = machine.getState();
-      expect(state.type).toBe('withdraw:errorKYC');
-    });
-  });
+            // Wait longer for async operations
+            await new Promise(resolve => setTimeout(resolve, 200));
 
-  describe('Complex error scenarios', () => {
-    it('should handle multiple error types in sequence', async () => {
-      const balanceError = new Error('Insufficient balance');
-      (balanceError as any).errorCode = ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE;
+            const state = machine.getState();
+            // The error could result in either error2FAInvalid or fatal state
+            expect(['withdraw:error2FAInvalid', 'withdraw:fatal']).toContain(state.type);
+        });
 
-      const minAmountError = new Error('Amount below minimum');
-      (minAmountError as any).errorCode = ERROR_CODES.WITHDRAWAL_AMOUNT_BELOW_MINIMUM;
+        it('should handle error in submitSMS and transition correctly', async () => {
+            const initialError = new Error('SMS required');
+            (initialError as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS;
 
-      // Create separate client instances to avoid call count confusion
-      const client1 = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockRejectedValue(balanceError)
-      });
+            const kycError = new Error('KYC required after SMS');
+            (kycError as any).errorCode = ERROR_CODES.WITHDRAWAL_KYC_REQUIRED;
 
-      const { machine: machine1 } = await client1.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            const executeWithdrawalFn = vi.fn()
+                .mockRejectedValueOnce(initialError)
+                .mockRejectedValueOnce(kycError);
 
-      // First quote request - insufficient balance
-      await client1.requestQuote({
-        asset: 'BTC',
-        amount: '2.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                executeWithdrawalFn
+            });
 
-      expect(machine1.getState().type).toBe('quote:error');
-      expect(machine1.getState().error?.message).toBe('Insufficient balance');
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      // Second client with different error
-      const client2 = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockRejectedValue(minAmountError)
-      });
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
 
-      const { machine: machine2 } = await client2.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            await client.executeWithdrawal('quote-123');
 
-      await client2.requestQuote({
-        asset: 'BTC',
-        amount: '0.00001',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            // Wait for async operations
+            await new Promise(resolve => setTimeout(resolve, 100));
 
-      expect(machine2.getState().type).toBe('quote:error');
-      expect(machine2.getState().error?.message).toBe('Amount below minimum');
+            expect(machine.getState().type).toBe('withdraw:errorSMS');
 
-      // Third client with success
-      const client3 = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse)
-      });
+            // Submit SMS code
+            await client.submitSMS('654321');
 
-      const { machine: machine3 } = await client3.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            // Wait for async operations
+            await new Promise(resolve => setTimeout(resolve, 100));
 
-      await client3.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
-
-      expect(machine3.getState().type).toBe('quote:ready');
+            const state = machine.getState();
+            expect(state.type).toBe('withdraw:errorKYC');
+        });
     });
 
-    it('should handle error during quote expiration timer', async () => {
-      // Create a quote that expires in 100ms
-      const shortExpiryQuote = {
-        ...mockQuoteResponse,
-        expiresAt: new Date(Date.now() + 100).toISOString()
-      };
+    describe('Complex error scenarios', () => {
+        it('should handle multiple error types in sequence', async () => {
+            const balanceError = new Error('Insufficient balance');
+            (balanceError as any).errorCode = ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE;
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockResolvedValue(shortExpiryQuote)
-      });
+            const minAmountError = new Error('Amount below minimum');
+            (minAmountError as any).errorCode = ERROR_CODES.WITHDRAWAL_AMOUNT_BELOW_MINIMUM;
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            // Create separate client instances to avoid call count confusion
+            const client1 = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockRejectedValue(balanceError)
+            });
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
-      });
+            const {machine: machine1} = await client1.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      expect(machine.getState().type).toBe('quote:ready');
+            // First quote request - insufficient balance
+            await client1.requestQuote({
+                asset: 'BTC',
+                amount: '2.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
 
-      // Wait for quote to expire
-      await new Promise(resolve => setTimeout(resolve, 150));
+            expect(machine1.getState().type).toBe('quote:error');
+            expect(machine1.getState().error?.message).toBe('Insufficient balance');
 
-      expect(machine.getState().type).toBe('quote:expired');
+            // Second client with different error
+            const client2 = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockRejectedValue(minAmountError)
+            });
+
+            const {machine: machine2} = await client2.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            await client2.requestQuote({
+                asset: 'BTC',
+                amount: '0.00001',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
+
+            expect(machine2.getState().type).toBe('quote:error');
+            expect(machine2.getState().error?.message).toBe('Amount below minimum');
+
+            // Third client with success
+            const client3 = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse)
+            });
+
+            const {machine: machine3} = await client3.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            await client3.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
+
+            expect(machine3.getState().type).toBe('quote:ready');
+        });
+
+        it('should handle error during quote expiration timer', async () => {
+            // Create a quote that expires in 100ms
+            const shortExpiryQuote = {
+                ...mockQuoteResponse,
+                expiresAt: new Date(Date.now() + 100).toISOString()
+            };
+
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockResolvedValue(shortExpiryQuote)
+            });
+
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa'
+            });
+
+            expect(machine.getState().type).toBe('quote:ready');
+
+            // Wait for quote to expire
+            await new Promise(resolve => setTimeout(resolve, 150));
+
+            expect(machine.getState().type).toBe('quote:expired');
+        });
     });
-  });
 
-  describe('Error code extraction edge cases', () => {
-    it('should handle error with code in response.data.type', async () => {
-      const error = {
-        message: 'API Error',
-        response: {
-          data: {
-            type: ERROR_CODES.WITHDRAWAL_INVALID_ADDRESS
-          }
-        }
-      };
+    describe('Error code extraction edge cases', () => {
+        it('should handle error with code in response.data.type', async () => {
+            const error = {
+                message: 'API Error',
+                response: {
+                    data: {
+                        type: ERROR_CODES.WITHDRAWAL_INVALID_ADDRESS
+                    }
+                }
+            };
 
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-        requestQuotationFn: vi.fn().mockRejectedValue(error)
-      });
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockRejectedValue(error)
+            });
 
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
 
-      await client.requestQuote({
-        asset: 'BTC',
-        amount: '1.0',
-        destinationAddress: 'invalid'
-      });
+            await client.requestQuote({
+                asset: 'BTC',
+                amount: '1.0',
+                destinationAddress: 'invalid'
+            });
 
-      const state = machine.getState();
-      expect(state.type).toBe('quote:error');
-      expect(state.error?.message).toBe('Invalid destination address');
+            const state = machine.getState();
+            expect(state.type).toBe('quote:error');
+            expect(state.error?.message).toBe('Invalid destination address');
+        });
+
+        it('should handle null/undefined errors gracefully', async () => {
+            const client = new BluvoFlowClient({
+                ...defaultOptions,
+                fetchWithdrawableBalanceFn: vi.fn().mockRejectedValue(null),
+            });
+
+            // Use resumeWithdrawalFlow for more predictable timing
+            const {machine} = await client.resumeWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-123'
+            });
+
+            // Wait for the async loadWallet to complete
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            const state = machine.getState();
+            expect(state.type).toBe('wallet:error');
+            expect(state.error?.message).toBe('Failed to load wallet');
+        });
     });
-
-    it('should handle null/undefined errors gracefully', async () => {
-      const client = new BluvoFlowClient({
-        ...defaultOptions,
-        fetchWithdrawableBalanceFn: vi.fn().mockRejectedValue(null),
-      });
-
-      // Use resumeWithdrawalFlow for more predictable timing
-      const { machine } = await client.resumeWithdrawalFlow({
-        exchange: 'coinbase',
-        walletId: 'wallet-123'
-      });
-
-      // Wait for the async loadWallet to complete
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      const state = machine.getState();
-      expect(state.type).toBe('wallet:error');
-      expect(state.error?.message).toBe('Failed to load wallet');
-    });
-  });
 });

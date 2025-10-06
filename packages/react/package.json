@@ -19,7 +19,7 @@
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc && tsc --module esnext --outDir dist/esm && mv dist/esm/index.js dist/index.esm.js && rm -rf dist/esm",
-    "test": "vitest",
+    "test": "vitest run",
     "prepublishOnly": "pnpm build"
   },
   "publishConfig": {

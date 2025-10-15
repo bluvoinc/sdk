@@ -2,7 +2,6 @@ export { useFlowMachine } from './useFlowMachine';
 export { useWithdrawMachine } from './useWithdrawMachine';
 export { useBluvoFlow } from './useBluvoFlow';
 export type { UseBluvoFlowOptions, UseBluvoFlowHook } from './useBluvoFlow';
-
 // Re-export types from the core SDK for convenience
 export type {
   BluvoFlowClientOptions,

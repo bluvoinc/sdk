@@ -4,7 +4,6 @@ import {
     ServerConfiguration,
     WalletsApi, WithdrawalsApi,
 } from "../generated";
-
 /**
  * The core client class for interacting with Bluvo's cryptocurrency exchange integration platform.
  *

@@ -35,6 +35,7 @@ interface FlowMachineOptions {
   orgId: string;
   projectId: string;
   maxRetryAttempts?: number;
+  autoRefreshQuotation?: boolean;
 }
 
 interface FlowMachineInstance {
@@ -47,6 +48,7 @@ const createInitialContext = (options: FlowMachineOptions): FlowContext => ({
   projectId: options.projectId,
   retryAttempts: 0,
   maxRetryAttempts: options.maxRetryAttempts || 3,
+  autoRefreshQuotation: options.autoRefreshQuotation !== undefined ? options.autoRefreshQuotation : true, // Default to true
 });
 
 const initialState = (options: FlowMachineOptions): FlowState => ({
@@ -195,7 +197,15 @@ function flowTransition(
       if (action.type === 'REQUEST_QUOTE') {
         return {
           type: 'quote:requesting',
-          context: state.context,
+          context: {
+            ...state.context,
+            lastQuoteRequest: {
+              asset: action.asset,
+              amount: action.amount,
+              destinationAddress: action.destinationAddress,
+              network: action.network
+            }
+          },
           error: null
         };
       }
@@ -204,6 +214,10 @@ function flowTransition(
     case 'quote:requesting':
       switch (action.type) {
         case 'QUOTE_RECEIVED':
+          if (action.quote) {
+            console.log('[State Machine] quote:requesting received QUOTE_RECEIVED with ID:', action.quote.id,
+              'ExpiresAt:', new Date(action.quote.expiresAt).toLocaleTimeString());
+          }
           return {
             type: 'quote:ready',
             context: {
@@ -224,13 +238,31 @@ function flowTransition(
 
     case 'quote:ready':
       switch (action.type) {
+        case 'REQUEST_QUOTE':
+          // Allow refreshing quote while in quote:ready state (for auto-refresh)
+          console.log('[State Machine] quote:ready received REQUEST_QUOTE, transitioning to quote:requesting');
+          return {
+            type: 'quote:requesting',
+            context: {
+              ...state.context,
+              quote: undefined,  // Clear old quote before requesting new one
+              lastQuoteRequest: {
+                asset: action.asset,
+                amount: action.amount,
+                destinationAddress: action.destinationAddress,
+                network: action.network
+              }
+            },
+            error: null
+          };
+
         case 'QUOTE_EXPIRED':
           return {
             type: 'quote:expired',
             context: state.context,
             error: new Error('Quote has expired')
           };
-        
+
         case 'START_WITHDRAWAL':
           if (!instance.withdrawalMachine) {
             instance.withdrawalMachine = createWithdrawalMachine({
@@ -251,6 +283,19 @@ function flowTransition(
             context: state.context,
             error: null
           };
+      }
+      break;
+
+    case 'quote:expired':
+      if (action.type === 'REQUEST_QUOTE') {
+        return {
+          type: 'quote:requesting',
+          context: {
+            ...state.context,
+            quote: undefined  // Clear expired quote to ensure fresh quote is requested
+          },
+          error: null
+        };
       }
       break;
 

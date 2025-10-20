@@ -21,6 +21,7 @@ export interface BluvoFlowClientOptions {
     orgId: string;
     projectId: string;
     maxRetryAttempts?: number;
+    autoRefreshQuotation?: boolean; // Default: true - Auto-refresh quotes when they expire
     topicToken?: string;
     cacheName?: string;
     // API function callbacks (to be implemented by the consumer)
@@ -79,6 +80,7 @@ export class BluvoFlowClient {
     private flowMachine?: Machine<FlowState, FlowActionType>;
     private subscription?: TopicSubscribe.Subscription;
     private generateId: () => string;
+    private quoteRefreshTimer?: ReturnType<typeof setTimeout>;
 
     constructor(private options: BluvoFlowClientOptions) {
         this.webClient = BluvoWebClient.createClient({
@@ -94,7 +96,8 @@ export class BluvoFlowClient {
             this.flowMachine = createFlowMachine({
                 orgId: this.options.orgId,
                 projectId: this.options.projectId,
-                maxRetryAttempts: this.options.maxRetryAttempts
+                maxRetryAttempts: this.options.maxRetryAttempts,
+                autoRefreshQuotation: this.options.autoRefreshQuotation
             });
         }
 
@@ -139,7 +142,8 @@ export class BluvoFlowClient {
         this.flowMachine = createFlowMachine({
             orgId: this.options.orgId,
             projectId: this.options.projectId,
-            maxRetryAttempts: this.options.maxRetryAttempts
+            maxRetryAttempts: this.options.maxRetryAttempts,
+            autoRefreshQuotation: this.options.autoRefreshQuotation
         });
 
         // Generate idempotency key for OAuth flow
@@ -217,7 +221,8 @@ export class BluvoFlowClient {
         this.flowMachine = createFlowMachine({
             orgId: this.options.orgId,
             projectId: this.options.projectId,
-            maxRetryAttempts: this.options.maxRetryAttempts
+            maxRetryAttempts: this.options.maxRetryAttempts,
+            autoRefreshQuotation: this.options.autoRefreshQuotation
         });
 
         // We need to transition through the states properly
@@ -298,6 +303,8 @@ export class BluvoFlowClient {
         const state = this.flowMachine.getState();
         if (!state.context.walletId) return;
 
+        console.log('[SDK] requestQuote called, current state:', state.type, 'amount:', options.amount);
+
         this.flowMachine.send({
             type: 'REQUEST_QUOTE',
             asset: options.asset,
@@ -305,6 +312,8 @@ export class BluvoFlowClient {
             destinationAddress: options.destinationAddress,
             network: options.network
         });
+
+        console.log('[SDK] REQUEST_QUOTE action sent to state machine');
 
         try {
             const quote = await this.options.requestQuotationFn(
@@ -319,30 +328,56 @@ export class BluvoFlowClient {
                 }
             );
 
+            console.log('[SDK] Backend returned quote with ID:', quote.id,
+                'ExpiresAt:', quote.expiresAt);
+
+            const quoteData = {
+                id: quote.id,
+                asset: quote.asset,
+                amount: String(quote.amountNoFee),
+                estimatedFee: String(quote.estimatedFee),
+                estimatedTotal: String(quote.estimatedTotal),
+
+                amountWithFeeInFiat: String(quote.amountWithFeeInFiat),
+                amountNoFeeInFiat: String(quote.amountNoFeeInFiat),
+                estimatedFeeInFiat: String(quote.estimatedFeeInFiat),
+
+                expiresAt: new Date(quote.expiresAt).getTime()
+            };
+
+            console.log('[SDK] Sending QUOTE_RECEIVED action with new quote ID:', quoteData.id,
+                'ExpiresAt:', new Date(quoteData.expiresAt).toLocaleTimeString());
+
             this.flowMachine.send({
                 type: 'QUOTE_RECEIVED',
-                quote: {
-                    id: quote.id,
-                    asset: quote.asset,
-                    amount: String(quote.amountNoFee),
-                    estimatedFee: String(quote.estimatedFee),
-                    estimatedTotal: String(quote.estimatedTotal),
-
-                    amountWithFeeInFiat: String(quote.amountWithFeeInFiat),
-                    amountNoFeeInFiat: String(quote.amountNoFeeInFiat),
-                    estimatedFeeInFiat: String(quote.estimatedFeeInFiat),
-
-                    expiresAt: new Date(quote.expiresAt).getTime()
-                }
+                quote: quoteData
             });
+
+            // Clear any existing quote refresh timer
+            if (this.quoteRefreshTimer) {
+                clearTimeout(this.quoteRefreshTimer);
+            }
 
             // Set up quote expiration timer
             const expiresIn = new Date(quote.expiresAt).getTime() - Date.now();
             if (expiresIn > 0) {
-                setTimeout(() => {
+                this.quoteRefreshTimer = setTimeout(() => {
                     const currentState = this.flowMachine?.getState();
                     if (currentState?.type === 'quote:ready' && currentState.context.quote?.id === quote.id) {
-                        this.flowMachine?.send({type: 'QUOTE_EXPIRED'});
+                        // Check if auto-refresh is enabled
+                        const autoRefresh = currentState.context.autoRefreshQuotation !== undefined
+                            ? currentState.context.autoRefreshQuotation
+                            : true; // Default to true
+
+                        if (autoRefresh && currentState.context.lastQuoteRequest) {
+                            // Auto-refresh the quote
+                            console.log('[SDK] Quote expired, auto-refreshing...');
+                            this.requestQuote(currentState.context.lastQuoteRequest);
+                        } else {
+                            // No auto-refresh, transition to expired state
+                            console.log('[SDK] Quote expired, transitioning to expired state');
+                            this.flowMachine?.send({type: 'QUOTE_EXPIRED'});
+                        }
                     }
                 }, expiresIn);
             }
@@ -685,6 +720,11 @@ export class BluvoFlowClient {
     }
 
     dispose() {
+        if (this.quoteRefreshTimer) {
+            clearTimeout(this.quoteRefreshTimer);
+            this.quoteRefreshTimer = undefined;
+        }
+
         if (this.subscription) {
             this.webClient.unsubscribe((this.subscription as any).topicName);
             this.subscription = undefined;

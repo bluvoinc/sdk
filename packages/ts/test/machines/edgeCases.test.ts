@@ -760,4 +760,308 @@ describe('Edge Cases and Error Scenarios', () => {
       expect(() => machine.getState()).toThrow('Machine has been disposed');
     });
   });
+
+  describe('Quote Expiration and Refresh Edge Cases', () => {
+    it('should replace expired quote with new quote when requesting with same parameters', () => {
+      const machine = createFlowMachine({
+        orgId: 'test-org',
+        projectId: 'test-project'
+      });
+
+      // Setup: Complete OAuth and wallet loading
+      machine.send({
+        type: 'START_OAUTH',
+        exchange: 'coinbase',
+        walletId: 'wallet-123',
+        idem: 'oauth-456'
+      });
+      machine.send({ type: 'OAUTH_WINDOW_OPENED' });
+      machine.send({
+        exchange: 'coinbase',
+        type: 'OAUTH_COMPLETED',
+        walletId: 'wallet-123'
+      });
+      machine.send({ type: 'LOAD_WALLET' });
+      machine.send({
+        type: 'WALLET_LOADED',
+        balances: [{ asset: 'BTC', balance: '1.0' }]
+      });
+
+      // Request initial quote
+      const quoteParams = {
+        asset: 'BTC',
+        amount: '0.5',
+        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+        network: 'bitcoin'
+      };
+
+      machine.send({
+        type: 'REQUEST_QUOTE',
+        ...quoteParams
+      });
+
+      expect(machine.getState().type).toBe('quote:requesting');
+
+      // Receive first quote (expires in 60 seconds)
+      const initialTimestamp = Date.now();
+      const firstQuote = {
+        id: 'quote-first-12345',
+        asset: 'BTC',
+        amount: '0.5',
+        estimatedFee: '0.0001',
+        estimatedTotal: '0.5001',
+        expiresAt: initialTimestamp + 60000, // 60 seconds from now
+        amountWithFeeInFiat: '15003',
+        amountNoFeeInFiat: '15000',
+        estimatedFeeInFiat: '3'
+      };
+
+      machine.send({
+        type: 'QUOTE_RECEIVED',
+        quote: firstQuote
+      });
+
+      let state = machine.getState();
+      expect(state.type).toBe('quote:ready');
+      expect(state.context.quote).toBeDefined();
+      expect(state.context.quote?.id).toBe('quote-first-12345');
+      expect(state.context.quote?.expiresAt).toBe(initialTimestamp + 60000);
+
+      // Simulate quote expiration after 60 seconds
+      machine.send({ type: 'QUOTE_EXPIRED' });
+
+      state = machine.getState();
+      expect(state.type).toBe('quote:expired');
+      expect(state.error?.message).toContain('expired');
+      // Old quote should still be in context until a new one is requested
+      expect(state.context.quote?.id).toBe('quote-first-12345');
+
+      // Request a new quote with the EXACT SAME parameters
+      machine.send({
+        type: 'REQUEST_QUOTE',
+        ...quoteParams // Same parameters as before
+      });
+
+      state = machine.getState();
+      expect(state.type).toBe('quote:requesting');
+      // Critical: Old quote should be cleared when requesting new quote
+      expect(state.context.quote).toBeUndefined();
+
+      // Receive new quote with different ID (simulating a fresh quote from the API)
+      const newTimestamp = Date.now();
+      const secondQuote = {
+        id: 'quote-second-67890', // Different ID
+        asset: 'BTC',
+        amount: '0.5',
+        estimatedFee: '0.00012', // Slightly different fee
+        estimatedTotal: '0.50012',
+        expiresAt: newTimestamp + 60000, // New expiration timestamp
+        amountWithFeeInFiat: '15004',
+        amountNoFeeInFiat: '15000',
+        estimatedFeeInFiat: '4'
+      };
+
+      machine.send({
+        type: 'QUOTE_RECEIVED',
+        quote: secondQuote
+      });
+
+      state = machine.getState();
+      expect(state.type).toBe('quote:ready');
+      expect(state.error).toBeNull(); // Error should be cleared
+
+      // Verify the new quote is stored in state
+      expect(state.context.quote).toBeDefined();
+      expect(state.context.quote?.id).toBe('quote-second-67890');
+      expect(state.context.quote?.id).not.toBe('quote-first-12345');
+
+      // Verify all quote properties are from the new quote
+      expect(state.context.quote?.expiresAt).toBe(newTimestamp + 60000);
+      expect(state.context.quote?.estimatedFee).toBe('0.00012');
+      expect(state.context.quote?.estimatedTotal).toBe('0.50012');
+      expect(state.context.quote?.amountWithFeeInFiat).toBe('15004');
+    });
+
+    it('should clear old quote when requesting new quote from quote:ready state', () => {
+      const machine = createFlowMachine({
+        orgId: 'test-org',
+        projectId: 'test-project'
+      });
+
+      // Setup to quote:ready state
+      machine.send({
+        type: 'START_OAUTH',
+        exchange: 'coinbase',
+        walletId: 'wallet-123',
+        idem: 'oauth-456'
+      });
+      machine.send({ type: 'OAUTH_WINDOW_OPENED' });
+      machine.send({
+        exchange: 'coinbase',
+        type: 'OAUTH_COMPLETED',
+        walletId: 'wallet-123'
+      });
+      machine.send({ type: 'LOAD_WALLET' });
+      machine.send({
+        type: 'WALLET_LOADED',
+        balances: [{ asset: 'ETH', balance: '5.0' }]
+      });
+
+      // First quote
+      machine.send({
+        type: 'REQUEST_QUOTE',
+        asset: 'ETH',
+        amount: '1.0',
+        destinationAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+      });
+      machine.send({
+        type: 'QUOTE_RECEIVED',
+        quote: {
+          id: 'quote-old',
+          asset: 'ETH',
+          amount: '1.0',
+          estimatedFee: '0.005',
+          estimatedTotal: '1.005',
+          expiresAt: Date.now() + 60000,
+          amountWithFeeInFiat: '3015',
+          amountNoFeeInFiat: '3000',
+          estimatedFeeInFiat: '15'
+        }
+      });
+
+      expect(machine.getState().type).toBe('quote:ready');
+      expect(machine.getState().context.quote?.id).toBe('quote-old');
+
+      // Request a new quote while still in quote:ready (auto-refresh scenario)
+      machine.send({
+        type: 'REQUEST_QUOTE',
+        asset: 'ETH',
+        amount: '1.0',
+        destinationAddress: '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb',
+      });
+
+      // Should transition to quote:requesting and clear old quote
+      let state = machine.getState();
+      expect(state.type).toBe('quote:requesting');
+      expect(state.context.quote).toBeUndefined(); // Old quote cleared
+
+      // Receive new quote
+      machine.send({
+        type: 'QUOTE_RECEIVED',
+        quote: {
+          id: 'quote-new',
+          asset: 'ETH',
+          amount: '1.0',
+          estimatedFee: '0.006',
+          estimatedTotal: '1.006',
+          expiresAt: Date.now() + 60000,
+          amountWithFeeInFiat: '3018',
+          amountNoFeeInFiat: '3000',
+          estimatedFeeInFiat: '18'
+        }
+      });
+
+      state = machine.getState();
+      expect(state.type).toBe('quote:ready');
+      expect(state.context.quote?.id).toBe('quote-new');
+      expect(state.context.quote?.id).not.toBe('quote-old');
+    });
+
+    it('should handle multiple quote expirations and refreshes in sequence', () => {
+      const machine = createFlowMachine({
+        orgId: 'test-org',
+        projectId: 'test-project'
+      });
+
+      // Setup
+      machine.send({
+        type: 'START_OAUTH',
+        exchange: 'coinbase',
+        walletId: 'wallet-123',
+        idem: 'oauth-456'
+      });
+      machine.send({ type: 'OAUTH_WINDOW_OPENED' });
+      machine.send({
+        exchange: 'coinbase',
+        type: 'OAUTH_COMPLETED',
+        walletId: 'wallet-123'
+      });
+      machine.send({ type: 'LOAD_WALLET' });
+      machine.send({
+        type: 'WALLET_LOADED',
+        balances: [{ asset: 'BTC', balance: '10.0' }]
+      });
+
+      const quoteParams = {
+        asset: 'BTC',
+        amount: '2.0',
+        destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      };
+
+      // First quote cycle
+      machine.send({ type: 'REQUEST_QUOTE', ...quoteParams });
+      machine.send({
+        type: 'QUOTE_RECEIVED',
+        quote: {
+          id: 'quote-1',
+          asset: 'BTC',
+          amount: '2.0',
+          estimatedFee: '0.0001',
+          estimatedTotal: '2.0001',
+          expiresAt: Date.now() + 60000,
+          amountWithFeeInFiat: '60003',
+          amountNoFeeInFiat: '60000',
+          estimatedFeeInFiat: '3'
+        }
+      });
+      expect(machine.getState().context.quote?.id).toBe('quote-1');
+
+      // Expire and refresh - cycle 2
+      machine.send({ type: 'QUOTE_EXPIRED' });
+      expect(machine.getState().type).toBe('quote:expired');
+
+      machine.send({ type: 'REQUEST_QUOTE', ...quoteParams });
+      expect(machine.getState().context.quote).toBeUndefined();
+
+      machine.send({
+        type: 'QUOTE_RECEIVED',
+        quote: {
+          id: 'quote-2',
+          asset: 'BTC',
+          amount: '2.0',
+          estimatedFee: '0.00015',
+          estimatedTotal: '2.00015',
+          expiresAt: Date.now() + 60000,
+          amountWithFeeInFiat: '60005',
+          amountNoFeeInFiat: '60000',
+          estimatedFeeInFiat: '5'
+        }
+      });
+      expect(machine.getState().context.quote?.id).toBe('quote-2');
+
+      // Expire and refresh - cycle 3
+      machine.send({ type: 'QUOTE_EXPIRED' });
+      machine.send({ type: 'REQUEST_QUOTE', ...quoteParams });
+      machine.send({
+        type: 'QUOTE_RECEIVED',
+        quote: {
+          id: 'quote-3',
+          asset: 'BTC',
+          amount: '2.0',
+          estimatedFee: '0.0002',
+          estimatedTotal: '2.0002',
+          expiresAt: Date.now() + 60000,
+          amountWithFeeInFiat: '60006',
+          amountNoFeeInFiat: '60000',
+          estimatedFeeInFiat: '6'
+        }
+      });
+
+      const finalState = machine.getState();
+      expect(finalState.type).toBe('quote:ready');
+      expect(finalState.context.quote?.id).toBe('quote-3');
+      expect(finalState.context.quote?.estimatedFee).toBe('0.0002');
+      expect(finalState.error).toBeNull();
+    });
+  });
 });

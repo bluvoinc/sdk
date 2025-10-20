@@ -885,6 +885,7 @@ describe('BluvoFlowClient Error Handling', () => {
 
             const client = new BluvoFlowClient({
                 ...defaultOptions,
+                autoRefreshQuotation: false, // Disable auto-refresh to test expiration behavior
                 fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
                 requestQuotationFn: vi.fn().mockResolvedValue(shortExpiryQuote)
             });

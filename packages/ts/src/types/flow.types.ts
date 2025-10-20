@@ -32,6 +32,15 @@ export type FlowStateType =
 export interface FlowContext {
   orgId: string;
   projectId: string;
+  autoRefreshQuotation?: boolean;
+  lastQuoteRequest?: {
+    asset: string;
+    amount: string;
+    destinationAddress: string;
+    network?: string;
+    tag?: string;
+    includeFee?: boolean;
+  };
   exchanges?: Array<{
     id: string;
     name: string;
@@ -40,8 +49,8 @@ export interface FlowContext {
   }>;
   exchange?: string;
   walletId?: string;
-  walletBalances?: Array<{ 
-    asset: string; 
+  walletBalances?: Array<{
+    asset: string;
     balance: string;
     balanceInFiat?: string;
     networks?: Array<{

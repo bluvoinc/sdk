@@ -8,8 +8,6 @@ export * from '../models/Walletget404Response';
 export * from '../models/Walletlistlistwallets200Response';
 export * from '../models/Walletlistlistwallets200ResponsePagination';
 export * from '../models/Walletlistlistwallets200ResponseWalletsInner';
-export * from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValue';
-export * from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
 export * from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 export * from '../models/Wallettransactionslisttransactions200Response';
 export * from '../models/Wallettransactionslisttransactions200ResponsePagination';
@@ -35,8 +33,6 @@ import { Walletget404Response , Walletget404ResponseTypeEnum    } from '../model
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
 import { Walletlistlistwallets200ResponseWalletsInner      , Walletlistlistwallets200ResponseWalletsInnerExchangeEnum      } from '../models/Walletlistlistwallets200ResponseWalletsInner';
-import { Walletlistlistwallets200ResponseWalletsInnerBalancesValue } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValue';
-import { Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
 import { Wallettransactionslisttransactions200ResponsePagination } from '../models/Wallettransactionslisttransactions200ResponsePagination';
@@ -90,8 +86,6 @@ let typeMap: {[index: string]: any} = {
     "Walletlistlistwallets200Response": Walletlistlistwallets200Response,
     "Walletlistlistwallets200ResponsePagination": Walletlistlistwallets200ResponsePagination,
     "Walletlistlistwallets200ResponseWalletsInner": Walletlistlistwallets200ResponseWalletsInner,
-    "Walletlistlistwallets200ResponseWalletsInnerBalancesValue": Walletlistlistwallets200ResponseWalletsInnerBalancesValue,
-    "Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf": Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf,
     "Walletlistlistwallets200ResponseWalletsInnerInvalidApi": Walletlistlistwallets200ResponseWalletsInnerInvalidApi,
     "Wallettransactionslisttransactions200Response": Wallettransactionslisttransactions200Response,
     "Wallettransactionslisttransactions200ResponsePagination": Wallettransactionslisttransactions200ResponsePagination,

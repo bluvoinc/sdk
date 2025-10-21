@@ -22,22 +22,12 @@ export type Wallet = Walletlistlistwallets200ResponseWalletsInner;
 /**
  * Balance information for a single cryptocurrency in a wallet
  */
-export type WalletBalance = Walletlistlistwallets200ResponseWalletsInnerBalancesValue;
-
-/**
- * All balances in a wallet, keyed by cryptocurrency symbol
- */
-export type WalletBalances = { [key: string]: WalletBalance };
-
-/**
- * Information about invalid API credentials for a wallet
- */
-export type WalletInvalidApiInfo = Walletlistlistwallets200ResponseWalletsInnerInvalidApi;
+export type WalletBalances = Walletlistlistwallets200ResponseWalletsInner['balances'];
 
 /**
  * Supported cryptocurrency exchanges
  */
-export type Exchange = Walletlistlistwallets200ResponseWalletsInnerExchangeEnum;
+export type CentralizedExchange = Walletlistlistwallets200ResponseWalletsInnerExchangeEnum;
 
 // Re-export the Exchange enum for direct use
 export { Walletlistlistwallets200ResponseWalletsInnerExchangeEnum as ExchangeEnum } from '../../generated/models/Walletlistlistwallets200ResponseWalletsInner';
@@ -52,7 +42,7 @@ import type {
     Wallettransactionslisttransactions200ResponseTransactionsInnerDirectionEnum,
     Wallettransactionslisttransactions200ResponseTransactionsInnerStatusEnum,
     Wallettransactionslisttransactions200ResponseTransactionsInnerFiatCurrencyEnum
-} from '../../generated/models/Wallettransactionslisttransactions200ResponseTransactionsInner';
+} from '../../generated';
 
 /**
  * Represents a single transaction in a wallet
@@ -112,7 +102,7 @@ export type WithdrawableBalance = Walletwithdrawbalancebalance200ResponseBalance
 /**
  * Network information for withdrawing a specific cryptocurrency
  */
-export type WithdrawableNetwork = Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner;
+export type WithdrawableBalanceNetwork = Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner;
 
 /**
  * Detailed fee information for a withdrawal
@@ -198,8 +188,8 @@ export type Pagination = Wallettransactionslisttransactions200ResponsePagination
 // Request Types
 // ============================================================================
 
-import type { WalletwithdrawquotequotationRequest } from '../../generated/models/WalletwithdrawquotequotationRequest';
-import type { WalletwithdrawquoteidexecutewithdrawRequest } from '../../generated/models/WalletwithdrawquoteidexecutewithdrawRequest';
+import type { WalletwithdrawquotequotationRequest } from '../../generated';
+import type { WalletwithdrawquoteidexecutewithdrawRequest } from '../../generated';
 
 /**
  * Request parameters for creating a withdrawal quotation
@@ -215,8 +205,8 @@ export type ExecuteWithdrawalRequest = WalletwithdrawquoteidexecutewithdrawReque
 // Response Types
 // ============================================================================
 
-import type { Walletwithdrawquoteidexecutewithdraw200Response } from '../../generated/models/Walletwithdrawquoteidexecutewithdraw200Response';
-import type { Oauth2exchangeurlgeturl200Response } from '../../generated/models/Oauth2exchangeurlgeturl200Response';
+import type { Walletwithdrawquoteidexecutewithdraw200Response } from '../../generated';
+import type { Oauth2exchangeurlgeturl200Response } from '../../generated';
 
 /**
  * Response from executing a withdrawal

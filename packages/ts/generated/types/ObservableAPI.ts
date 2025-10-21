@@ -13,8 +13,6 @@ import { Walletget404Response } from '../models/Walletget404Response';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
 import { Walletlistlistwallets200ResponseWalletsInner } from '../models/Walletlistlistwallets200ResponseWalletsInner';
-import { Walletlistlistwallets200ResponseWalletsInnerBalancesValue } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValue';
-import { Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
 import { Wallettransactionslisttransactions200ResponsePagination } from '../models/Wallettransactionslisttransactions200ResponsePagination';
@@ -84,7 +82,7 @@ export class ObservableOAuth2Api {
      * @param exchange Exchange identifier.
      * @param idem Idempotency key.
      */
-    public oauth2exchangeurlgeturlWithHttpInfo(exchange: 'coinbase' | 'kraken', idem: string, _options?: ConfigurationOptions): Observable<HttpInfo<Oauth2exchangeurlgeturl200Response>> {
+    public oauth2exchangeurlgeturlWithHttpInfo(exchange: 'coinbase' | 'kraken' | 'gemini', idem: string, _options?: ConfigurationOptions): Observable<HttpInfo<Oauth2exchangeurlgeturl200Response>> {
         const _config = mergeConfiguration(this.configuration, _options);
 
         const requestContextPromise = this.requestFactory.oauth2exchangeurlgeturl(exchange, idem, _config);
@@ -110,7 +108,7 @@ export class ObservableOAuth2Api {
      * @param exchange Exchange identifier.
      * @param idem Idempotency key.
      */
-    public oauth2exchangeurlgeturl(exchange: 'coinbase' | 'kraken', idem: string, _options?: ConfigurationOptions): Observable<Oauth2exchangeurlgeturl200Response> {
+    public oauth2exchangeurlgeturl(exchange: 'coinbase' | 'kraken' | 'gemini', idem: string, _options?: ConfigurationOptions): Observable<Oauth2exchangeurlgeturl200Response> {
         return this.oauth2exchangeurlgeturlWithHttpInfo(exchange, idem, _options).pipe(map((apiResponse: HttpInfo<Oauth2exchangeurlgeturl200Response>) => apiResponse.data));
     }
 

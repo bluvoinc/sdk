@@ -85,7 +85,7 @@ console.log('API called successfully. Returned data:', data);
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **exchange** | [**&#39;coinbase&#39; | &#39;kraken&#39;**]**Array<&#39;coinbase&#39; &#124; &#39;kraken&#39;>** | Exchange identifier. | defaults to undefined
+ **exchange** | [**&#39;coinbase&#39; | &#39;kraken&#39; | &#39;gemini&#39;**]**Array<&#39;coinbase&#39; &#124; &#39;kraken&#39; &#124; &#39;gemini&#39;>** | Exchange identifier. | defaults to undefined
  **idem** | [**string**] | Idempotency key. | defaults to undefined
 
 

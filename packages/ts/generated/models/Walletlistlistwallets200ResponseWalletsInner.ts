@@ -11,7 +11,6 @@
  */
 
 import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
-import { Walletlistlistwallets200ResponseWalletsInnerBalancesValue } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValue';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 import { HttpFile } from '../http/http';
 
@@ -23,7 +22,7 @@ export class Walletlistlistwallets200ResponseWalletsInner {
     'lastSyncAt'?: Walletget200ResponseCreatedAt | null;
     'expiresAt'?: Walletget200ResponseCreatedAt | null;
     'exchange': Walletlistlistwallets200ResponseWalletsInnerExchangeEnum;
-    'balances': { [key: string]: Walletlistlistwallets200ResponseWalletsInnerBalancesValue; };
+    'balances': { [key: string]: number; };
     'ipPool'?: Array<string> | null;
     'invalidApi'?: Walletlistlistwallets200ResponseWalletsInnerInvalidApi | null;
 
@@ -77,7 +76,7 @@ export class Walletlistlistwallets200ResponseWalletsInner {
         {
             "name": "balances",
             "baseName": "balances",
-            "type": "{ [key: string]: Walletlistlistwallets200ResponseWalletsInnerBalancesValue; }",
+            "type": "{ [key: string]: number; }",
             "format": ""
         },
         {

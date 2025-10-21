@@ -12,8 +12,6 @@ import { Walletget404Response } from '../models/Walletget404Response';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
 import { Walletlistlistwallets200ResponseWalletsInner } from '../models/Walletlistlistwallets200ResponseWalletsInner';
-import { Walletlistlistwallets200ResponseWalletsInnerBalancesValue } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValue';
-import { Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf } from '../models/Walletlistlistwallets200ResponseWalletsInnerBalancesValueAnyOf';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
 import { Wallettransactionslisttransactions200ResponsePagination } from '../models/Wallettransactionslisttransactions200ResponsePagination';
@@ -39,10 +37,10 @@ export interface OAuth2ApiOauth2exchangeurlgeturlRequest {
     /**
      * Exchange identifier.
      * Defaults to: undefined
-     * @type &#39;coinbase&#39; | &#39;kraken&#39;
+     * @type &#39;coinbase&#39; | &#39;kraken&#39; | &#39;gemini&#39;
      * @memberof OAuth2Apioauth2exchangeurlgeturl
      */
-    exchange: 'coinbase' | 'kraken'
+    exchange: 'coinbase' | 'kraken' | 'gemini'
     /**
      * Idempotency key.
      * Defaults to: undefined

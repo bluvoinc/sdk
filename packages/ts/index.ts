@@ -12,6 +12,9 @@ export * from './src/types/machine.types';
 export * from './src/types/flow.types';
 export * from './src/types/withdrawal.types';
 
+// API Types - Clean, self-explanatory type exports
+export * from './src/types/api.types';
+
 /**
  * Create a fully configured Bluvo SDK client instance with a single function call.
  *

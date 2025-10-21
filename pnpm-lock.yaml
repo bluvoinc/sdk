@@ -23,11 +23,10 @@ importers:
         version: 5.8.2
 
   packages/react:
-    dependencies:
+    devDependencies:
       '@bluvo/sdk-ts':
         specifier: workspace:*
         version: link:../ts
-    devDependencies:
       '@types/react':
         specifier: ^18.0.0
         version: 18.3.24

@@ -16,8 +16,11 @@ import {
     Walletwithdrawquoteidexecutewithdraw200Response
 } from "../../generated";
 import {Walletwithdrawbalancebalance200Response} from "../../generated";
-import {Walletget200Response} from "../../generated";
-import {type ListCentralizedExchangesResponse, Wallet} from "../types/api.types";
+import {
+    type ListCentralizedExchangesResponse,
+    ListCentralizedExchangesResponseStatusEnum,
+    Wallet
+} from "../types/api.types";
 
 export interface BluvoFlowClientOptions {
     orgId: string;
@@ -27,7 +30,7 @@ export interface BluvoFlowClientOptions {
     topicToken?: string;
     cacheName?: string;
     // API function callbacks (to be implemented by the consumer)
-    listExchangesFn: (status?: 'live' | 'offline' | 'maintenance' | 'coming_soon') => Promise<ListCentralizedExchangesResponse['exchanges']>;
+    listExchangesFn: (status?: ListCentralizedExchangesResponseStatusEnum) => Promise<ListCentralizedExchangesResponse['exchanges']>;
     fetchWithdrawableBalanceFn: (walletId: string) => Promise<Walletwithdrawbalancebalance200Response>;
     requestQuotationFn: (walletId: string, params: {
         asset: string;
@@ -87,7 +90,7 @@ export class BluvoFlowClient {
         this.generateId = options.mkUUIDFn || (() => crypto.randomUUID());
     }
 
-    async loadExchanges(status?: 'live' | 'offline' | 'maintenance' | 'coming_soon') {
+    async loadExchanges(status?: ListCentralizedExchangesResponseStatusEnum) {
         if (!this.flowMachine) {
             // Create flow machine if it doesn't exist
             this.flowMachine = createFlowMachine({

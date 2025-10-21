@@ -4,6 +4,7 @@ import {
     ServerConfiguration,
     WalletsApi, WithdrawalsApi,
 } from "../generated";
+import {ListCentralizedExchangesResponseStatusEnum} from "./types/api.types";
 /**
  * The core client class for interacting with Bluvo's cryptocurrency exchange integration platform.
  *
@@ -314,7 +315,7 @@ export class BluvoClient {
         },
 
         listExchanges: async (
-            status?: 'live' | 'offline' | 'maintenance' | 'coming_soon',
+            status?: ListCentralizedExchangesResponseStatusEnum
         ) => {
             const res = await new OAuth2Api(this.configuration())
                 .oauth2exchangeslistexchanges();

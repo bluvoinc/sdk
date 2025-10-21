@@ -14,6 +14,7 @@ import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCre
 import { HttpFile } from '../http/http';
 
 export class Walletget200Response {
+    'id': string;
     'exchange': Walletget200ResponseExchangeEnum;
     'balances': { [key: string]: number; };
     'ipPool'?: Array<string> | null;
@@ -28,6 +29,12 @@ export class Walletget200Response {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "id",
+            "baseName": "id",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "exchange",
             "baseName": "exchange",

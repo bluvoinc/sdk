@@ -9,15 +9,21 @@
 // Wallet Types
 // ============================================================================
 
-import type { Walletlistlistwallets200ResponseWalletsInner } from '../../generated/models/Walletlistlistwallets200ResponseWalletsInner';
-import type { Walletlistlistwallets200ResponseWalletsInnerBalancesValue } from '../../generated/models/Walletlistlistwallets200ResponseWalletsInnerBalancesValue';
-import type { Walletlistlistwallets200ResponseWalletsInnerExchangeEnum } from '../../generated/models/Walletlistlistwallets200ResponseWalletsInner';
-import type { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../../generated/models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
+import type { Walletlistlistwallets200ResponseWalletsInner } from '../../generated';
+import type { Walletlistlistwallets200ResponseWalletsInnerExchangeEnum } from '../../generated';
+import {
+    Wallettransactionslisttransactions200ResponseTransactionsInner,
+    Wallettransactionslisttransactions200ResponseTransactionsInnerTypeEnum,
+    Wallettransactionslisttransactions200ResponseTransactionsInnerDirectionEnum,
+    Wallettransactionslisttransactions200ResponseTransactionsInnerStatusEnum,
+    Wallettransactionslisttransactions200ResponseTransactionsInnerFiatCurrencyEnum,
+    Walletget200Response
+} from '../../generated';
 
 /**
  * Represents a connected cryptocurrency exchange wallet
  */
-export type Wallet = Walletlistlistwallets200ResponseWalletsInner;
+export type Wallet = Walletget200Response;
 
 /**
  * Balance information for a single cryptocurrency in a wallet
@@ -35,14 +41,6 @@ export { Walletlistlistwallets200ResponseWalletsInnerExchangeEnum as ExchangeEnu
 // ============================================================================
 // Transaction Types
 // ============================================================================
-
-import type {
-    Wallettransactionslisttransactions200ResponseTransactionsInner,
-    Wallettransactionslisttransactions200ResponseTransactionsInnerTypeEnum,
-    Wallettransactionslisttransactions200ResponseTransactionsInnerDirectionEnum,
-    Wallettransactionslisttransactions200ResponseTransactionsInnerStatusEnum,
-    Wallettransactionslisttransactions200ResponseTransactionsInnerFiatCurrencyEnum
-} from '../../generated';
 
 /**
  * Represents a single transaction in a wallet
@@ -81,13 +79,13 @@ export {
 // Withdrawal Types
 // ============================================================================
 
-import type { Walletwithdrawquotequotation200Response } from '../../generated/models/Walletwithdrawquotequotation200Response';
-import type { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../../generated/models/Walletwithdrawbalancebalance200ResponseBalancesInner';
-import type { Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner } from '../../generated/models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
+import type { Walletwithdrawquotequotation200Response } from '../../generated';
+import type { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../../generated';
+import type { Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner } from '../../generated';
 import type {
     Walletwithdrawquotequotation200ResponseFeeDetailsInner,
     Walletwithdrawquotequotation200ResponseFeeDetailsInnerCategoryEnum
-} from '../../generated/models/Walletwithdrawquotequotation200ResponseFeeDetailsInner';
+} from '../../generated';
 
 /**
  * A withdrawal quotation with fee breakdown and total amount
@@ -207,6 +205,7 @@ export type ExecuteWithdrawalRequest = WalletwithdrawquoteidexecutewithdrawReque
 
 import type { Walletwithdrawquoteidexecutewithdraw200Response } from '../../generated';
 import type { Oauth2exchangeurlgeturl200Response } from '../../generated';
+import type { Oauth2exchangeslistexchanges200Response } from '../../generated';
 
 /**
  * Response from executing a withdrawal
@@ -217,3 +216,16 @@ export type WithdrawalResponse = Walletwithdrawquoteidexecutewithdraw200Response
  * Response containing an OAuth2 authorization URL
  */
 export type OAuth2UrlResponse = Oauth2exchangeurlgeturl200Response;
+
+/**
+ * Response containing list of supported centralized exchanges
+ */
+export type ListCentralizedExchangesResponse = Oauth2exchangeslistexchanges200Response;
+
+/**
+ * Status type for centralized exchanges (live, offline, maintenance, coming_soon)
+ */
+export type ListCentralizedExchangesResponseStatus = Oauth2exchangeslistexchanges200Response['exchanges'][number]['status'];
+
+// Re-export the status enum for direct use
+export { Oauth2exchangeslistexchanges200ResponseExchangesInnerStatusEnum as ListCentralizedExchangesResponseStatusEnum } from '../../generated/models/Oauth2exchangeslistexchanges200ResponseExchangesInner';

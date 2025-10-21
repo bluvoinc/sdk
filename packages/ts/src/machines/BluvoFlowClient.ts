@@ -11,11 +11,13 @@ import {
     extractErrorCode,
     extractErrorResult
 } from '../error-codes';
-import {Walletwithdrawquotequotation200Response} from "../../generated/models/Walletwithdrawquotequotation200Response";
+import {Walletwithdrawquotequotation200Response} from "../../generated";
 import {
     Walletwithdrawquoteidexecutewithdraw200Response
-} from "../../generated/models/Walletwithdrawquoteidexecutewithdraw200Response";
-import {Walletwithdrawbalancebalance200Response} from "../../generated/models/Walletwithdrawbalancebalance200Response";
+} from "../../generated";
+import {Walletwithdrawbalancebalance200Response} from "../../generated";
+import {Walletget200Response} from "../../generated";
+import {type ListCentralizedExchangesResponse, Wallet} from "../types/api.types";
 
 export interface BluvoFlowClientOptions {
     orgId: string;
@@ -25,12 +27,7 @@ export interface BluvoFlowClientOptions {
     topicToken?: string;
     cacheName?: string;
     // API function callbacks (to be implemented by the consumer)
-    listExchangesFn: (status?: 'live' | 'offline' | 'maintenance' | 'coming_soon') => Promise<Array<{
-        id: string;
-        name: string;
-        logoUrl: string;
-        status: string;
-    }>>;
+    listExchangesFn: (status?: 'live' | 'offline' | 'maintenance' | 'coming_soon') => Promise<ListCentralizedExchangesResponse['exchanges']>;
     fetchWithdrawableBalanceFn: (walletId: string) => Promise<Walletwithdrawbalancebalance200Response>;
     requestQuotationFn: (walletId: string, params: {
         asset: string;
@@ -44,7 +41,7 @@ export interface BluvoFlowClientOptions {
         twofa?: string;
         smsCode?: string;
     }) => Promise<Walletwithdrawquoteidexecutewithdraw200Response>;
-    getWalletByIdFn: (walletId: string) => Promise<{ id: string; exchange: string; } | null>;
+    getWalletByIdFn: (walletId: string) => Promise<Pick<Wallet,'id'|'exchange'> | null>;
     mkUUIDFn?: () => string;
     onWalletConnectedFn?: (walletId: string, exchange: string) => any;
 }

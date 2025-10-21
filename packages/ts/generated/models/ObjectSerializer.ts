@@ -27,7 +27,7 @@ import { Oauth2exchangeslistexchanges200Response } from '../models/Oauth2exchang
 import { Oauth2exchangeslistexchanges200ResponseExchangesInner   , Oauth2exchangeslistexchanges200ResponseExchangesInnerStatusEnum   } from '../models/Oauth2exchangeslistexchanges200ResponseExchangesInner';
 import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlgeturl200Response';
 import { Walletdelete200Response } from '../models/Walletdelete200Response';
-import { Walletget200Response, Walletget200ResponseExchangeEnum          } from '../models/Walletget200Response';
+import { Walletget200Response , Walletget200ResponseExchangeEnum          } from '../models/Walletget200Response';
 import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
 import { Walletget404Response , Walletget404ResponseTypeEnum    } from '../models/Walletget404Response';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';

@@ -11,7 +11,10 @@ import {
     extractErrorCode,
     extractErrorResult
 } from '../error-codes';
-import {Walletwithdrawquotequotation200Response} from "../../generated";
+import {
+    Walletwithdrawbalancebalance200ResponseBalancesInner,
+    Walletwithdrawquotequotation200Response
+} from "../../generated";
 import {
     Walletwithdrawquoteidexecutewithdraw200Response
 } from "../../generated";
@@ -19,7 +22,7 @@ import {Walletwithdrawbalancebalance200Response} from "../../generated";
 import {
     type ListCentralizedExchangesResponse,
     ListCentralizedExchangesResponseStatusEnum,
-    Wallet
+    Wallet, WithdrawableBalance, WithdrawableBalanceNetwork
 } from "../types/api.types";
 
 export interface BluvoFlowClientOptions {
@@ -269,18 +272,21 @@ export class BluvoFlowClient {
 
             this.flowMachine.send({
                 type: 'WALLET_LOADED',
-                balances: withdrawableBalanceInfo.balances.map((b:any) => ({
+                balances: withdrawableBalanceInfo.balances.map((b:WithdrawableBalance) => ({
                     asset: b.asset,
                     balance: String(b.amount),
-                    networks: b.networks.map((n:any) => ({
+                    networks: b.networks.map((n:WithdrawableBalanceNetwork) => ({
                         id: n.id,
                         name: n.name,
                         displayName: n.displayName,
                         minWithdrawal: n.minWithdrawal,
                         maxWithdrawal: n.maxWithdrawal,
                         assetName: n.assetName,
-                        // Convert null to undefined for addressRegex
-                        ...(n.addressRegex !== null ? {addressRegex: n.addressRegex} : {})
+                        // Only include optional fields if they have meaningful values (not null or undefined)
+                        ...(n.addressRegex !== null && n.addressRegex !== undefined ? {addressRegex: n.addressRegex} : {}),
+                        ...(n.chainId !== null && n.chainId !== undefined ? {chainId: n.chainId} : {}),
+                        ...(n.tokenAddress !== null && n.tokenAddress !== undefined ? {tokenAddress: n.tokenAddress} : {}),
+                        ...(n.contractAddress !== null && n.contractAddress !== undefined ? {contractAddress: n.contractAddress} : {})
                     })),
 
                     // if amountInFiat is present (including 0), include balanceInFiat

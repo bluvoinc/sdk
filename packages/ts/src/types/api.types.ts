@@ -97,6 +97,9 @@ export type WithdrawalQuotation = Walletwithdrawquotequotation200Response;
  */
 export type WithdrawableBalance = Walletwithdrawbalancebalance200ResponseBalancesInner;
 
+export type ChainId = Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner['chainId'];
+export type TokenAddress = Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner['tokenAddress'];
+
 /**
  * Network information for withdrawing a specific cryptocurrency
  */

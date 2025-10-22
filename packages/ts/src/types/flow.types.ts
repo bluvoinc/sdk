@@ -1,4 +1,5 @@
 import { StateValue } from './machine.types';
+import {ChainId, TokenAddress} from "./api.types";
 
 export type FlowStateType = 
   | 'idle'
@@ -114,9 +115,13 @@ export type FlowActionType =
       'name': string;
       'displayName': string;
       'minWithdrawal': string;
-      'maxWithdrawal'?: string;
+      'maxWithdrawal'?: string | undefined,
       'assetName': string;
-      'addressRegex'?: string | null;
+
+      'addressRegex'?: string;
+      'chainId'?: ChainId;
+      'tokenAddress'?: TokenAddress;
+      'contractAddress'?: string | null;
     }>;
   }> }
   | { type: 'WALLET_FAILED'; error: Error }

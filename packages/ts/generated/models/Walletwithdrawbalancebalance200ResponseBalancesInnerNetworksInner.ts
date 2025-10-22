@@ -16,6 +16,7 @@ export class Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner {
     'chainId'?: Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInnerChainIdEnum | null;
     'tokenAddress'?: Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInnerTokenAddressEnum | null;
     'contractAddress'?: string | null;
+    'contractAddressVerified'?: boolean | null;
     'id': string;
     'name': string;
     'displayName': string;
@@ -45,6 +46,12 @@ export class Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner {
             "name": "contractAddress",
             "baseName": "contractAddress",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "contractAddressVerified",
+            "baseName": "contractAddressVerified",
+            "type": "boolean",
             "format": ""
         },
         {

@@ -286,7 +286,9 @@ export class BluvoFlowClient {
                         ...(n.addressRegex !== null && n.addressRegex !== undefined ? {addressRegex: n.addressRegex} : {}),
                         ...(n.chainId !== null && n.chainId !== undefined ? {chainId: n.chainId} : {}),
                         ...(n.tokenAddress !== null && n.tokenAddress !== undefined ? {tokenAddress: n.tokenAddress} : {}),
-                        ...(n.contractAddress !== null && n.contractAddress !== undefined ? {contractAddress: n.contractAddress} : {})
+                        ...(n.contractAddress !== null && n.contractAddress !== undefined ? {contractAddress: n.contractAddress} : {}),
+                        // contractAddressVerified defaults to true if null or undefined
+                        contractAddressVerified: n.contractAddressVerified ?? true
                     })),
 
                     // if amountInFiat is present (including 0), include balanceInFiat

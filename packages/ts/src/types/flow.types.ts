@@ -122,6 +122,7 @@ export type FlowActionType =
       'chainId'?: ChainId;
       'tokenAddress'?: TokenAddress;
       'contractAddress'?: string | null;
+      'contractAddressVerified'?: boolean | null;
     }>;
   }> }
   | { type: 'WALLET_FAILED'; error: Error }

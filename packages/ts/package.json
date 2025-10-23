@@ -12,7 +12,7 @@
     },
     "./package.json": "./package.json"
   },
-  "version": "1.1.90",
+  "version": "1.1.91",
   "description": "Bluvo SDK for TypeScript",
   "author": "Bluvo Inc.",
   "license": "MIT",

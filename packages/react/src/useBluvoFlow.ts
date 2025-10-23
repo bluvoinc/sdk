@@ -75,7 +75,6 @@ export interface UseBluvoFlowHook {
   requestQuote: (options: QuoteRequestOptions) => Promise<void>;
   executeWithdrawal: (quoteId: string) => Promise<void>;
   submit2FA: (code: string) => Promise<void>;
-  submitSMS: (code: string) => Promise<void>;
   retryWithdrawal: () => Promise<void>;
   cancel: () => void;
   testWithdrawalComplete: (transactionId?: string) => void;
@@ -97,7 +96,6 @@ export interface UseBluvoFlowHook {
   hasFatalError: boolean;
   requires2FA: boolean;
   requiresValid2FAMethod: boolean; // i.e. some exchanges support TOTP and SMS only, instead of Passkey/Yubikey
-  requiresSMS: boolean;
   requiresKYC: boolean;
   hasInsufficientBalance: boolean;
   canRetry: boolean;
@@ -142,23 +140,19 @@ export function useBluvoFlow(options: UseBluvoFlowOptions): UseBluvoFlowHook {
   }, [flowClient]);
 
   const requestQuote = useCallback(async (options: QuoteRequestOptions) => {
-    await flowClient.requestQuote(options);
+    return await flowClient.requestQuote(options);
   }, [flowClient]);
 
   const executeWithdrawal = useCallback(async (quoteId: string) => {
-    await flowClient.executeWithdrawal(quoteId);
+    return await flowClient.executeWithdrawal(quoteId);
   }, [flowClient]);
 
   const submit2FA = useCallback(async (code: string) => {
-    await flowClient.submit2FA(code);
-  }, [flowClient]);
-
-  const submitSMS = useCallback(async (code: string) => {
-    await flowClient.submitSMS(code);
+    return await flowClient.submit2FA(code);
   }, [flowClient]);
 
   const retryWithdrawal = useCallback(async () => {
-    await flowClient.retryWithdrawal();
+    return await flowClient.retryWithdrawal();
   }, [flowClient]);
 
   const listExchanges = useCallback(async (status?: 'live' | 'offline' | 'maintenance' | 'coming_soon') => {
@@ -213,7 +207,6 @@ export function useBluvoFlow(options: UseBluvoFlowOptions): UseBluvoFlowHook {
     requestQuote,
     executeWithdrawal,
     submit2FA,
-    submitSMS,
     retryWithdrawal,
     cancel,
     testWithdrawalComplete, // TEST METHOD
@@ -239,7 +232,6 @@ export function useBluvoFlow(options: UseBluvoFlowOptions): UseBluvoFlowHook {
     requires2FA: flow.state?.type === 'withdraw:error2FA',
     requiresValid2FAMethod: (flow.state?.type === 'withdraw:fatal' && 
                             flow.error?.message?.includes('Two-factor authentication method not supported')) || false,
-    requiresSMS: flow.state?.type === 'withdraw:errorSMS',
     requiresKYC: flow.state?.type === 'withdraw:errorKYC',
     hasInsufficientBalance: flow.state?.type === 'withdraw:errorBalance',
     canRetry: flow.state?.type === 'withdraw:retrying',

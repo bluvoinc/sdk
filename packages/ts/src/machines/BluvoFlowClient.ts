@@ -306,10 +306,14 @@ export class BluvoFlowClient {
     }
 
     async requestQuote(options: QuoteRequestOptions) {
-        if (!this.flowMachine) return;
+        if (!this.flowMachine) {
+            return undefined;
+        }
 
         const state = this.flowMachine.getState();
-        if (!state.context.walletId) return;
+        if (!state.context.walletId) {
+            return undefined;
+        }
 
         console.log('[SDK] requestQuote called, current state:', state.type, 'amount:', options.amount);
 
@@ -389,6 +393,12 @@ export class BluvoFlowClient {
                     }
                 }, expiresIn);
             }
+
+            // return the quote
+            return {
+                rawQuote: quote,
+                quoteData,
+            };
         } catch (error: any) {
             // Extract error code from new format or legacy format
             const errorCode = extractErrorCode(error) || error.code || error.type || error.response?.data?.type;
@@ -551,7 +561,7 @@ export class BluvoFlowClient {
 
         // Execute withdrawal
         try {
-            await this.options.executeWithdrawalFn(
+            return await this.options.executeWithdrawalFn(
                 state.context.walletId,
                 quoteId,
                 quoteId,
@@ -617,7 +627,7 @@ export class BluvoFlowClient {
             const idem = this.generateId();
 
             try {
-                await this.options.executeWithdrawalFn(
+                return await this.options.executeWithdrawalFn(
                     state.context.walletId,
                     idem,
                     quote.id,
@@ -647,7 +657,7 @@ export class BluvoFlowClient {
             const idem = this.generateId();
 
             try {
-                await this.options.executeWithdrawalFn(
+                return await this.options.executeWithdrawalFn(
                     state.context.walletId,
                     idem,
                     quote.id,
@@ -670,7 +680,7 @@ export class BluvoFlowClient {
         // Re-execute withdrawal with new idempotency key
         const quote = state.context.quote;
         if (quote) {
-            await this.executeWithdrawal(quote.id);
+            return await this.executeWithdrawal(quote.id);
         }
     }
 

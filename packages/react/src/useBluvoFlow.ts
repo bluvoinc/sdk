@@ -69,15 +69,15 @@ export interface UseBluvoFlowHook {
   context: FlowContext | null | undefined;
   
   // Actions
-  listExchanges: (status?: 'live' | 'offline' | 'maintenance' | 'coming_soon') => Promise<Exchange[]>;
-  startWithdrawalFlow: (flowOptions: WithdrawalFlowOptions) => Promise<WithdrawalFlowResult>;
-  resumeWithdrawalFlow: (flowOptions: ResumeWithdrawalFlowOptions) => Promise<WithdrawalFlowResult>;
-  requestQuote: (options: QuoteRequestOptions) => Promise<void>;
-  executeWithdrawal: (quoteId: string) => Promise<void>;
-  submit2FA: (code: string) => Promise<void>;
-  retryWithdrawal: () => Promise<void>;
-  cancel: () => void;
-  testWithdrawalComplete: (transactionId?: string) => void;
+  listExchanges: BluvoFlowClient['loadExchanges'];
+  startWithdrawalFlow: BluvoFlowClient['startWithdrawalFlow'];
+  resumeWithdrawalFlow: BluvoFlowClient['resumeWithdrawalFlow'];
+  requestQuote: BluvoFlowClient['requestQuote'];
+  executeWithdrawal: BluvoFlowClient['executeWithdrawal'];
+  submit2FA: BluvoFlowClient['submit2FA'];
+  retryWithdrawal: BluvoFlowClient['retryWithdrawal'];
+  cancel: BluvoFlowClient['cancel'];
+  testWithdrawalComplete: BluvoFlowClient['testWithdrawalComplete'];
   
   // Computed state helpers
   isExchangesLoading: boolean;
@@ -112,7 +112,7 @@ export interface UseBluvoFlowHook {
   client: BluvoFlowClient;
 }
 
-export function useBluvoFlow(options: UseBluvoFlowOptions): UseBluvoFlowHook {
+export function useBluvoFlow(options: UseBluvoFlowOptions):UseBluvoFlowHook {
   const [flowClient] = useState(() => {
     // Lazy import to avoid SSR issues
     const { BluvoFlowClient } = require('@bluvo/sdk-ts');

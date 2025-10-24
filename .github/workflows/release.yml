@@ -33,8 +33,13 @@ jobs:
 
       - name: Install dependencies
         run: pnpm i
-      #      - name: Run tests
-      #        run: pnpm test
+
+      - name: Run tests for @bluvo/sdk-ts
+        run: pnpm -F @bluvo/sdk-ts test
+
+      - name: Run tests for @bluvo/react
+        run: pnpm -F @bluvo/react test
+
       - name: Build packages
         run: |
           pnpm -F @bluvo/sdk-ts build

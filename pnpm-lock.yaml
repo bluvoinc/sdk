@@ -75,10 +75,6 @@ importers:
         version: 5.8.2
 
   packages/ts:
-    dependencies:
-      '@gomomento/sdk-web':
-        specifier: ^1.113.0
-        version: 1.116.0
     devDependencies:
       '@vitest/browser':
         specifier: ^3.2.4

@@ -45,6 +45,7 @@ type Quote = {
   amountWithFeeInFiat: string;
   amountNoFeeInFiat: string;
   estimatedFeeInFiat: string;
+  additionalInfo: { minWithdrawal: string | null; maxWithdrawal?: string | null; };
   expiresAt: number;
 };
 

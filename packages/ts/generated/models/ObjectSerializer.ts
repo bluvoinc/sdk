@@ -19,6 +19,7 @@ export * from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
 export * from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 export * from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 export * from '../models/Walletwithdrawquotequotation200Response';
+export * from '../models/Walletwithdrawquotequotation200ResponseAdditionalInfo';
 export * from '../models/Walletwithdrawquotequotation200ResponseFeeDetailsInner';
 export * from '../models/Walletwithdrawquotequotation400Response';
 export * from '../models/WalletwithdrawquotequotationRequest';
@@ -44,6 +45,7 @@ import { Walletwithdrawquoteidexecutewithdraw200Response  , Walletwithdrawquotei
 import { Walletwithdrawquoteidexecutewithdraw400Response , Walletwithdrawquoteidexecutewithdraw400ResponseTypeEnum    } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
+import { Walletwithdrawquotequotation200ResponseAdditionalInfo } from '../models/Walletwithdrawquotequotation200ResponseAdditionalInfo';
 import { Walletwithdrawquotequotation200ResponseFeeDetailsInner, Walletwithdrawquotequotation200ResponseFeeDetailsInnerCategoryEnum       } from '../models/Walletwithdrawquotequotation200ResponseFeeDetailsInner';
 import { Walletwithdrawquotequotation400Response , Walletwithdrawquotequotation400ResponseTypeEnum    } from '../models/Walletwithdrawquotequotation400Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
@@ -99,6 +101,7 @@ let typeMap: {[index: string]: any} = {
     "Walletwithdrawquoteidexecutewithdraw400Response": Walletwithdrawquoteidexecutewithdraw400Response,
     "WalletwithdrawquoteidexecutewithdrawRequest": WalletwithdrawquoteidexecutewithdrawRequest,
     "Walletwithdrawquotequotation200Response": Walletwithdrawquotequotation200Response,
+    "Walletwithdrawquotequotation200ResponseAdditionalInfo": Walletwithdrawquotequotation200ResponseAdditionalInfo,
     "Walletwithdrawquotequotation200ResponseFeeDetailsInner": Walletwithdrawquotequotation200ResponseFeeDetailsInner,
     "Walletwithdrawquotequotation400Response": Walletwithdrawquotequotation400Response,
     "WalletwithdrawquotequotationRequest": WalletwithdrawquotequotationRequest,

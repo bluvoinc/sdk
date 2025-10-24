@@ -354,6 +354,8 @@ export class BluvoFlowClient {
                 amountNoFeeInFiat: String(quote.amountNoFeeInFiat),
                 estimatedFeeInFiat: String(quote.estimatedFeeInFiat),
 
+                additionalInfo: quote.additionalInfo,
+
                 expiresAt: new Date(quote.expiresAt).getTime()
             };
 

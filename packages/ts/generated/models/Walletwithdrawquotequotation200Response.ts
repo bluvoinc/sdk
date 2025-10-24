@@ -10,6 +10,7 @@
  * Do not edit the class manually.
  */
 
+import { Walletwithdrawquotequotation200ResponseAdditionalInfo } from '../models/Walletwithdrawquotequotation200ResponseAdditionalInfo';
 import { Walletwithdrawquotequotation200ResponseFeeDetailsInner } from '../models/Walletwithdrawquotequotation200ResponseFeeDetailsInner';
 import { HttpFile } from '../http/http';
 
@@ -28,6 +29,7 @@ export class Walletwithdrawquotequotation200Response {
     'estimatedTotal'?: number;
     'feeDetails'?: Array<Walletwithdrawquotequotation200ResponseFeeDetailsInner>;
     'expiresAt': string;
+    'additionalInfo': Walletwithdrawquotequotation200ResponseAdditionalInfo;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -116,6 +118,12 @@ export class Walletwithdrawquotequotation200Response {
             "name": "expiresAt",
             "baseName": "expiresAt",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "additionalInfo",
+            "baseName": "additionalInfo",
+            "type": "Walletwithdrawquotequotation200ResponseAdditionalInfo",
             "format": ""
         }    ];
 

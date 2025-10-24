@@ -16,6 +16,7 @@ import {ListCentralizedExchangesResponseStatusEnum} from "./types/api.types";
  * This class is not typically instantiated directly; use the `createClient` function instead.
  */
 export class BluvoClient {
+    private readonly wsBase: string;
 
     /**
      * Creates a new BluvoClient instance with the specified credentials.
@@ -34,6 +35,14 @@ export class BluvoClient {
         private readonly sandbox: boolean = false,
         private readonly dev: boolean = false
     ) {
+        // Configure WebSocket base URL based on environment
+        if (dev) {
+            this.wsBase = 'ws://localhost:8787';
+        } else if (sandbox) {
+            this.wsBase = 'wss://test.api-bluvo.com';
+        } else {
+            this.wsBase = 'wss://api-bluvo.com';
+        }
     }
 
     /**
@@ -356,24 +365,6 @@ export class BluvoClient {
         const baseServer = this.sandbox ?
             server2 :
             this.dev ? serverDev : server1;
-
-        // TODO: delete concept of OTT at all
-        if(!!ott) {
-            return createConfiguration({
-
-                baseServer: baseServer,
-
-                authMethods: {
-                    bluvoOtt: ott,
-
-                    bluvoOrgId: this.orgId,
-                    bluvoProjectId: this.projectId,
-                    bluvoWalletId: walletId,
-                    bluvoOttActionId: idem,
-                },
-            });
-        }
-
 
         return createConfiguration({
             baseServer: baseServer,

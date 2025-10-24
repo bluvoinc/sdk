@@ -1,6 +1,5 @@
-import {createConfiguration, OAuth2Api} from "../generated";
-import {WebSocketClient} from "./WebSocketClient";
-import {TopicSubscribe} from "@gomomento/sdk-web";
+import {createConfiguration, OAuth2Api, server1, server2, ServerConfiguration} from "../generated";
+import {WebSocketClient, Subscription} from "./WebSocketClient";
 import {
     OAuth2WorkflowMessageBody,
     WithdrawFundsWorkflowMessageBody,
@@ -12,8 +11,6 @@ export type BaseOptions = {
     onStep?: (message: WorkflowMessageBody) => void;
     onError?: (error: Error) => void;
     onFatal?: (error: Error) => void;
-    cacheName?: string
-    topicToken?: string;
 };
 
 export type OAuth2Options = BaseOptions & {
@@ -25,9 +22,6 @@ export type WithdrawOptions = BaseOptions & {
     onWithdrawComplete: (message: WithdrawFundsWorkflowMessageBody) => any;
     onOAuth2Complete?: never;
 };
-
-// Constants
-const DEFAULT_SUBSCRIBE_ONLY_TOKEN = 'eyJlbmRwb2ludCI6ImNlbGwtNC11cy13ZXN0LTItMS5wcm9kLmEubW9tZW50b2hxLmNvbSIsImFwaV9rZXkiOiJleUpoYkdjaU9pSklVekkxTmlKOS5leUp6ZFdJaU9pSm1iRzlBWW14MWRtOHVZMjhpTENKMlpYSWlPakVzSW5BaU9pSkZhRWxMUlVKSlQwTkJTV0ZEUVc5SFlqSkdNV1JIWjNsSlowRTlJbjAuU0Y2M3NHWkoxYUdKckJpRVZCdXZlbG9pOEFWWkNFVzd1ZnNOUklGYUx5dyJ9'
 
 /**
  * A web-specific client for Bluvo SDK that provides browser-oriented functionality
@@ -42,24 +36,43 @@ const DEFAULT_SUBSCRIBE_ONLY_TOKEN = 'eyJlbmRwb2ludCI6ImNlbGwtNC11cy13ZXN0LTItMS
  */
 export class BluvoWebClient {
     private wsClient: WebSocketClient;
-    
+    private readonly wsBase: string;
+
     /**
      * Creates a new BluvoWebClient instance for browser environments.
-     * 
+     *
      * @param orgId Your Bluvo organization identifier.
      * @param projectId Your Bluvo project identifier.
+     * @param sandbox Whether to use the sandbox environment.
+     * @param dev Whether to use the local development environment (localhost:8787).
      */
     constructor(
         private readonly orgId: string,
-        private readonly projectId: string
+        private readonly projectId: string,
+        private readonly sandbox: boolean = false,
+        private readonly dev: boolean = false
     ) {
         this.wsClient = new WebSocketClient();
+
+        // Configure WebSocket base URL based on environment
+        if (dev) {
+            this.wsBase = 'ws://localhost:8787';
+        } else if (sandbox) {
+            this.wsBase = 'wss://test.api-bluvo.com';
+        } else {
+            this.wsBase = 'wss://api-bluvo.com';
+        }
     }
 
     static createClient(
-        {orgId, projectId}: { orgId: string; projectId: string }
+        {orgId, projectId, sandbox, dev}: {
+            orgId: string;
+            projectId: string;
+            sandbox?: boolean;
+            dev?: boolean;
+        }
     ): BluvoWebClient {
-        return new BluvoWebClient(orgId, projectId);
+        return new BluvoWebClient(orgId, projectId, sandbox, dev);
     }
 
     oauth2 = {
@@ -300,21 +313,14 @@ export class BluvoWebClient {
     async listen(
         topicName: string,
         options: OAuth2Options | WithdrawOptions
-    ): Promise<TopicSubscribe.Subscription> {
-
-        // TODO: Manually split cacheName per argument and per-tenant
-        // Safely resolve topicToken with fallback and validation
-        let topicToken: string;
-
-        if (options.topicToken && (options?.topicToken?.trim()?.length??0) > 0) {
-            topicToken = options.topicToken;
-        } else {
-            topicToken = DEFAULT_SUBSCRIBE_ONLY_TOKEN;
-        }
-        
-        const cacheName = options.cacheName ?? 'oauth2';
-
-        const onMessage = (data:WorkflowMessageBody) => {
+    ): Promise<Subscription> {
+        const onMessage = (rawData: any) => {
+            // Extract the body if the message has a wrapper structure
+            // WebSocket messages come in format: { messageId, idem, timestamp, body }
+            // We need to extract the body which contains the actual WorkflowMessageBody
+            const data: WorkflowMessageBody = (rawData && typeof rawData === 'object' && 'body' in rawData)
+                ? rawData.body
+                : rawData;
 
             // if success === true
             const success = data?.success === true;
@@ -378,12 +384,13 @@ export class BluvoWebClient {
 
         return this.wsClient.subscribe(
             topicName,
-            topicToken,
+            this.orgId,
+            this.wsBase,
             {
-            onError: options.onError,
-            cacheName: cacheName,
-            onMessage: onMessage,
-        })
+                onError: options.onError,
+                onMessage: onMessage,
+            }
+        )
     }
 
     /**
@@ -426,7 +433,7 @@ export class BluvoWebClient {
      *
      * This private getter method centralizes the creation of API configuration objects,
      * ensuring consistent authentication and request handling across all API calls made
-     * through this client. It automatically injects the organization ID and API key
+     * through this client. It automatically injects the organization ID and project ID
      * credentials that were provided when the client was initialized.
      *
      * The configuration includes:
@@ -439,7 +446,14 @@ export class BluvoWebClient {
      * @returns A fully configured API configuration object ready for use with API clients
      */
     private configuration(walletId?:string, ott?:string, idem?:string) {
+        const serverDev = new ServerConfiguration<{  }>("http://localhost:8787", {  })
+
+        const baseServer = this.sandbox ?
+            server2 :
+            this.dev ? serverDev : server1;
+
         return createConfiguration({
+            baseServer: baseServer,
             authMethods: {
                 bluvoOtt: ott,
                 bluvoOrgId: this.orgId,

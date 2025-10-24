@@ -2,7 +2,7 @@ import {BluvoWebClient} from '../BluvoWebClient';
 import {createFlowMachine} from './flowMachine';
 import {Machine} from '../types/machine.types';
 import {FlowActionType, FlowState} from '../types/flow.types';
-import {TopicSubscribe} from '@gomomento/sdk-web';
+import {Subscription} from '../WebSocketClient';
 import {WithdrawFundsWorkflowMessageBody, WorkflowMessageBody, WorkflowTypes} from '../WorkflowTypes';
 import {
     ERROR_CODES,
@@ -28,10 +28,10 @@ import {
 export interface BluvoFlowClientOptions {
     orgId: string;
     projectId: string;
+    sandbox?: boolean;
+    dev?: boolean;
     maxRetryAttempts?: number;
     autoRefreshQuotation?: boolean; // Default: true - Auto-refresh quotes when they expire
-    topicToken?: string;
-    cacheName?: string;
     // API function callbacks (to be implemented by the consumer)
     listExchangesFn: (status?: ListCentralizedExchangesResponseStatusEnum) => Promise<ListCentralizedExchangesResponse['exchanges']>;
     fetchWithdrawableBalanceFn: (walletId: string) => Promise<Walletwithdrawbalancebalance200Response>;
@@ -81,15 +81,19 @@ export interface QuoteRequestOptions {
 export class BluvoFlowClient {
     private webClient: BluvoWebClient;
     private flowMachine?: Machine<FlowState, FlowActionType>;
-    private subscription?: TopicSubscribe.Subscription;
+    private subscription?: Subscription;
     private generateId: () => string;
     private quoteRefreshTimer?: ReturnType<typeof setTimeout>;
 
     constructor(private options: BluvoFlowClientOptions) {
+
         this.webClient = BluvoWebClient.createClient({
             orgId: options.orgId,
-            projectId: options.projectId
+            projectId: options.projectId,
+            sandbox: options.sandbox,
+            dev: options.dev
         });
+
         this.generateId = options.mkUUIDFn || (() => crypto.randomUUID());
     }
 
@@ -162,8 +166,6 @@ export class BluvoFlowClient {
 
         // Subscribe to workflow messages
         this.subscription = await this.webClient.listen(idem, {
-            topicToken: this.options.topicToken,
-            cacheName: this.options.cacheName,
             onOAuth2Complete: (message) => {
                 this.flowMachine?.send({
                     type: 'OAUTH_COMPLETED',
@@ -453,12 +455,10 @@ export class BluvoFlowClient {
         });
 
         if (this.subscription) {
-            await this.webClient.unsubscribe((this.subscription as any).topicName);
+            await this.webClient.unsubscribe(this.subscription.topicName);
         }
 
         this.subscription = await this.webClient.listen(quoteId, {
-            topicToken: this.options.topicToken,
-            cacheName: this.options.cacheName,
             onWithdrawComplete: (message: any) => {
                 console.log("onWithdrawComplete received:", message);
 
@@ -746,7 +746,7 @@ export class BluvoFlowClient {
         }
 
         if (this.subscription) {
-            this.webClient.unsubscribe((this.subscription as any).topicName);
+            this.webClient.unsubscribe(this.subscription.topicName);
             this.subscription = undefined;
         }
 

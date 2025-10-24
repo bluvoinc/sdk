@@ -12,7 +12,7 @@
     },
     "./package.json": "./package.json"
   },
-  "version": "1.1.93",
+  "version": "1.2.0",
   "description": "Bluvo SDK for TypeScript",
   "author": "Bluvo Inc.",
   "license": "MIT",
@@ -45,9 +45,7 @@
     "nodejs",
     "api"
   ],
-  "dependencies": {
-    "@gomomento/sdk-web": "^1.113.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@vitest/browser": "^3.2.4",
     "esbuild": "^0.24.0",

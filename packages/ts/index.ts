@@ -4,7 +4,7 @@ import { BluvoClient } from './src/BluvoClient';
 export { BluvoWebClient } from './src/BluvoWebClient';
 export { BluvoClient } from './src/BluvoClient';
 export { WebSocketClient } from './src/WebSocketClient';
-export type { TopicInfo } from './src/WebSocketClient';
+export type { Subscription, TopicInfo } from './src/WebSocketClient';
 
 // State Machine exports
 export * from './src/machines';
@@ -90,4 +90,46 @@ export function createWebClient(
     {orgId, projectId}: { orgId: string; projectId: string }
 ): BluvoWebClient {
     return BluvoWebClient.createClient({orgId, projectId});
+}
+
+/**
+ * Create a BluvoWebClient instance for the sandbox environment.
+ *
+ * This client is configured to use the Bluvo sandbox/test environment,
+ * which is useful for development and testing without affecting production data.
+ *
+ * @param orgId Your Bluvo organization identifier.
+ * @param projectId Your Bluvo project identifier.
+ *
+ * @returns A new BluvoWebClient instance configured for the sandbox environment.
+ */
+export function createSandboxWebClient(
+    {orgId, projectId}: { orgId: string; projectId: string }
+): BluvoWebClient {
+    return BluvoWebClient.createClient({
+        orgId,
+        projectId,
+        sandbox: true
+    });
+}
+
+/**
+ * Create a BluvoWebClient instance for local development.
+ *
+ * This client is configured to use localhost:8787 as the API endpoint,
+ * which is useful for local development and testing with a local Bluvo backend.
+ *
+ * @param orgId Your Bluvo organization identifier.
+ * @param projectId Your Bluvo project identifier.
+ *
+ * @returns A new BluvoWebClient instance configured for local development.
+ */
+export function createDevWebClient(
+    {orgId, projectId}: { orgId: string; projectId: string }
+): BluvoWebClient {
+    return BluvoWebClient.createClient({
+        orgId,
+        projectId,
+        dev: true
+    });
 }

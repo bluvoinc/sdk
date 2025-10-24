@@ -35,7 +35,7 @@ jobs:
         run: pnpm i
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps
 
       - name: Run tests for @bluvo/sdk-ts
         run: pnpm -F @bluvo/sdk-ts test

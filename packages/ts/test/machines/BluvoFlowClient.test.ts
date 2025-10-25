@@ -60,6 +60,10 @@ describe('BluvoFlowClient Error Handling', () => {
         estimatedFeeInFiat: 30,
         expiresAt: new Date(Date.now() + 300000).toISOString(), // 5 minutes from now
         destinationAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+
+        additionalInfo: {
+            minWithdrawal: '0.0001',
+        }
     };
 
     beforeEach(() => {
@@ -885,7 +889,9 @@ describe('BluvoFlowClient Error Handling', () => {
 
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                autoRefreshQuotation: false, // Disable auto-refresh to test expiration behavior
+                options: {
+                    autoRefreshQuotation: false // Disable auto-refresh to test expiration behavior
+                },
                 fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
                 requestQuotationFn: vi.fn().mockResolvedValue(shortExpiryQuote)
             });

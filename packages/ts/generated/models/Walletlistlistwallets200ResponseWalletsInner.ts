@@ -195,6 +195,7 @@ export enum Walletlistlistwallets200ResponseWalletsInnerExchangeEnum {
     Xt = 'xt',
     Yobit = 'yobit',
     Zaif = 'zaif',
-    Zonda = 'zonda'
+    Zonda = 'zonda',
+    LocalCex = 'local-cex'
 }
 

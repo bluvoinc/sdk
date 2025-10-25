@@ -50,14 +50,34 @@ export class Walletwithdrawquotequotation400Response {
 }
 
 export enum Walletwithdrawquotequotation400ResponseTypeEnum {
-    QuoteExpired = 'QUOTE_EXPIRED',
+    GenericNotFound = 'GENERIC_NOT_FOUND',
+    GenericUnauthorized = 'GENERIC_UNAUTHORIZED',
+    GenericInternalServerError = 'GENERIC_INTERNAL_SERVER_ERROR',
+    GenericValidationError = 'GENERIC_VALIDATION_ERROR',
+    GenericInvalidRequest = 'GENERIC_INVALID_REQUEST',
+    WalletNotFound = 'WALLET_NOT_FOUND',
+    WalletInvalidCredentials = 'WALLET_INVALID_CREDENTIALS',
     QuoteNotFound = 'QUOTE_NOT_FOUND',
+    QuoteExpired = 'QUOTE_EXPIRED',
     WithdrawalInsufficientBalance = 'WITHDRAWAL_INSUFFICIENT_BALANCE',
+    WithdrawalInsufficientBalanceForFee = 'WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE',
     WithdrawalInvalidAddress = 'WITHDRAWAL_INVALID_ADDRESS',
+    WithdrawalNetworkNotSupported = 'WITHDRAWAL_NETWORK_NOT_SUPPORTED',
+    WithdrawalTooManyAddresses = 'WITHDRAWAL_TOO_MANY_ADDRESSES',
     WithdrawalAmountBelowMinimum = 'WITHDRAWAL_AMOUNT_BELOW_MINIMUM',
     WithdrawalAmountAboveMaximum = 'WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM',
     WithdrawalAssetNotSupported = 'WITHDRAWAL_ASSET_NOT_SUPPORTED',
-    GenericNotFound = 'GENERIC_NOT_FOUND',
-    GenericInternalServerError = 'GENERIC_INTERNAL_SERVER_ERROR'
+    WithdrawalProviderError = 'WITHDRAWAL_PROVIDER_ERROR',
+    Withdrawal2FaRequiredTotp = 'WITHDRAWAL_2FA_REQUIRED_TOTP',
+    Withdrawal2FaRequiredSms = 'WITHDRAWAL_2FA_REQUIRED_SMS',
+    Withdrawal2FaRequiredYubikey = 'WITHDRAWAL_2FA_REQUIRED_YUBIKEY',
+    Withdrawal2FaRequiredPassphrase = 'WITHDRAWAL_2FA_REQUIRED_PASSPHRASE',
+    Withdrawal2FaInvalid = 'WITHDRAWAL_2FA_INVALID',
+    Withdrawal2FaMethodNotSupported = 'WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED',
+    WithdrawalKycRequired = 'WITHDRAWAL_KYC_REQUIRED',
+    WithdrawalEmailUnverified = 'WITHDRAWAL_EMAIL_UNVERIFIED',
+    OauthAuthorizationFailed = 'OAUTH_AUTHORIZATION_FAILED',
+    OauthTokenExchangeFailed = 'OAUTH_TOKEN_EXCHANGE_FAILED',
+    OauthInvalidState = 'OAUTH_INVALID_STATE'
 }
 

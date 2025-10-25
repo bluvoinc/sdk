@@ -11,7 +11,6 @@ import {SecurityAuthentication} from '../auth/auth';
 import { Walletget404Response } from '../models/Walletget404Response';
 import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
 import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
-import { Walletwithdrawquoteidexecutewithdraw400Response } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
 import { Walletwithdrawquotequotation400Response } from '../models/Walletwithdrawquotequotation400Response';
@@ -258,18 +257,18 @@ export class WithdrawalsApiResponseProcessor {
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
         if (isCodeInRange("400", response.httpStatusCode)) {
-            const body: Walletwithdrawquoteidexecutewithdraw400Response = ObjectSerializer.deserialize(
+            const body: Walletwithdrawquotequotation400Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "Walletwithdrawquoteidexecutewithdraw400Response", ""
-            ) as Walletwithdrawquoteidexecutewithdraw400Response;
-            throw new ApiException<Walletwithdrawquoteidexecutewithdraw400Response>(response.httpStatusCode, "Bad Request", body, response.headers);
+                "Walletwithdrawquotequotation400Response", ""
+            ) as Walletwithdrawquotequotation400Response;
+            throw new ApiException<Walletwithdrawquotequotation400Response>(response.httpStatusCode, "Bad Request", body, response.headers);
         }
         if (isCodeInRange("404", response.httpStatusCode)) {
-            const body: Walletwithdrawquoteidexecutewithdraw400Response = ObjectSerializer.deserialize(
+            const body: Walletwithdrawquotequotation400Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
-                "Walletwithdrawquoteidexecutewithdraw400Response", ""
-            ) as Walletwithdrawquoteidexecutewithdraw400Response;
-            throw new ApiException<Walletwithdrawquoteidexecutewithdraw400Response>(response.httpStatusCode, "Not Found", body, response.headers);
+                "Walletwithdrawquotequotation400Response", ""
+            ) as Walletwithdrawquotequotation400Response;
+            throw new ApiException<Walletwithdrawquotequotation400Response>(response.httpStatusCode, "Not Found", body, response.headers);
         }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml

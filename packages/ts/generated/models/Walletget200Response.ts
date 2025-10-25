@@ -187,6 +187,7 @@ export enum Walletget200ResponseExchangeEnum {
     Xt = 'xt',
     Yobit = 'yobit',
     Zaif = 'zaif',
-    Zonda = 'zonda'
+    Zonda = 'zonda',
+    LocalCex = 'local-cex'
 }
 

@@ -16,7 +16,6 @@ export * from '../models/Walletwithdrawbalancebalance200Response';
 export * from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
 export * from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
 export * from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
-export * from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 export * from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 export * from '../models/Walletwithdrawquotequotation200Response';
 export * from '../models/Walletwithdrawquotequotation200ResponseAdditionalInfo';
@@ -42,7 +41,6 @@ import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdra
 import { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
 import { Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner, Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInnerChainIdEnum  , Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInnerTokenAddressEnum            } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
 import { Walletwithdrawquoteidexecutewithdraw200Response  , Walletwithdrawquoteidexecutewithdraw200ResponseTypeEnum    } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
-import { Walletwithdrawquoteidexecutewithdraw400Response , Walletwithdrawquoteidexecutewithdraw400ResponseTypeEnum    } from '../models/Walletwithdrawquoteidexecutewithdraw400Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
 import { Walletwithdrawquotequotation200Response } from '../models/Walletwithdrawquotequotation200Response';
 import { Walletwithdrawquotequotation200ResponseAdditionalInfo } from '../models/Walletwithdrawquotequotation200ResponseAdditionalInfo';
@@ -74,7 +72,6 @@ let enumsMap: Set<string> = new Set<string>([
     "Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInnerChainIdEnum",
     "Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInnerTokenAddressEnum",
     "Walletwithdrawquoteidexecutewithdraw200ResponseTypeEnum",
-    "Walletwithdrawquoteidexecutewithdraw400ResponseTypeEnum",
     "Walletwithdrawquotequotation200ResponseFeeDetailsInnerCategoryEnum",
     "Walletwithdrawquotequotation400ResponseTypeEnum",
 ]);
@@ -98,7 +95,6 @@ let typeMap: {[index: string]: any} = {
     "Walletwithdrawbalancebalance200ResponseBalancesInner": Walletwithdrawbalancebalance200ResponseBalancesInner,
     "Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner": Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner,
     "Walletwithdrawquoteidexecutewithdraw200Response": Walletwithdrawquoteidexecutewithdraw200Response,
-    "Walletwithdrawquoteidexecutewithdraw400Response": Walletwithdrawquoteidexecutewithdraw400Response,
     "WalletwithdrawquoteidexecutewithdrawRequest": WalletwithdrawquoteidexecutewithdrawRequest,
     "Walletwithdrawquotequotation200Response": Walletwithdrawquotequotation200Response,
     "Walletwithdrawquotequotation200ResponseAdditionalInfo": Walletwithdrawquotequotation200ResponseAdditionalInfo,

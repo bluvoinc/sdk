@@ -28,11 +28,6 @@ import {
 export interface BluvoFlowClientOptions {
     orgId: string;
     projectId: string;
-    sandbox?: boolean;
-    dev?: boolean;
-    maxRetryAttempts?: number;
-    autoRefreshQuotation?: boolean; // Default: true - Auto-refresh quotes when they expire
-    // API function callbacks (to be implemented by the consumer)
     listExchangesFn: (status?: ListCentralizedExchangesResponseStatusEnum) => Promise<ListCentralizedExchangesResponse['exchanges']>;
     fetchWithdrawableBalanceFn: (walletId: string) => Promise<Walletwithdrawbalancebalance200Response>;
     requestQuotationFn: (walletId: string, params: {
@@ -50,6 +45,17 @@ export interface BluvoFlowClientOptions {
     getWalletByIdFn: (walletId: string) => Promise<Pick<Wallet,'id'|'exchange'> | null>;
     mkUUIDFn?: () => string;
     onWalletConnectedFn?: (walletId: string, exchange: string) => any;
+
+    options?: {
+        sandbox?: boolean;
+        dev?: boolean;
+        maxRetryAttempts?: number;
+        autoRefreshQuotation?: boolean;
+        customDomain?: string | "api-bluvo.com" | {
+            api: string;
+            ws: string;
+        }
+    }
 }
 
 export interface WithdrawalFlowOptions {
@@ -90,8 +96,9 @@ export class BluvoFlowClient {
         this.webClient = BluvoWebClient.createClient({
             orgId: options.orgId,
             projectId: options.projectId,
-            sandbox: options.sandbox,
-            dev: options.dev
+            sandbox: options.options?.sandbox,
+            dev: options.options?.dev,
+            customDomain: options.options?.customDomain
         });
 
         this.generateId = options.mkUUIDFn || (() => crypto.randomUUID());
@@ -103,8 +110,8 @@ export class BluvoFlowClient {
             this.flowMachine = createFlowMachine({
                 orgId: this.options.orgId,
                 projectId: this.options.projectId,
-                maxRetryAttempts: this.options.maxRetryAttempts,
-                autoRefreshQuotation: this.options.autoRefreshQuotation
+                maxRetryAttempts: this.options.options?.maxRetryAttempts,
+                autoRefreshQuotation: this.options.options?.autoRefreshQuotation
             });
         }
 
@@ -149,8 +156,8 @@ export class BluvoFlowClient {
         this.flowMachine = createFlowMachine({
             orgId: this.options.orgId,
             projectId: this.options.projectId,
-            maxRetryAttempts: this.options.maxRetryAttempts,
-            autoRefreshQuotation: this.options.autoRefreshQuotation
+            maxRetryAttempts: this.options.options?.maxRetryAttempts,
+            autoRefreshQuotation: this.options.options?.autoRefreshQuotation
         });
 
         // Generate idempotency key for OAuth flow
@@ -226,8 +233,8 @@ export class BluvoFlowClient {
         this.flowMachine = createFlowMachine({
             orgId: this.options.orgId,
             projectId: this.options.projectId,
-            maxRetryAttempts: this.options.maxRetryAttempts,
-            autoRefreshQuotation: this.options.autoRefreshQuotation
+            maxRetryAttempts: this.options.options?.maxRetryAttempts,
+            autoRefreshQuotation: this.options.options?.autoRefreshQuotation
         });
 
         // We need to transition through the states properly

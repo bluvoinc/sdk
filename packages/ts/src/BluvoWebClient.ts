@@ -26,17 +26,18 @@ export type WithdrawOptions = BaseOptions & {
 /**
  * A web-specific client for Bluvo SDK that provides browser-oriented functionality
  * for cryptocurrency exchange integrations and OAuth2 authentication flows.
- * 
+ *
  * This client is designed for use in browser environments where direct API key usage
  * is not secure. It provides methods for OAuth2 authentication flows and other
  * browser-specific features that require user interaction.
- * 
+ *
  * Unlike the main BluvoClient which requires API keys, BluvoWebClient uses only
  * organization and project identifiers, making it safe for client-side applications.
  */
 export class BluvoWebClient {
     private wsClient: WebSocketClient;
     private readonly wsBase: string;
+    private readonly apiBase?: string;
 
     /**
      * Creates a new BluvoWebClient instance for browser environments.
@@ -45,34 +46,49 @@ export class BluvoWebClient {
      * @param projectId Your Bluvo project identifier.
      * @param sandbox Whether to use the sandbox environment.
      * @param dev Whether to use the local development environment (localhost:8787).
+     * @param customDomain Custom domain configuration to override default api-bluvo.com
      */
     constructor(
         private readonly orgId: string,
         private readonly projectId: string,
         private readonly sandbox: boolean = false,
-        private readonly dev: boolean = false
+        private readonly dev: boolean = false,
+        private readonly customDomain?: string | "api-bluvo.com" | { api: string; ws: string }
     ) {
         this.wsClient = new WebSocketClient();
 
-        // Configure WebSocket base URL based on environment
-        if (dev) {
+        // Configure WebSocket and API base URLs based on customDomain first, then environment
+        if (customDomain && typeof customDomain === 'object') {
+            // Custom domain with separate API and WebSocket URLs
+            this.apiBase = `https://${customDomain.api}`;
+            this.wsBase = `wss://${customDomain.ws}`;
+        } else if (customDomain && typeof customDomain === 'string' && customDomain !== 'api-bluvo.com') {
+            // Custom domain for both API and WebSocket
+            this.apiBase = `https://${customDomain}`;
+            this.wsBase = `wss://${customDomain}`;
+        } else if (dev) {
+            this.apiBase = 'http://localhost:8787';
             this.wsBase = 'ws://localhost:8787';
         } else if (sandbox) {
+            this.apiBase = 'https://test.api-bluvo.com';
             this.wsBase = 'wss://test.api-bluvo.com';
         } else {
+            // Production default or explicit "api-bluvo.com"
+            this.apiBase = 'https://api-bluvo.com';
             this.wsBase = 'wss://api-bluvo.com';
         }
     }
 
     static createClient(
-        {orgId, projectId, sandbox, dev}: {
+        {orgId, projectId, sandbox, dev, customDomain}: {
             orgId: string;
             projectId: string;
             sandbox?: boolean;
             dev?: boolean;
+            customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
         }
     ): BluvoWebClient {
-        return new BluvoWebClient(orgId, projectId, sandbox, dev);
+        return new BluvoWebClient(orgId, projectId, sandbox, dev, customDomain);
     }
 
     oauth2 = {
@@ -446,11 +462,15 @@ export class BluvoWebClient {
      * @returns A fully configured API configuration object ready for use with API clients
      */
     private configuration(walletId?:string, ott?:string, idem?:string) {
-        const serverDev = new ServerConfiguration<{  }>("http://localhost:8787", {  })
+        let baseServer: ServerConfiguration<{}>;
 
-        const baseServer = this.sandbox ?
-            server2 :
-            this.dev ? serverDev : server1;
+        // Use custom API base if provided, otherwise use environment-based defaults
+        if (this.apiBase) {
+            baseServer = new ServerConfiguration<{}>(this.apiBase, {});
+        } else {
+            const serverDev = new ServerConfiguration<{}>("http://localhost:8787", {});
+            baseServer = this.sandbox ? server2 : this.dev ? serverDev : server1;
+        }
 
         return createConfiguration({
             baseServer: baseServer,

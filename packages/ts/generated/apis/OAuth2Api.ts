@@ -46,7 +46,7 @@ export class OAuth2ApiRequestFactory extends BaseAPIRequestFactory {
      * @param exchange Exchange identifier.
      * @param idem Idempotency key.
      */
-    public async oauth2exchangeurlgeturl(exchange: 'coinbase' | 'kraken' | 'gemini', idem: string, _options?: Configuration): Promise<RequestContext> {
+    public async oauth2exchangeurlgeturl(exchange: 'coinbase' | 'kraken' | 'gemini' | 'local-cex', idem: string, _options?: Configuration): Promise<RequestContext> {
         let _config = _options || this.configuration;
 
         // verify required parameter 'exchange' is not null or undefined

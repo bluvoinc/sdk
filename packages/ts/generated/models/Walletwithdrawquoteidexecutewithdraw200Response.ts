@@ -62,6 +62,7 @@ export enum Walletwithdrawquoteidexecutewithdraw200ResponseTypeEnum {
     GenericInternalServerError = 'GENERIC_INTERNAL_SERVER_ERROR',
     GenericValidationError = 'GENERIC_VALIDATION_ERROR',
     GenericInvalidRequest = 'GENERIC_INVALID_REQUEST',
+    ApikeyInsufficientPermissions = 'APIKEY_INSUFFICIENT_PERMISSIONS',
     WalletNotFound = 'WALLET_NOT_FOUND',
     WalletInvalidCredentials = 'WALLET_INVALID_CREDENTIALS',
     QuoteNotFound = 'QUOTE_NOT_FOUND',
@@ -83,8 +84,10 @@ export enum Walletwithdrawquoteidexecutewithdraw200ResponseTypeEnum {
     Withdrawal2FaMethodNotSupported = 'WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED',
     WithdrawalKycRequired = 'WITHDRAWAL_KYC_REQUIRED',
     WithdrawalEmailUnverified = 'WITHDRAWAL_EMAIL_UNVERIFIED',
+    WithdrawalRateLimitExceeded = 'WITHDRAWAL_RATE_LIMIT_EXCEEDED',
     OauthAuthorizationFailed = 'OAUTH_AUTHORIZATION_FAILED',
     OauthTokenExchangeFailed = 'OAUTH_TOKEN_EXCHANGE_FAILED',
-    OauthInvalidState = 'OAUTH_INVALID_STATE'
+    OauthInvalidState = 'OAUTH_INVALID_STATE',
+    OauthInsufficientScope = 'OAUTH_INSUFFICIENT_SCOPE'
 }
 

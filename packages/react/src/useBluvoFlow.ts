@@ -100,16 +100,16 @@ export interface UseBluvoFlowHook {
   requiresKYC: boolean;
   hasInsufficientBalance: boolean;
   canRetry: boolean;
-  invalid2FAAttempts: number;
-  
+
   // Data
   exchanges: Exchange[];
   walletBalances: WalletBalance[];
   quote: Quote | undefined;
   withdrawal: Withdrawal | undefined;
   valid2FAMethods: string[] | undefined;
-  
-  // Client instance (for advanced use)
+  invalid2FAAttempts?: number;
+
+    // Client instance (for advanced use)
   client: BluvoFlowClient;
 }
 

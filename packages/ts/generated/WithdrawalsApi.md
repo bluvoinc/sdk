@@ -12,7 +12,7 @@ Method | HTTP request | Description
 # **walletwithdrawbalancebalance**
 > Walletwithdrawbalancebalance200Response walletwithdrawbalancebalance()
 
-Get withdrawable balances and supported networks.
+Get withdrawable balances and supported networks.  **Required API Key Scopes:** `read`
 
 ### Example
 
@@ -52,6 +52,7 @@ This endpoint does not need any parameter.
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful response |  -  |
+**403** | Forbidden - Insufficient API key permissions |  -  |
 **404** | Not Found |  -  |
 
 [[Back to top]](#) [[Back to API list]](README.md#documentation-for-api-endpoints) [[Back to Model list]](README.md#documentation-for-models) [[Back to README]](README.md)
@@ -59,7 +60,7 @@ This endpoint does not need any parameter.
 # **walletwithdrawquoteidexecutewithdraw**
 > Walletwithdrawquoteidexecutewithdraw200Response walletwithdrawquoteidexecutewithdraw(walletwithdrawquoteidexecutewithdrawRequest)
 
-Execute a withdrawal using a quote ID.
+Execute a withdrawal using a quote ID.  **Required API Key Scopes:** `read`, `quote`, `withdrawal`
 
 ### Example
 
@@ -113,6 +114,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | Successful response |  -  |
 **400** | Bad Request |  -  |
+**403** | Forbidden - Insufficient API key permissions |  -  |
 **404** | Not Found |  -  |
 
 [[Back to top]](#) [[Back to API list]](README.md#documentation-for-api-endpoints) [[Back to Model list]](README.md#documentation-for-models) [[Back to README]](README.md)
@@ -120,7 +122,7 @@ Name | Type | Description  | Notes
 # **walletwithdrawquotequotation**
 > Walletwithdrawquotequotation200Response walletwithdrawquotequotation(walletwithdrawquotequotationRequest)
 
-Get withdrawal quote with fees and estimates.
+Get withdrawal quote with fees and estimates.  **Required API Key Scopes:** `read`, `quote`
 
 ### Example
 
@@ -175,6 +177,7 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | Successful response |  -  |
 **400** | Bad Request |  -  |
+**403** | Forbidden - Insufficient API key permissions |  -  |
 **404** | Not Found |  -  |
 
 [[Back to top]](#) [[Back to API list]](README.md#documentation-for-api-endpoints) [[Back to Model list]](README.md#documentation-for-models) [[Back to README]](README.md)

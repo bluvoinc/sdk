@@ -8,6 +8,7 @@ import {canConsumeForm, isCodeInRange} from '../util';
 import {SecurityAuthentication} from '../auth/auth';
 
 
+import { Walletget403Response } from '../models/Walletget403Response';
 import { Walletget404Response } from '../models/Walletget404Response';
 import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
 import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
@@ -22,7 +23,7 @@ import { WalletwithdrawquotequotationRequest } from '../models/Walletwithdrawquo
 export class WithdrawalsApiRequestFactory extends BaseAPIRequestFactory {
 
     /**
-     * Get withdrawable balances and supported networks.
+     * Get withdrawable balances and supported networks.  **Required API Key Scopes:** `read`
      * Balance
      */
     public async walletwithdrawbalancebalance(_options?: Configuration): Promise<RequestContext> {
@@ -67,7 +68,7 @@ export class WithdrawalsApiRequestFactory extends BaseAPIRequestFactory {
     }
 
     /**
-     * Execute a withdrawal using a quote ID.
+     * Execute a withdrawal using a quote ID.  **Required API Key Scopes:** `read`, `quote`, `withdrawal`
      * Withdraw
      * @param quoteId 
      * @param walletwithdrawquoteidexecutewithdrawRequest 
@@ -138,7 +139,7 @@ export class WithdrawalsApiRequestFactory extends BaseAPIRequestFactory {
     }
 
     /**
-     * Get withdrawal quote with fees and estimates.
+     * Get withdrawal quote with fees and estimates.  **Required API Key Scopes:** `read`, `quote`
      * Quotation
      * @param walletwithdrawquotequotationRequest 
      */
@@ -220,6 +221,13 @@ export class WithdrawalsApiResponseProcessor {
             ) as Walletwithdrawbalancebalance200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
+        if (isCodeInRange("403", response.httpStatusCode)) {
+            const body: Walletget403Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletget403Response", ""
+            ) as Walletget403Response;
+            throw new ApiException<Walletget403Response>(response.httpStatusCode, "Forbidden - Insufficient API key permissions", body, response.headers);
+        }
         if (isCodeInRange("404", response.httpStatusCode)) {
             const body: Walletget404Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
@@ -263,6 +271,13 @@ export class WithdrawalsApiResponseProcessor {
             ) as Walletwithdrawquotequotation400Response;
             throw new ApiException<Walletwithdrawquotequotation400Response>(response.httpStatusCode, "Bad Request", body, response.headers);
         }
+        if (isCodeInRange("403", response.httpStatusCode)) {
+            const body: Walletget403Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletget403Response", ""
+            ) as Walletget403Response;
+            throw new ApiException<Walletget403Response>(response.httpStatusCode, "Forbidden - Insufficient API key permissions", body, response.headers);
+        }
         if (isCodeInRange("404", response.httpStatusCode)) {
             const body: Walletwithdrawquotequotation400Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
@@ -305,6 +320,13 @@ export class WithdrawalsApiResponseProcessor {
                 "Walletwithdrawquotequotation400Response", ""
             ) as Walletwithdrawquotequotation400Response;
             throw new ApiException<Walletwithdrawquotequotation400Response>(response.httpStatusCode, "Bad Request", body, response.headers);
+        }
+        if (isCodeInRange("403", response.httpStatusCode)) {
+            const body: Walletget403Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletget403Response", ""
+            ) as Walletget403Response;
+            throw new ApiException<Walletget403Response>(response.httpStatusCode, "Forbidden - Insufficient API key permissions", body, response.headers);
         }
         if (isCodeInRange("404", response.httpStatusCode)) {
             const body: Walletget404Response = ObjectSerializer.deserialize(

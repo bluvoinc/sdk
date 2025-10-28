@@ -13,7 +13,7 @@ Method | HTTP request | Description
 # **walletdelete**
 > Walletdelete200Response walletdelete()
 
-Delete a connected exchange wallet.
+Delete a connected exchange wallet.  **Required API Key Scopes:** `read`, `delete`
 
 ### Example
 
@@ -53,6 +53,7 @@ This endpoint does not need any parameter.
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful response |  -  |
+**403** | Forbidden - Insufficient API key permissions |  -  |
 **404** | Not Found |  -  |
 
 [[Back to top]](#) [[Back to API list]](README.md#documentation-for-api-endpoints) [[Back to Model list]](README.md#documentation-for-models) [[Back to README]](README.md)
@@ -60,7 +61,7 @@ This endpoint does not need any parameter.
 # **walletget**
 > Walletget200Response walletget()
 
-Get wallet information and balances.
+Get wallet information and balances.  **Required API Key Scopes:** `read`
 
 ### Example
 
@@ -100,6 +101,7 @@ This endpoint does not need any parameter.
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful response |  -  |
+**403** | Forbidden - Insufficient API key permissions |  -  |
 **404** | Not Found |  -  |
 
 [[Back to top]](#) [[Back to API list]](README.md#documentation-for-api-endpoints) [[Back to Model list]](README.md#documentation-for-models) [[Back to README]](README.md)
@@ -107,7 +109,7 @@ This endpoint does not need any parameter.
 # **walletlistlistwallets**
 > Walletlistlistwallets200Response walletlistlistwallets()
 
-List all connected exchange wallets.
+List all connected exchange wallets.  **Required API Key Scopes:** `read`
 
 ### Example
 
@@ -178,13 +180,14 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful response |  -  |
+**403** | Forbidden - Insufficient API key permissions |  -  |
 
 [[Back to top]](#) [[Back to API list]](README.md#documentation-for-api-endpoints) [[Back to Model list]](README.md#documentation-for-models) [[Back to README]](README.md)
 
 # **wallettransactionslisttransactions**
 > Wallettransactionslisttransactions200Response wallettransactionslisttransactions()
 
-List transactions for a specific wallet or all wallets with filtering options.
+List transactions for a specific wallet or all wallets with filtering options.  **Required API Key Scopes:** `read`
 
 ### Example
 
@@ -240,6 +243,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful response |  -  |
+**403** | Forbidden - Insufficient API key permissions |  -  |
 
 [[Back to top]](#) [[Back to API list]](README.md#documentation-for-api-endpoints) [[Back to Model list]](README.md#documentation-for-models) [[Back to README]](README.md)
 

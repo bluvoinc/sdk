@@ -8,6 +8,7 @@ import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlg
 import { Walletdelete200Response } from '../models/Walletdelete200Response';
 import { Walletget200Response } from '../models/Walletget200Response';
 import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
+import { Walletget403Response } from '../models/Walletget403Response';
 import { Walletget404Response } from '../models/Walletget404Response';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
@@ -217,7 +218,7 @@ export class ObjectWalletsApi {
     }
 
     /**
-     * Delete a connected exchange wallet.
+     * Delete a connected exchange wallet.  **Required API Key Scopes:** `read`, `delete`
      * Delete
      * @param param the request object
      */
@@ -226,7 +227,7 @@ export class ObjectWalletsApi {
     }
 
     /**
-     * Delete a connected exchange wallet.
+     * Delete a connected exchange wallet.  **Required API Key Scopes:** `read`, `delete`
      * Delete
      * @param param the request object
      */
@@ -235,7 +236,7 @@ export class ObjectWalletsApi {
     }
 
     /**
-     * Get wallet information and balances.
+     * Get wallet information and balances.  **Required API Key Scopes:** `read`
      * Get
      * @param param the request object
      */
@@ -244,7 +245,7 @@ export class ObjectWalletsApi {
     }
 
     /**
-     * Get wallet information and balances.
+     * Get wallet information and balances.  **Required API Key Scopes:** `read`
      * Get
      * @param param the request object
      */
@@ -253,7 +254,7 @@ export class ObjectWalletsApi {
     }
 
     /**
-     * List all connected exchange wallets.
+     * List all connected exchange wallets.  **Required API Key Scopes:** `read`
      * List Wallets
      * @param param the request object
      */
@@ -262,7 +263,7 @@ export class ObjectWalletsApi {
     }
 
     /**
-     * List all connected exchange wallets.
+     * List all connected exchange wallets.  **Required API Key Scopes:** `read`
      * List Wallets
      * @param param the request object
      */
@@ -271,7 +272,7 @@ export class ObjectWalletsApi {
     }
 
     /**
-     * List transactions for a specific wallet or all wallets with filtering options.
+     * List transactions for a specific wallet or all wallets with filtering options.  **Required API Key Scopes:** `read`
      * List Transactions
      * @param param the request object
      */
@@ -280,7 +281,7 @@ export class ObjectWalletsApi {
     }
 
     /**
-     * List transactions for a specific wallet or all wallets with filtering options.
+     * List transactions for a specific wallet or all wallets with filtering options.  **Required API Key Scopes:** `read`
      * List Transactions
      * @param param the request object
      */
@@ -329,7 +330,7 @@ export class ObjectWithdrawalsApi {
     }
 
     /**
-     * Get withdrawable balances and supported networks.
+     * Get withdrawable balances and supported networks.  **Required API Key Scopes:** `read`
      * Balance
      * @param param the request object
      */
@@ -338,7 +339,7 @@ export class ObjectWithdrawalsApi {
     }
 
     /**
-     * Get withdrawable balances and supported networks.
+     * Get withdrawable balances and supported networks.  **Required API Key Scopes:** `read`
      * Balance
      * @param param the request object
      */
@@ -347,7 +348,7 @@ export class ObjectWithdrawalsApi {
     }
 
     /**
-     * Execute a withdrawal using a quote ID.
+     * Execute a withdrawal using a quote ID.  **Required API Key Scopes:** `read`, `quote`, `withdrawal`
      * Withdraw
      * @param param the request object
      */
@@ -356,7 +357,7 @@ export class ObjectWithdrawalsApi {
     }
 
     /**
-     * Execute a withdrawal using a quote ID.
+     * Execute a withdrawal using a quote ID.  **Required API Key Scopes:** `read`, `quote`, `withdrawal`
      * Withdraw
      * @param param the request object
      */
@@ -365,7 +366,7 @@ export class ObjectWithdrawalsApi {
     }
 
     /**
-     * Get withdrawal quote with fees and estimates.
+     * Get withdrawal quote with fees and estimates.  **Required API Key Scopes:** `read`, `quote`
      * Quotation
      * @param param the request object
      */
@@ -374,7 +375,7 @@ export class ObjectWithdrawalsApi {
     }
 
     /**
-     * Get withdrawal quote with fees and estimates.
+     * Get withdrawal quote with fees and estimates.  **Required API Key Scopes:** `read`, `quote`
      * Quotation
      * @param param the request object
      */

@@ -8,6 +8,7 @@ import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlg
 import { Walletdelete200Response } from '../models/Walletdelete200Response';
 import { Walletget200Response } from '../models/Walletget200Response';
 import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
+import { Walletget403Response } from '../models/Walletget403Response';
 import { Walletget404Response } from '../models/Walletget404Response';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
@@ -104,7 +105,7 @@ export class PromiseWalletsApi {
     }
 
     /**
-     * Delete a connected exchange wallet.
+     * Delete a connected exchange wallet.  **Required API Key Scopes:** `read`, `delete`
      * Delete
      */
     public walletdeleteWithHttpInfo(_options?: PromiseConfigurationOptions): Promise<HttpInfo<Walletdelete200Response>> {
@@ -114,7 +115,7 @@ export class PromiseWalletsApi {
     }
 
     /**
-     * Delete a connected exchange wallet.
+     * Delete a connected exchange wallet.  **Required API Key Scopes:** `read`, `delete`
      * Delete
      */
     public walletdelete(_options?: PromiseConfigurationOptions): Promise<Walletdelete200Response> {
@@ -124,7 +125,7 @@ export class PromiseWalletsApi {
     }
 
     /**
-     * Get wallet information and balances.
+     * Get wallet information and balances.  **Required API Key Scopes:** `read`
      * Get
      */
     public walletgetWithHttpInfo(_options?: PromiseConfigurationOptions): Promise<HttpInfo<Walletget200Response>> {
@@ -134,7 +135,7 @@ export class PromiseWalletsApi {
     }
 
     /**
-     * Get wallet information and balances.
+     * Get wallet information and balances.  **Required API Key Scopes:** `read`
      * Get
      */
     public walletget(_options?: PromiseConfigurationOptions): Promise<Walletget200Response> {
@@ -144,7 +145,7 @@ export class PromiseWalletsApi {
     }
 
     /**
-     * List all connected exchange wallets.
+     * List all connected exchange wallets.  **Required API Key Scopes:** `read`
      * List Wallets
      * @param [page] Page number (0-indexed).
      * @param [limit] Number of wallets per page (max 1000).
@@ -163,7 +164,7 @@ export class PromiseWalletsApi {
     }
 
     /**
-     * List all connected exchange wallets.
+     * List all connected exchange wallets.  **Required API Key Scopes:** `read`
      * List Wallets
      * @param [page] Page number (0-indexed).
      * @param [limit] Number of wallets per page (max 1000).
@@ -182,7 +183,7 @@ export class PromiseWalletsApi {
     }
 
     /**
-     * List transactions for a specific wallet or all wallets with filtering options.
+     * List transactions for a specific wallet or all wallets with filtering options.  **Required API Key Scopes:** `read`
      * List Transactions
      * @param [walletId] The wallet ID to list transactions for. If not provided, returns transactions for all wallets.
      * @param [page] Page number (0-indexed).
@@ -196,7 +197,7 @@ export class PromiseWalletsApi {
     }
 
     /**
-     * List transactions for a specific wallet or all wallets with filtering options.
+     * List transactions for a specific wallet or all wallets with filtering options.  **Required API Key Scopes:** `read`
      * List Transactions
      * @param [walletId] The wallet ID to list transactions for. If not provided, returns transactions for all wallets.
      * @param [page] Page number (0-indexed).
@@ -229,7 +230,7 @@ export class PromiseWithdrawalsApi {
     }
 
     /**
-     * Get withdrawable balances and supported networks.
+     * Get withdrawable balances and supported networks.  **Required API Key Scopes:** `read`
      * Balance
      */
     public walletwithdrawbalancebalanceWithHttpInfo(_options?: PromiseConfigurationOptions): Promise<HttpInfo<Walletwithdrawbalancebalance200Response>> {
@@ -239,7 +240,7 @@ export class PromiseWithdrawalsApi {
     }
 
     /**
-     * Get withdrawable balances and supported networks.
+     * Get withdrawable balances and supported networks.  **Required API Key Scopes:** `read`
      * Balance
      */
     public walletwithdrawbalancebalance(_options?: PromiseConfigurationOptions): Promise<Walletwithdrawbalancebalance200Response> {
@@ -249,7 +250,7 @@ export class PromiseWithdrawalsApi {
     }
 
     /**
-     * Execute a withdrawal using a quote ID.
+     * Execute a withdrawal using a quote ID.  **Required API Key Scopes:** `read`, `quote`, `withdrawal`
      * Withdraw
      * @param quoteId
      * @param walletwithdrawquoteidexecutewithdrawRequest
@@ -261,7 +262,7 @@ export class PromiseWithdrawalsApi {
     }
 
     /**
-     * Execute a withdrawal using a quote ID.
+     * Execute a withdrawal using a quote ID.  **Required API Key Scopes:** `read`, `quote`, `withdrawal`
      * Withdraw
      * @param quoteId
      * @param walletwithdrawquoteidexecutewithdrawRequest
@@ -273,7 +274,7 @@ export class PromiseWithdrawalsApi {
     }
 
     /**
-     * Get withdrawal quote with fees and estimates.
+     * Get withdrawal quote with fees and estimates.  **Required API Key Scopes:** `read`, `quote`
      * Quotation
      * @param walletwithdrawquotequotationRequest
      */
@@ -284,7 +285,7 @@ export class PromiseWithdrawalsApi {
     }
 
     /**
-     * Get withdrawal quote with fees and estimates.
+     * Get withdrawal quote with fees and estimates.  **Required API Key Scopes:** `read`, `quote`
      * Quotation
      * @param walletwithdrawquotequotationRequest
      */

@@ -256,7 +256,7 @@ export class BluvoWebClient {
                 };
             }
 
-// Default cleanup if no hooks provided
+            // Default cleanup if no hooks provided
             return () => {
                 try {
                     if (newWindow && !newWindow.closed) {

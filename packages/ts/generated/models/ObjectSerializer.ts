@@ -4,6 +4,7 @@ export * from '../models/Oauth2exchangeurlgeturl200Response';
 export * from '../models/Walletdelete200Response';
 export * from '../models/Walletget200Response';
 export * from '../models/Walletget200ResponseCreatedAt';
+export * from '../models/Walletget403Response';
 export * from '../models/Walletget404Response';
 export * from '../models/Walletlistlistwallets200Response';
 export * from '../models/Walletlistlistwallets200ResponsePagination';
@@ -29,6 +30,7 @@ import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlg
 import { Walletdelete200Response } from '../models/Walletdelete200Response';
 import { Walletget200Response , Walletget200ResponseExchangeEnum          } from '../models/Walletget200Response';
 import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
+import { Walletget403Response , Walletget403ResponseTypeEnum    } from '../models/Walletget403Response';
 import { Walletget404Response , Walletget404ResponseTypeEnum    } from '../models/Walletget404Response';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
@@ -63,6 +65,7 @@ let primitives = [
 let enumsMap: Set<string> = new Set<string>([
     "Oauth2exchangeslistexchanges200ResponseExchangesInnerStatusEnum",
     "Walletget200ResponseExchangeEnum",
+    "Walletget403ResponseTypeEnum",
     "Walletget404ResponseTypeEnum",
     "Walletlistlistwallets200ResponseWalletsInnerExchangeEnum",
     "Wallettransactionslisttransactions200ResponseTransactionsInnerTypeEnum",
@@ -83,6 +86,7 @@ let typeMap: {[index: string]: any} = {
     "Walletdelete200Response": Walletdelete200Response,
     "Walletget200Response": Walletget200Response,
     "Walletget200ResponseCreatedAt": Walletget200ResponseCreatedAt,
+    "Walletget403Response": Walletget403Response,
     "Walletget404Response": Walletget404Response,
     "Walletlistlistwallets200Response": Walletlistlistwallets200Response,
     "Walletlistlistwallets200ResponsePagination": Walletlistlistwallets200ResponsePagination,

@@ -10,6 +10,7 @@ import {SecurityAuthentication} from '../auth/auth';
 
 import { Walletdelete200Response } from '../models/Walletdelete200Response';
 import { Walletget200Response } from '../models/Walletget200Response';
+import { Walletget403Response } from '../models/Walletget403Response';
 import { Walletget404Response } from '../models/Walletget404Response';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
@@ -20,7 +21,7 @@ import { Wallettransactionslisttransactions200Response } from '../models/Wallett
 export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
 
     /**
-     * Delete a connected exchange wallet.
+     * Delete a connected exchange wallet.  **Required API Key Scopes:** `read`, `delete`
      * Delete
      */
     public async walletdelete(_options?: Configuration): Promise<RequestContext> {
@@ -65,7 +66,7 @@ export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
     }
 
     /**
-     * Get wallet information and balances.
+     * Get wallet information and balances.  **Required API Key Scopes:** `read`
      * Get
      */
     public async walletget(_options?: Configuration): Promise<RequestContext> {
@@ -110,7 +111,7 @@ export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
     }
 
     /**
-     * List all connected exchange wallets.
+     * List all connected exchange wallets.  **Required API Key Scopes:** `read`
      * List Wallets
      * @param page Page number (0-indexed).
      * @param limit Number of wallets per page (max 1000).
@@ -213,7 +214,7 @@ export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
     }
 
     /**
-     * List transactions for a specific wallet or all wallets with filtering options.
+     * List transactions for a specific wallet or all wallets with filtering options.  **Required API Key Scopes:** `read`
      * List Transactions
      * @param walletId The wallet ID to list transactions for. If not provided, returns transactions for all wallets.
      * @param page Page number (0-indexed).
@@ -300,6 +301,13 @@ export class WalletsApiResponseProcessor {
             ) as Walletdelete200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
+        if (isCodeInRange("403", response.httpStatusCode)) {
+            const body: Walletget403Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletget403Response", ""
+            ) as Walletget403Response;
+            throw new ApiException<Walletget403Response>(response.httpStatusCode, "Forbidden - Insufficient API key permissions", body, response.headers);
+        }
         if (isCodeInRange("404", response.httpStatusCode)) {
             const body: Walletget404Response = ObjectSerializer.deserialize(
                 ObjectSerializer.parse(await response.body.text(), contentType),
@@ -335,6 +343,13 @@ export class WalletsApiResponseProcessor {
                 "Walletget200Response", ""
             ) as Walletget200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
+        }
+        if (isCodeInRange("403", response.httpStatusCode)) {
+            const body: Walletget403Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletget403Response", ""
+            ) as Walletget403Response;
+            throw new ApiException<Walletget403Response>(response.httpStatusCode, "Forbidden - Insufficient API key permissions", body, response.headers);
         }
         if (isCodeInRange("404", response.httpStatusCode)) {
             const body: Walletget404Response = ObjectSerializer.deserialize(
@@ -372,6 +387,13 @@ export class WalletsApiResponseProcessor {
             ) as Walletlistlistwallets200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
+        if (isCodeInRange("403", response.httpStatusCode)) {
+            const body: Walletget403Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletget403Response", ""
+            ) as Walletget403Response;
+            throw new ApiException<Walletget403Response>(response.httpStatusCode, "Forbidden - Insufficient API key permissions", body, response.headers);
+        }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml
         if (response.httpStatusCode >= 200 && response.httpStatusCode <= 299) {
@@ -400,6 +422,13 @@ export class WalletsApiResponseProcessor {
                 "Wallettransactionslisttransactions200Response", ""
             ) as Wallettransactionslisttransactions200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
+        }
+        if (isCodeInRange("403", response.httpStatusCode)) {
+            const body: Walletget403Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletget403Response", ""
+            ) as Walletget403Response;
+            throw new ApiException<Walletget403Response>(response.httpStatusCode, "Forbidden - Insufficient API key permissions", body, response.headers);
         }
 
         // Work around for missing responses in specification, e.g. for petstore.yaml

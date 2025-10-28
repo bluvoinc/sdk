@@ -23,6 +23,7 @@ models/ObjectSerializer.ts
 models/Walletdelete200Response.ts
 models/Walletget200Response.ts
 models/Walletget200ResponseCreatedAt.ts
+models/Walletget403Response.ts
 models/Walletget404Response.ts
 models/Walletlistlistwallets200Response.ts
 models/Walletlistlistwallets200ResponsePagination.ts

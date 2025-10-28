@@ -9,6 +9,7 @@ import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlg
 import { Walletdelete200Response } from '../models/Walletdelete200Response';
 import { Walletget200Response } from '../models/Walletget200Response';
 import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
+import { Walletget403Response } from '../models/Walletget403Response';
 import { Walletget404Response } from '../models/Walletget404Response';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
@@ -131,7 +132,7 @@ export class ObservableWalletsApi {
     }
 
     /**
-     * Delete a connected exchange wallet.
+     * Delete a connected exchange wallet.  **Required API Key Scopes:** `read`, `delete`
      * Delete
      */
     public walletdeleteWithHttpInfo(_options?: ConfigurationOptions): Observable<HttpInfo<Walletdelete200Response>> {
@@ -155,7 +156,7 @@ export class ObservableWalletsApi {
     }
 
     /**
-     * Delete a connected exchange wallet.
+     * Delete a connected exchange wallet.  **Required API Key Scopes:** `read`, `delete`
      * Delete
      */
     public walletdelete(_options?: ConfigurationOptions): Observable<Walletdelete200Response> {
@@ -163,7 +164,7 @@ export class ObservableWalletsApi {
     }
 
     /**
-     * Get wallet information and balances.
+     * Get wallet information and balances.  **Required API Key Scopes:** `read`
      * Get
      */
     public walletgetWithHttpInfo(_options?: ConfigurationOptions): Observable<HttpInfo<Walletget200Response>> {
@@ -187,7 +188,7 @@ export class ObservableWalletsApi {
     }
 
     /**
-     * Get wallet information and balances.
+     * Get wallet information and balances.  **Required API Key Scopes:** `read`
      * Get
      */
     public walletget(_options?: ConfigurationOptions): Observable<Walletget200Response> {
@@ -195,7 +196,7 @@ export class ObservableWalletsApi {
     }
 
     /**
-     * List all connected exchange wallets.
+     * List all connected exchange wallets.  **Required API Key Scopes:** `read`
      * List Wallets
      * @param [page] Page number (0-indexed).
      * @param [limit] Number of wallets per page (max 1000).
@@ -228,7 +229,7 @@ export class ObservableWalletsApi {
     }
 
     /**
-     * List all connected exchange wallets.
+     * List all connected exchange wallets.  **Required API Key Scopes:** `read`
      * List Wallets
      * @param [page] Page number (0-indexed).
      * @param [limit] Number of wallets per page (max 1000).
@@ -245,7 +246,7 @@ export class ObservableWalletsApi {
     }
 
     /**
-     * List transactions for a specific wallet or all wallets with filtering options.
+     * List transactions for a specific wallet or all wallets with filtering options.  **Required API Key Scopes:** `read`
      * List Transactions
      * @param [walletId] The wallet ID to list transactions for. If not provided, returns transactions for all wallets.
      * @param [page] Page number (0-indexed).
@@ -273,7 +274,7 @@ export class ObservableWalletsApi {
     }
 
     /**
-     * List transactions for a specific wallet or all wallets with filtering options.
+     * List transactions for a specific wallet or all wallets with filtering options.  **Required API Key Scopes:** `read`
      * List Transactions
      * @param [walletId] The wallet ID to list transactions for. If not provided, returns transactions for all wallets.
      * @param [page] Page number (0-indexed).
@@ -303,7 +304,7 @@ export class ObservableWithdrawalsApi {
     }
 
     /**
-     * Get withdrawable balances and supported networks.
+     * Get withdrawable balances and supported networks.  **Required API Key Scopes:** `read`
      * Balance
      */
     public walletwithdrawbalancebalanceWithHttpInfo(_options?: ConfigurationOptions): Observable<HttpInfo<Walletwithdrawbalancebalance200Response>> {
@@ -327,7 +328,7 @@ export class ObservableWithdrawalsApi {
     }
 
     /**
-     * Get withdrawable balances and supported networks.
+     * Get withdrawable balances and supported networks.  **Required API Key Scopes:** `read`
      * Balance
      */
     public walletwithdrawbalancebalance(_options?: ConfigurationOptions): Observable<Walletwithdrawbalancebalance200Response> {
@@ -335,7 +336,7 @@ export class ObservableWithdrawalsApi {
     }
 
     /**
-     * Execute a withdrawal using a quote ID.
+     * Execute a withdrawal using a quote ID.  **Required API Key Scopes:** `read`, `quote`, `withdrawal`
      * Withdraw
      * @param quoteId
      * @param walletwithdrawquoteidexecutewithdrawRequest
@@ -361,7 +362,7 @@ export class ObservableWithdrawalsApi {
     }
 
     /**
-     * Execute a withdrawal using a quote ID.
+     * Execute a withdrawal using a quote ID.  **Required API Key Scopes:** `read`, `quote`, `withdrawal`
      * Withdraw
      * @param quoteId
      * @param walletwithdrawquoteidexecutewithdrawRequest
@@ -371,7 +372,7 @@ export class ObservableWithdrawalsApi {
     }
 
     /**
-     * Get withdrawal quote with fees and estimates.
+     * Get withdrawal quote with fees and estimates.  **Required API Key Scopes:** `read`, `quote`
      * Quotation
      * @param walletwithdrawquotequotationRequest
      */
@@ -396,7 +397,7 @@ export class ObservableWithdrawalsApi {
     }
 
     /**
-     * Get withdrawal quote with fees and estimates.
+     * Get withdrawal quote with fees and estimates.  **Required API Key Scopes:** `read`, `quote`
      * Quotation
      * @param walletwithdrawquotequotationRequest
      */

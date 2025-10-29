@@ -1,6 +1,6 @@
 {
   "name": "@bluvo/react",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "description": "React hooks for Bluvo SDK - Framework-agnostic state machine for crypto withdrawals",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",

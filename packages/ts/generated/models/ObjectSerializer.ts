@@ -10,6 +10,7 @@ export * from '../models/Walletlistlistwallets200Response';
 export * from '../models/Walletlistlistwallets200ResponsePagination';
 export * from '../models/Walletlistlistwallets200ResponseWalletsInner';
 export * from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
+export * from '../models/Walletpingping200Response';
 export * from '../models/Wallettransactionslisttransactions200Response';
 export * from '../models/Wallettransactionslisttransactions200ResponsePagination';
 export * from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
@@ -36,6 +37,7 @@ import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallet
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
 import { Walletlistlistwallets200ResponseWalletsInner      , Walletlistlistwallets200ResponseWalletsInnerExchangeEnum      } from '../models/Walletlistlistwallets200ResponseWalletsInner';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
+import { Walletpingping200Response , Walletpingping200ResponseExchangeEnum  , Walletpingping200ResponseStatusEnum    } from '../models/Walletpingping200Response';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
 import { Wallettransactionslisttransactions200ResponsePagination } from '../models/Wallettransactionslisttransactions200ResponsePagination';
 import { Wallettransactionslisttransactions200ResponseTransactionsInner     , Wallettransactionslisttransactions200ResponseTransactionsInnerTypeEnum    , Wallettransactionslisttransactions200ResponseTransactionsInnerDirectionEnum      , Wallettransactionslisttransactions200ResponseTransactionsInnerFiatCurrencyEnum  , Wallettransactionslisttransactions200ResponseTransactionsInnerStatusEnum      } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
@@ -68,6 +70,8 @@ let enumsMap: Set<string> = new Set<string>([
     "Walletget403ResponseTypeEnum",
     "Walletget404ResponseTypeEnum",
     "Walletlistlistwallets200ResponseWalletsInnerExchangeEnum",
+    "Walletpingping200ResponseExchangeEnum",
+    "Walletpingping200ResponseStatusEnum",
     "Wallettransactionslisttransactions200ResponseTransactionsInnerTypeEnum",
     "Wallettransactionslisttransactions200ResponseTransactionsInnerDirectionEnum",
     "Wallettransactionslisttransactions200ResponseTransactionsInnerFiatCurrencyEnum",
@@ -92,6 +96,7 @@ let typeMap: {[index: string]: any} = {
     "Walletlistlistwallets200ResponsePagination": Walletlistlistwallets200ResponsePagination,
     "Walletlistlistwallets200ResponseWalletsInner": Walletlistlistwallets200ResponseWalletsInner,
     "Walletlistlistwallets200ResponseWalletsInnerInvalidApi": Walletlistlistwallets200ResponseWalletsInnerInvalidApi,
+    "Walletpingping200Response": Walletpingping200Response,
     "Wallettransactionslisttransactions200Response": Wallettransactionslisttransactions200Response,
     "Wallettransactionslisttransactions200ResponsePagination": Wallettransactionslisttransactions200ResponsePagination,
     "Wallettransactionslisttransactions200ResponseTransactionsInner": Wallettransactionslisttransactions200ResponseTransactionsInner,

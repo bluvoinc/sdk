@@ -14,6 +14,7 @@ import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallet
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
 import { Walletlistlistwallets200ResponseWalletsInner } from '../models/Walletlistlistwallets200ResponseWalletsInner';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
+import { Walletpingping200Response } from '../models/Walletpingping200Response';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
 import { Wallettransactionslisttransactions200ResponsePagination } from '../models/Wallettransactionslisttransactions200ResponsePagination';
 import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
@@ -175,6 +176,9 @@ export interface WalletsApiWalletlistlistwalletsRequest {
     fields?: string
 }
 
+export interface WalletsApiWalletpingpingRequest {
+}
+
 export interface WalletsApiWallettransactionslisttransactionsRequest {
     /**
      * The wallet ID to list transactions for. If not provided, returns transactions for all wallets.
@@ -269,6 +273,24 @@ export class ObjectWalletsApi {
      */
     public walletlistlistwallets(param: WalletsApiWalletlistlistwalletsRequest = {}, options?: ConfigurationOptions): Promise<Walletlistlistwallets200Response> {
         return this.api.walletlistlistwallets(param.page, param.limit, param.exchange, param.createdSince, param.createdBefore, param.lastSyncSince, param.lastSyncBefore, param.invalidApi, param.fields,  options).toPromise();
+    }
+
+    /**
+     * Test wallet connectivity and validate exchange API credentials. This endpoint verifies that the stored credentials are valid by making a test API call to the exchange. Use this to check if credentials need to be refreshed or if the wallet connection is still active.  **Required API Key Scopes:** `read`
+     * Ping
+     * @param param the request object
+     */
+    public walletpingpingWithHttpInfo(param: WalletsApiWalletpingpingRequest = {}, options?: ConfigurationOptions): Promise<HttpInfo<Walletpingping200Response>> {
+        return this.api.walletpingpingWithHttpInfo( options).toPromise();
+    }
+
+    /**
+     * Test wallet connectivity and validate exchange API credentials. This endpoint verifies that the stored credentials are valid by making a test API call to the exchange. Use this to check if credentials need to be refreshed or if the wallet connection is still active.  **Required API Key Scopes:** `read`
+     * Ping
+     * @param param the request object
+     */
+    public walletpingping(param: WalletsApiWalletpingpingRequest = {}, options?: ConfigurationOptions): Promise<Walletpingping200Response> {
+        return this.api.walletpingping( options).toPromise();
     }
 
     /**

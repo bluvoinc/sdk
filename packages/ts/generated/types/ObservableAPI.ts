@@ -15,6 +15,7 @@ import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallet
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
 import { Walletlistlistwallets200ResponseWalletsInner } from '../models/Walletlistlistwallets200ResponseWalletsInner';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
+import { Walletpingping200Response } from '../models/Walletpingping200Response';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
 import { Wallettransactionslisttransactions200ResponsePagination } from '../models/Wallettransactionslisttransactions200ResponsePagination';
 import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
@@ -243,6 +244,38 @@ export class ObservableWalletsApi {
      */
     public walletlistlistwallets(page?: number, limit?: number, exchange?: 'ace' | 'ascendex' | 'bequant' | 'bigone' | 'binance' | 'coinbase' | 'binanceus' | 'bingx' | 'bit2c' | 'bitbank' | 'bitbns' | 'bitcoincom' | 'bitfinex' | 'bitflyer' | 'bitget' | 'bithumb' | 'bitmart' | 'bitmex' | 'bitopro' | 'bitpanda' | 'bitrue' | 'bitso' | 'bitstamp' | 'bitteam' | 'bitvavo' | 'bybit' | 'bl3p' | 'blockchaincom' | 'blofin' | 'btcalpha' | 'btcbox' | 'btcmarkets' | 'btcturk' | 'cex' | 'coincheck' | 'coinex' | 'coinlist' | 'coinmate' | 'coinmetro' | 'coinone' | 'coinsph' | 'coinspot' | 'cryptocom' | 'delta' | 'deribit' | 'digifinex' | 'exmo' | 'fmfwio' | 'gate' | 'gateio' | 'gemini' | 'hashkey' | 'hitbtc' | 'hollaex' | 'htx' | 'huobi' | 'huobijp' | 'hyperliquid' | 'independentreserve' | 'indodax' | 'kraken' | 'krakenfutures' | 'kucoin' | 'kucoinfutures' | 'latoken' | 'lbank' | 'luno' | 'mercado' | 'mexc' | 'ndax' | 'novadax' | 'oceanex' | 'okcoin' | 'okx' | 'onetrading' | 'oxfun' | 'p2b' | 'paradex' | 'paymium' | 'phemex' | 'poloniex' | 'poloniexfutures' | 'probit' | 'timex' | 'tradeogre' | 'upbit' | 'vertex' | 'wavesexchange' | 'whitebit' | 'woo' | 'woofipro' | 'xt' | 'yobit' | 'zaif' | 'zonda' | 'local-cex' | 'null', createdSince?: string, createdBefore?: string, lastSyncSince?: string, lastSyncBefore?: string, invalidApi?: 'true' | 'false' | 'null', fields?: string, _options?: ConfigurationOptions): Observable<Walletlistlistwallets200Response> {
         return this.walletlistlistwalletsWithHttpInfo(page, limit, exchange, createdSince, createdBefore, lastSyncSince, lastSyncBefore, invalidApi, fields, _options).pipe(map((apiResponse: HttpInfo<Walletlistlistwallets200Response>) => apiResponse.data));
+    }
+
+    /**
+     * Test wallet connectivity and validate exchange API credentials. This endpoint verifies that the stored credentials are valid by making a test API call to the exchange. Use this to check if credentials need to be refreshed or if the wallet connection is still active.  **Required API Key Scopes:** `read`
+     * Ping
+     */
+    public walletpingpingWithHttpInfo(_options?: ConfigurationOptions): Observable<HttpInfo<Walletpingping200Response>> {
+        const _config = mergeConfiguration(this.configuration, _options);
+
+        const requestContextPromise = this.requestFactory.walletpingping(_config);
+        // build promise chain
+        let middlewarePreObservable = from<RequestContext>(requestContextPromise);
+        for (const middleware of _config.middleware) {
+            middlewarePreObservable = middlewarePreObservable.pipe(mergeMap((ctx: RequestContext) => middleware.pre(ctx)));
+        }
+
+        return middlewarePreObservable.pipe(mergeMap((ctx: RequestContext) => _config.httpApi.send(ctx))).
+            pipe(mergeMap((response: ResponseContext) => {
+                let middlewarePostObservable = of(response);
+                for (const middleware of _config.middleware.reverse()) {
+                    middlewarePostObservable = middlewarePostObservable.pipe(mergeMap((rsp: ResponseContext) => middleware.post(rsp)));
+                }
+                return middlewarePostObservable.pipe(map((rsp: ResponseContext) => this.responseProcessor.walletpingpingWithHttpInfo(rsp)));
+            }));
+    }
+
+    /**
+     * Test wallet connectivity and validate exchange API credentials. This endpoint verifies that the stored credentials are valid by making a test API call to the exchange. Use this to check if credentials need to be refreshed or if the wallet connection is still active.  **Required API Key Scopes:** `read`
+     * Ping
+     */
+    public walletpingping(_options?: ConfigurationOptions): Observable<Walletpingping200Response> {
+        return this.walletpingpingWithHttpInfo(_options).pipe(map((apiResponse: HttpInfo<Walletpingping200Response>) => apiResponse.data));
     }
 
     /**

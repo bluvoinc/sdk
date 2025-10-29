@@ -14,6 +14,7 @@ import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallet
 import { Walletlistlistwallets200ResponsePagination } from '../models/Walletlistlistwallets200ResponsePagination';
 import { Walletlistlistwallets200ResponseWalletsInner } from '../models/Walletlistlistwallets200ResponseWalletsInner';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
+import { Walletpingping200Response } from '../models/Walletpingping200Response';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
 import { Wallettransactionslisttransactions200ResponsePagination } from '../models/Wallettransactionslisttransactions200ResponsePagination';
 import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
@@ -179,6 +180,26 @@ export class PromiseWalletsApi {
     public walletlistlistwallets(page?: number, limit?: number, exchange?: 'ace' | 'ascendex' | 'bequant' | 'bigone' | 'binance' | 'coinbase' | 'binanceus' | 'bingx' | 'bit2c' | 'bitbank' | 'bitbns' | 'bitcoincom' | 'bitfinex' | 'bitflyer' | 'bitget' | 'bithumb' | 'bitmart' | 'bitmex' | 'bitopro' | 'bitpanda' | 'bitrue' | 'bitso' | 'bitstamp' | 'bitteam' | 'bitvavo' | 'bybit' | 'bl3p' | 'blockchaincom' | 'blofin' | 'btcalpha' | 'btcbox' | 'btcmarkets' | 'btcturk' | 'cex' | 'coincheck' | 'coinex' | 'coinlist' | 'coinmate' | 'coinmetro' | 'coinone' | 'coinsph' | 'coinspot' | 'cryptocom' | 'delta' | 'deribit' | 'digifinex' | 'exmo' | 'fmfwio' | 'gate' | 'gateio' | 'gemini' | 'hashkey' | 'hitbtc' | 'hollaex' | 'htx' | 'huobi' | 'huobijp' | 'hyperliquid' | 'independentreserve' | 'indodax' | 'kraken' | 'krakenfutures' | 'kucoin' | 'kucoinfutures' | 'latoken' | 'lbank' | 'luno' | 'mercado' | 'mexc' | 'ndax' | 'novadax' | 'oceanex' | 'okcoin' | 'okx' | 'onetrading' | 'oxfun' | 'p2b' | 'paradex' | 'paymium' | 'phemex' | 'poloniex' | 'poloniexfutures' | 'probit' | 'timex' | 'tradeogre' | 'upbit' | 'vertex' | 'wavesexchange' | 'whitebit' | 'woo' | 'woofipro' | 'xt' | 'yobit' | 'zaif' | 'zonda' | 'local-cex' | 'null', createdSince?: string, createdBefore?: string, lastSyncSince?: string, lastSyncBefore?: string, invalidApi?: 'true' | 'false' | 'null', fields?: string, _options?: PromiseConfigurationOptions): Promise<Walletlistlistwallets200Response> {
         const observableOptions = wrapOptions(_options);
         const result = this.api.walletlistlistwallets(page, limit, exchange, createdSince, createdBefore, lastSyncSince, lastSyncBefore, invalidApi, fields, observableOptions);
+        return result.toPromise();
+    }
+
+    /**
+     * Test wallet connectivity and validate exchange API credentials. This endpoint verifies that the stored credentials are valid by making a test API call to the exchange. Use this to check if credentials need to be refreshed or if the wallet connection is still active.  **Required API Key Scopes:** `read`
+     * Ping
+     */
+    public walletpingpingWithHttpInfo(_options?: PromiseConfigurationOptions): Promise<HttpInfo<Walletpingping200Response>> {
+        const observableOptions = wrapOptions(_options);
+        const result = this.api.walletpingpingWithHttpInfo(observableOptions);
+        return result.toPromise();
+    }
+
+    /**
+     * Test wallet connectivity and validate exchange API credentials. This endpoint verifies that the stored credentials are valid by making a test API call to the exchange. Use this to check if credentials need to be refreshed or if the wallet connection is still active.  **Required API Key Scopes:** `read`
+     * Ping
+     */
+    public walletpingping(_options?: PromiseConfigurationOptions): Promise<Walletpingping200Response> {
+        const observableOptions = wrapOptions(_options);
+        const result = this.api.walletpingping(observableOptions);
         return result.toPromise();
     }
 

@@ -130,6 +130,14 @@ export class BluvoClient {
         },
 
         /**
+         * Ping
+         */
+        ping: (walletId: string, _options?: PromiseConfigurationOptions) => {
+            return new WalletsApi(this.configuration(walletId))
+                .walletpingping(_options);
+        },
+
+        /**
          * Securely disconnect and remove a previously connected exchange wallet from your Bluvo project.
          *
          * This method completely removes the stored API credentials and terminates the connection between your Bluvo

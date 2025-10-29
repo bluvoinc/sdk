@@ -13,6 +13,7 @@ import { Walletget200Response } from '../models/Walletget200Response';
 import { Walletget403Response } from '../models/Walletget403Response';
 import { Walletget404Response } from '../models/Walletget404Response';
 import { Walletlistlistwallets200Response } from '../models/Walletlistlistwallets200Response';
+import { Walletpingping200Response } from '../models/Walletpingping200Response';
 import { Wallettransactionslisttransactions200Response } from '../models/Wallettransactionslisttransactions200Response';
 
 /**
@@ -214,6 +215,51 @@ export class WalletsApiRequestFactory extends BaseAPIRequestFactory {
     }
 
     /**
+     * Test wallet connectivity and validate exchange API credentials. This endpoint verifies that the stored credentials are valid by making a test API call to the exchange. Use this to check if credentials need to be refreshed or if the wallet connection is still active.  **Required API Key Scopes:** `read`
+     * Ping
+     */
+    public async walletpingping(_options?: Configuration): Promise<RequestContext> {
+        let _config = _options || this.configuration;
+
+        // Path Params
+        const localVarPath = '/v0/wallet/ping';
+
+        // Make Request Context
+        const requestContext = _config.baseServer.makeRequestContext(localVarPath, HttpMethod.GET);
+        requestContext.setHeaderParam("Accept", "application/json, */*;q=0.8")
+
+
+        let authMethod: SecurityAuthentication | undefined;
+        // Apply auth methods
+        authMethod = _config.authMethods["bluvoOrgId"]
+        if (authMethod?.applySecurityAuthentication) {
+            await authMethod?.applySecurityAuthentication(requestContext);
+        }
+        // Apply auth methods
+        authMethod = _config.authMethods["bluvoApiKey"]
+        if (authMethod?.applySecurityAuthentication) {
+            await authMethod?.applySecurityAuthentication(requestContext);
+        }
+        // Apply auth methods
+        authMethod = _config.authMethods["bluvoProjectId"]
+        if (authMethod?.applySecurityAuthentication) {
+            await authMethod?.applySecurityAuthentication(requestContext);
+        }
+        // Apply auth methods
+        authMethod = _config.authMethods["bluvoWalletId"]
+        if (authMethod?.applySecurityAuthentication) {
+            await authMethod?.applySecurityAuthentication(requestContext);
+        }
+        
+        const defaultAuth: SecurityAuthentication | undefined = _config?.authMethods?.default
+        if (defaultAuth?.applySecurityAuthentication) {
+            await defaultAuth?.applySecurityAuthentication(requestContext);
+        }
+
+        return requestContext;
+    }
+
+    /**
      * List transactions for a specific wallet or all wallets with filtering options.  **Required API Key Scopes:** `read`
      * List Transactions
      * @param walletId The wallet ID to list transactions for. If not provided, returns transactions for all wallets.
@@ -401,6 +447,49 @@ export class WalletsApiResponseProcessor {
                 ObjectSerializer.parse(await response.body.text(), contentType),
                 "Walletlistlistwallets200Response", ""
             ) as Walletlistlistwallets200Response;
+            return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
+        }
+
+        throw new ApiException<string | Blob | undefined>(response.httpStatusCode, "Unknown API Status Code!", await response.getBodyAsAny(), response.headers);
+    }
+
+    /**
+     * Unwraps the actual response sent by the server from the response context and deserializes the response content
+     * to the expected objects
+     *
+     * @params response Response returned by the server for a request to walletpingping
+     * @throws ApiException if the response code was not in [200, 299]
+     */
+     public async walletpingpingWithHttpInfo(response: ResponseContext): Promise<HttpInfo<Walletpingping200Response >> {
+        const contentType = ObjectSerializer.normalizeMediaType(response.headers["content-type"]);
+        if (isCodeInRange("200", response.httpStatusCode)) {
+            const body: Walletpingping200Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletpingping200Response", ""
+            ) as Walletpingping200Response;
+            return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
+        }
+        if (isCodeInRange("403", response.httpStatusCode)) {
+            const body: Walletget403Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletget403Response", ""
+            ) as Walletget403Response;
+            throw new ApiException<Walletget403Response>(response.httpStatusCode, "Forbidden - Insufficient API key permissions", body, response.headers);
+        }
+        if (isCodeInRange("404", response.httpStatusCode)) {
+            const body: Walletget404Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletget404Response", ""
+            ) as Walletget404Response;
+            throw new ApiException<Walletget404Response>(response.httpStatusCode, "Not Found", body, response.headers);
+        }
+
+        // Work around for missing responses in specification, e.g. for petstore.yaml
+        if (response.httpStatusCode >= 200 && response.httpStatusCode <= 299) {
+            const body: Walletpingping200Response = ObjectSerializer.deserialize(
+                ObjectSerializer.parse(await response.body.text(), contentType),
+                "Walletpingping200Response", ""
+            ) as Walletpingping200Response;
             return new HttpInfo(response.httpStatusCode, response.headers, response.body, body);
         }
 

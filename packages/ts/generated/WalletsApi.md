@@ -7,6 +7,7 @@ Method | HTTP request | Description
 [**walletdelete**](WalletsApi.md#walletdelete) | **DELETE** /v0/wallet | Delete
 [**walletget**](WalletsApi.md#walletget) | **GET** /v0/wallet | Get
 [**walletlistlistwallets**](WalletsApi.md#walletlistlistwallets) | **GET** /v0/wallet/list | List Wallets
+[**walletpingping**](WalletsApi.md#walletpingping) | **GET** /v0/wallet/ping | Ping
 [**wallettransactionslisttransactions**](WalletsApi.md#wallettransactionslisttransactions) | **GET** /v0/wallet/transactions | List Transactions
 
 
@@ -181,6 +182,54 @@ Name | Type | Description  | Notes
 |-------------|-------------|------------------|
 **200** | Successful response |  -  |
 **403** | Forbidden - Insufficient API key permissions |  -  |
+
+[[Back to top]](#) [[Back to API list]](README.md#documentation-for-api-endpoints) [[Back to Model list]](README.md#documentation-for-models) [[Back to README]](README.md)
+
+# **walletpingping**
+> Walletpingping200Response walletpingping()
+
+Test wallet connectivity and validate exchange API credentials. This endpoint verifies that the stored credentials are valid by making a test API call to the exchange. Use this to check if credentials need to be refreshed or if the wallet connection is still active.  **Required API Key Scopes:** `read`
+
+### Example
+
+
+```typescript
+import { createConfiguration, WalletsApi } from '';
+
+const configuration = createConfiguration();
+const apiInstance = new WalletsApi(configuration);
+
+const request = {};
+
+const data = await apiInstance.walletpingping(request);
+console.log('API called successfully. Returned data:', data);
+```
+
+
+### Parameters
+This endpoint does not need any parameter.
+
+
+### Return type
+
+**Walletpingping200Response**
+
+### Authorization
+
+[bluvoOrgId](README.md#bluvoOrgId), [bluvoApiKey](README.md#bluvoApiKey), [bluvoProjectId](README.md#bluvoProjectId), [bluvoWalletId](README.md#bluvoWalletId)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful response |  -  |
+**403** | Forbidden - Insufficient API key permissions |  -  |
+**404** | Not Found |  -  |
 
 [[Back to top]](#) [[Back to API list]](README.md#documentation-for-api-endpoints) [[Back to Model list]](README.md#documentation-for-models) [[Back to README]](README.md)
 

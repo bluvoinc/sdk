@@ -272,13 +272,14 @@ export class BluvoFlowClient {
     }
 
     private async loadWallet(walletId: string) {
-        if (!this.flowMachine) return;
+        if (!this.flowMachine) {
+            return;
+        }
 
         this.flowMachine.send({type: 'LOAD_WALLET'});
 
         try {
             const withdrawableBalanceInfo = await this.options.fetchWithdrawableBalanceFn(walletId);
-
             this.flowMachine.send({
                 type: 'WALLET_LOADED',
                 balances: withdrawableBalanceInfo.balances.map((b:WithdrawableBalance) => ({

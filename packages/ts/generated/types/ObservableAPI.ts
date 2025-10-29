@@ -247,7 +247,7 @@ export class ObservableWalletsApi {
     }
 
     /**
-     * Test wallet connectivity and validate exchange API credentials. This endpoint verifies that the stored credentials are valid by making a test API call to the exchange. Use this to check if credentials need to be refreshed or if the wallet connection is still active.  **Required API Key Scopes:** `read`
+     * Test wallet connectivity and validate exchange API credentials. This endpoint verifies that the stored credentials are valid by making a test API call to the exchange.  **Required API Key Scopes:** `read`
      * Ping
      */
     public walletpingpingWithHttpInfo(_options?: ConfigurationOptions): Observable<HttpInfo<Walletpingping200Response>> {
@@ -271,7 +271,7 @@ export class ObservableWalletsApi {
     }
 
     /**
-     * Test wallet connectivity and validate exchange API credentials. This endpoint verifies that the stored credentials are valid by making a test API call to the exchange. Use this to check if credentials need to be refreshed or if the wallet connection is still active.  **Required API Key Scopes:** `read`
+     * Test wallet connectivity and validate exchange API credentials. This endpoint verifies that the stored credentials are valid by making a test API call to the exchange.  **Required API Key Scopes:** `read`
      * Ping
      */
     public walletpingping(_options?: ConfigurationOptions): Observable<Walletpingping200Response> {

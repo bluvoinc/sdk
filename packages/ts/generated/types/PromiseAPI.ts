@@ -253,20 +253,22 @@ export class PromiseWithdrawalsApi {
     /**
      * Get withdrawable balances and supported networks.  **Required API Key Scopes:** `read`
      * Balance
+     * @param [refreshThresholdMinutes] Override balance refresh threshold in minutes. Set to 0 to always refresh balances from the exchange. Defaults to 0.
      */
-    public walletwithdrawbalancebalanceWithHttpInfo(_options?: PromiseConfigurationOptions): Promise<HttpInfo<Walletwithdrawbalancebalance200Response>> {
+    public walletwithdrawbalancebalanceWithHttpInfo(refreshThresholdMinutes?: number, _options?: PromiseConfigurationOptions): Promise<HttpInfo<Walletwithdrawbalancebalance200Response>> {
         const observableOptions = wrapOptions(_options);
-        const result = this.api.walletwithdrawbalancebalanceWithHttpInfo(observableOptions);
+        const result = this.api.walletwithdrawbalancebalanceWithHttpInfo(refreshThresholdMinutes, observableOptions);
         return result.toPromise();
     }
 
     /**
      * Get withdrawable balances and supported networks.  **Required API Key Scopes:** `read`
      * Balance
+     * @param [refreshThresholdMinutes] Override balance refresh threshold in minutes. Set to 0 to always refresh balances from the exchange. Defaults to 0.
      */
-    public walletwithdrawbalancebalance(_options?: PromiseConfigurationOptions): Promise<Walletwithdrawbalancebalance200Response> {
+    public walletwithdrawbalancebalance(refreshThresholdMinutes?: number, _options?: PromiseConfigurationOptions): Promise<Walletwithdrawbalancebalance200Response> {
         const observableOptions = wrapOptions(_options);
-        const result = this.api.walletwithdrawbalancebalance(observableOptions);
+        const result = this.api.walletwithdrawbalancebalance(refreshThresholdMinutes, observableOptions);
         return result.toPromise();
     }
 

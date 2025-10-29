@@ -25,9 +25,11 @@ export class WithdrawalsApiRequestFactory extends BaseAPIRequestFactory {
     /**
      * Get withdrawable balances and supported networks.  **Required API Key Scopes:** `read`
      * Balance
+     * @param refreshThresholdMinutes Override balance refresh threshold in minutes. Set to 0 to always refresh balances from the exchange. Defaults to 0.
      */
-    public async walletwithdrawbalancebalance(_options?: Configuration): Promise<RequestContext> {
+    public async walletwithdrawbalancebalance(refreshThresholdMinutes?: number, _options?: Configuration): Promise<RequestContext> {
         let _config = _options || this.configuration;
+
 
         // Path Params
         const localVarPath = '/v0/wallet/withdraw/balance';
@@ -35,6 +37,11 @@ export class WithdrawalsApiRequestFactory extends BaseAPIRequestFactory {
         // Make Request Context
         const requestContext = _config.baseServer.makeRequestContext(localVarPath, HttpMethod.GET);
         requestContext.setHeaderParam("Accept", "application/json, */*;q=0.8")
+
+        // Query Params
+        if (refreshThresholdMinutes !== undefined) {
+            requestContext.setQueryParam("refreshThresholdMinutes", ObjectSerializer.serialize(refreshThresholdMinutes, "number", ""));
+        }
 
 
         let authMethod: SecurityAuthentication | undefined;

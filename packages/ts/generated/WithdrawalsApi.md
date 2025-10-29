@@ -19,11 +19,15 @@ Get withdrawable balances and supported networks.  **Required API Key Scopes:** 
 
 ```typescript
 import { createConfiguration, WithdrawalsApi } from '';
+import type { WithdrawalsApiWalletwithdrawbalancebalanceRequest } from '';
 
 const configuration = createConfiguration();
 const apiInstance = new WithdrawalsApi(configuration);
 
-const request = {};
+const request: WithdrawalsApiWalletwithdrawbalancebalanceRequest = {
+    // Override balance refresh threshold in minutes. Set to 0 to always refresh balances from the exchange. Defaults to 0. (optional)
+  refreshThresholdMinutes: 0,
+};
 
 const data = await apiInstance.walletwithdrawbalancebalance(request);
 console.log('API called successfully. Returned data:', data);
@@ -31,7 +35,10 @@ console.log('API called successfully. Returned data:', data);
 
 
 ### Parameters
-This endpoint does not need any parameter.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **refreshThresholdMinutes** | [**number**] | Override balance refresh threshold in minutes. Set to 0 to always refresh balances from the exchange. Defaults to 0. | (optional) defaults to undefined
 
 
 ### Return type

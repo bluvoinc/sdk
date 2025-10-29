@@ -339,11 +339,12 @@ export class ObservableWithdrawalsApi {
     /**
      * Get withdrawable balances and supported networks.  **Required API Key Scopes:** `read`
      * Balance
+     * @param [refreshThresholdMinutes] Override balance refresh threshold in minutes. Set to 0 to always refresh balances from the exchange. Defaults to 0.
      */
-    public walletwithdrawbalancebalanceWithHttpInfo(_options?: ConfigurationOptions): Observable<HttpInfo<Walletwithdrawbalancebalance200Response>> {
+    public walletwithdrawbalancebalanceWithHttpInfo(refreshThresholdMinutes?: number, _options?: ConfigurationOptions): Observable<HttpInfo<Walletwithdrawbalancebalance200Response>> {
         const _config = mergeConfiguration(this.configuration, _options);
 
-        const requestContextPromise = this.requestFactory.walletwithdrawbalancebalance(_config);
+        const requestContextPromise = this.requestFactory.walletwithdrawbalancebalance(refreshThresholdMinutes, _config);
         // build promise chain
         let middlewarePreObservable = from<RequestContext>(requestContextPromise);
         for (const middleware of _config.middleware) {
@@ -363,9 +364,10 @@ export class ObservableWithdrawalsApi {
     /**
      * Get withdrawable balances and supported networks.  **Required API Key Scopes:** `read`
      * Balance
+     * @param [refreshThresholdMinutes] Override balance refresh threshold in minutes. Set to 0 to always refresh balances from the exchange. Defaults to 0.
      */
-    public walletwithdrawbalancebalance(_options?: ConfigurationOptions): Observable<Walletwithdrawbalancebalance200Response> {
-        return this.walletwithdrawbalancebalanceWithHttpInfo(_options).pipe(map((apiResponse: HttpInfo<Walletwithdrawbalancebalance200Response>) => apiResponse.data));
+    public walletwithdrawbalancebalance(refreshThresholdMinutes?: number, _options?: ConfigurationOptions): Observable<Walletwithdrawbalancebalance200Response> {
+        return this.walletwithdrawbalancebalanceWithHttpInfo(refreshThresholdMinutes, _options).pipe(map((apiResponse: HttpInfo<Walletwithdrawbalancebalance200Response>) => apiResponse.data));
     }
 
     /**

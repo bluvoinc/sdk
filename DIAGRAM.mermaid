@@ -1,0 +1,168 @@
+---
+config:
+      theme: redux
+---
+stateDiagram-v2
+    [*] --> idle
+
+    %% ===================================
+    %% EXCHANGES FLOW
+    %% ===================================
+    idle --> exchanges_loading: LOAD_EXCHANGES
+    exchanges_loading --> exchanges_ready: EXCHANGES_LOADED
+    exchanges_loading --> exchanges_error: EXCHANGES_FAILED
+    exchanges_ready --> oauth_waiting: START_OAUTH
+
+    %% ===================================
+    %% OAUTH FLOW
+    %% ===================================
+    idle --> oauth_waiting: START_OAUTH
+    oauth_waiting --> oauth_processing: OAUTH_WINDOW_OPENED
+    oauth_processing --> oauth_completed: OAUTH_COMPLETED
+    oauth_processing --> oauth_error: OAUTH_FAILED
+    oauth_processing --> oauth_window_closed: OAUTH_WINDOW_CLOSED_BY_USER
+
+    %% ===================================
+    %% WALLET FLOW
+    %% ===================================
+    oauth_completed --> wallet_loading: LOAD_WALLET
+    wallet_loading --> wallet_ready: WALLET_LOADED
+    wallet_loading --> wallet_error: WALLET_FAILED
+
+    %% ===================================
+    %% QUOTE FLOW
+    %% ===================================
+    wallet_ready --> quote_requesting: REQUEST_QUOTE
+    quote_requesting --> quote_ready: QUOTE_RECEIVED
+    quote_requesting --> quote_error: QUOTE_FAILED
+
+    %% Quote refresh flow
+    quote_ready --> quote_requesting: REQUEST_QUOTE
+    quote_ready --> quote_expired: QUOTE_EXPIRED
+    quote_expired --> quote_requesting: REQUEST_QUOTE
+
+    %% ===================================
+    %% WITHDRAWAL FLOW (Parent Machine)
+    %% ===================================
+    quote_ready --> withdraw_processing: START_WITHDRAWAL
+
+    %% Withdrawal processing states
+    withdraw_processing --> withdraw_error2FA: WITHDRAWAL_REQUIRES_2FA
+    withdraw_processing --> withdraw_errorSMS: WITHDRAWAL_REQUIRES_SMS
+    withdraw_processing --> withdraw_errorKYC: WITHDRAWAL_REQUIRES_KYC
+    withdraw_processing --> withdraw_errorBalance: WITHDRAWAL_INSUFFICIENT_BALANCE
+    withdraw_processing --> withdraw_retrying: RETRYING
+    withdraw_processing --> withdraw_completed: WITHDRAWAL_COMPLETED
+    withdraw_processing --> withdraw_blocked: WITHDRAWAL_BLOCKED
+    withdraw_processing --> withdraw_fatal: WITHDRAWAL_FATAL
+
+    %% 2FA handling
+    withdraw_error2FA --> withdraw_processing: SUBMIT_2FA
+    withdraw_error2FA --> withdraw_error2FA: WITHDRAWAL_2FA_INVALID
+
+    %% SMS handling
+    withdraw_errorSMS --> withdraw_processing: SUBMIT_SMS
+
+    %% Retry handling
+    withdraw_retrying --> withdraw_processing: RETRY_WITHDRAWAL
+
+    %% Fatal errors
+    withdraw_error2FA --> withdraw_fatal: WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED
+
+    %% ===================================
+    %% NESTED WITHDRAWAL MACHINE
+    %% ===================================
+    state "Nested Withdrawal Machine" as nested {
+        [*] --> w_idle
+        w_idle --> w_processing: EXECUTE
+
+        w_processing --> w_waitingFor2FA: REQUIRES_2FA
+        w_processing --> w_waitingForSMS: REQUIRES_SMS
+        w_processing --> w_waitingForKYC: REQUIRES_KYC
+        w_processing --> w_completed: SUCCESS
+        w_processing --> w_retrying: FAIL
+        w_processing --> w_failed: FAIL_MAX_RETRIES
+        w_processing --> w_blocked: BLOCKED
+
+        w_waitingFor2FA --> w_processing: SUBMIT_2FA
+        w_waitingForSMS --> w_processing: SUBMIT_SMS
+        w_retrying --> w_processing: RETRY
+
+        w_completed --> [*]
+        w_failed --> [*]
+        w_blocked --> [*]
+    }
+
+    %% ===================================
+    %% TERMINAL STATES
+    %% ===================================
+    withdraw_completed --> [*]
+    withdraw_fatal --> [*]
+    withdraw_blocked --> [*]
+
+    %% ===================================
+    %% CANCEL FLOW (from any state)
+    %% ===================================
+    idle --> flow_cancelled: CANCEL_FLOW
+    exchanges_loading --> flow_cancelled: CANCEL_FLOW
+    exchanges_ready --> flow_cancelled: CANCEL_FLOW
+    exchanges_error --> flow_cancelled: CANCEL_FLOW
+    oauth_waiting --> flow_cancelled: CANCEL_FLOW
+    oauth_processing --> flow_cancelled: CANCEL_FLOW
+    oauth_completed --> flow_cancelled: CANCEL_FLOW
+    oauth_error --> flow_cancelled: CANCEL_FLOW
+    oauth_window_closed --> flow_cancelled: CANCEL_FLOW
+    wallet_loading --> flow_cancelled: CANCEL_FLOW
+    wallet_ready --> flow_cancelled: CANCEL_FLOW
+    wallet_error --> flow_cancelled: CANCEL_FLOW
+    quote_requesting --> flow_cancelled: CANCEL_FLOW
+    quote_ready --> flow_cancelled: CANCEL_FLOW
+    quote_expired --> flow_cancelled: CANCEL_FLOW
+    quote_error --> flow_cancelled: CANCEL_FLOW
+    withdraw_processing --> flow_cancelled: CANCEL_FLOW
+    withdraw_error2FA --> flow_cancelled: CANCEL_FLOW
+    withdraw_errorSMS --> flow_cancelled: CANCEL_FLOW
+    withdraw_errorKYC --> flow_cancelled: CANCEL_FLOW
+    withdraw_errorBalance --> flow_cancelled: CANCEL_FLOW
+    withdraw_retrying --> flow_cancelled: CANCEL_FLOW
+
+    flow_cancelled --> [*]
+
+    %% ===================================
+    %% STATE ANNOTATIONS
+    %% ===================================
+    note right of idle
+        Initial state
+        Ready to start flow
+    end note
+
+    note right of oauth_processing
+        Handles OAuth errors:
+        - TOKEN_EXCHANGE_FAILED
+        - AUTHORIZATION_FAILED
+        - INVALID_STATE
+    end note
+
+    note right of quote_ready
+        Auto-refresh enabled by default
+        Transitions back to requesting
+        when quote expires
+    end note
+
+    note right of withdraw_processing
+        Parent machine delegates to
+        nested withdrawal machine.
+        State syncs with nested machine.
+    end note
+
+    note right of nested
+        Independent state machine
+        for withdrawal execution.
+        Handles retries, 2FA, SMS, KYC.
+    end note
+
+    note right of flow_cancelled
+        CANCEL_FLOW can be triggered
+        from any state at any time.
+        Cleans up nested machines.
+    end note

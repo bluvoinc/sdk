@@ -317,6 +317,14 @@ import { ObservableWithdrawalsApi } from "./ObservableAPI";
 import { WithdrawalsApiRequestFactory, WithdrawalsApiResponseProcessor} from "../apis/WithdrawalsApi";
 
 export interface WithdrawalsApiWalletwithdrawbalancebalanceRequest {
+    /**
+     * Override balance refresh threshold in minutes. Set to 0 to always refresh balances from the exchange. Defaults to 0.
+     * Minimum: 0
+     * Defaults to: undefined
+     * @type number
+     * @memberof WithdrawalsApiwalletwithdrawbalancebalance
+     */
+    refreshThresholdMinutes?: number
 }
 
 export interface WithdrawalsApiWalletwithdrawquoteidexecutewithdrawRequest {
@@ -357,7 +365,7 @@ export class ObjectWithdrawalsApi {
      * @param param the request object
      */
     public walletwithdrawbalancebalanceWithHttpInfo(param: WithdrawalsApiWalletwithdrawbalancebalanceRequest = {}, options?: ConfigurationOptions): Promise<HttpInfo<Walletwithdrawbalancebalance200Response>> {
-        return this.api.walletwithdrawbalancebalanceWithHttpInfo( options).toPromise();
+        return this.api.walletwithdrawbalancebalanceWithHttpInfo(param.refreshThresholdMinutes,  options).toPromise();
     }
 
     /**
@@ -366,7 +374,7 @@ export class ObjectWithdrawalsApi {
      * @param param the request object
      */
     public walletwithdrawbalancebalance(param: WithdrawalsApiWalletwithdrawbalancebalanceRequest = {}, options?: ConfigurationOptions): Promise<Walletwithdrawbalancebalance200Response> {
-        return this.api.walletwithdrawbalancebalance( options).toPromise();
+        return this.api.walletwithdrawbalancebalance(param.refreshThresholdMinutes,  options).toPromise();
     }
 
     /**

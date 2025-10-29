@@ -124,32 +124,76 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
         cancel,
         testWithdrawalComplete, // TEST METHOD
 
+        // === General Flow State ===
+        isIdle: flow.state?.type === 'idle',
+        isFlowCancelled: flow.state?.type === 'flow:cancelled',
+
+        // === Exchanges State ===
         isExchangesLoading: exchangesLoading || flow.state?.type === 'exchanges:loading',
         isExchangesReady: flow.state?.type === 'exchanges:ready' || exchanges.length > 0,
+        isExchangesError: flow.state?.type === 'exchanges:error',
         exchangesError: exchangesError || (flow.state?.type === 'exchanges:error' ? flow.error || null : null),
+
+        // === OAuth State ===
         isOAuthPending: flow.state?.type === 'oauth:waiting' || flow.state?.type === 'oauth:processing',
+        isOAuthWaiting: flow.state?.type === 'oauth:waiting',
+        isOAuthProcessing: flow.state?.type === 'oauth:processing',
         isOAuthError: flow.state?.type === 'oauth:error',
         isOAuthComplete: flow.state?.type === 'oauth:completed',
         isOAuthWindowBeenClosedByTheUser: flow.state?.type === 'oauth:window_closed_by_user',
+
+        // === Wallet State ===
         isWalletLoading: flow.state?.type === 'wallet:loading',
         isWalletError: flow.state?.type === 'wallet:error',
         isWalletReady: flow.state?.type === 'wallet:ready',
+
+        // === Quote State ===
         isQuoteLoading: flow.state?.type === 'quote:requesting',
         isQuoteReady: flow.state?.type === 'quote:ready',
         isQuoteExpired: flow.state?.type === 'quote:expired',
+        isQuoteError: flow.state?.type === 'quote:error',
+
+        // === Withdrawal State ===
         isWithdrawing: flow.state?.type?.startsWith('withdraw:') &&
             flow.state?.type !== 'withdraw:completed' &&
             flow.state?.type !== 'withdraw:fatal' &&
             !flow.state?.type?.startsWith('withdraw:error') || false,
+        isWithdrawProcessing: flow.state?.type === 'withdraw:processing',
         isWithdrawalComplete: flow.state?.type === 'withdraw:completed',
+        isWithdrawBlocked: flow.state?.type === 'withdraw:blocked',
         hasFatalError: flow.state?.type === 'withdraw:fatal',
+
+        // === Withdrawal Requirements & Errors ===
         requires2FA: flow.state?.type === 'withdraw:error2FA',
-        requiresValid2FAMethod: (flow.state?.type === 'withdraw:fatal' &&
-            flow.error?.message?.includes('Two-factor authentication method not supported')) || false,
+        requiresSMS: flow.state?.type === 'withdraw:errorSMS',
         requiresKYC: flow.state?.type === 'withdraw:errorKYC',
+        requiresValid2FAMethod: (flow.state?.type === 'withdraw:fatal' &&
+            !!flow.context?.errorDetails?.valid2FAMethods) || false,
+        requiresEmailVerification: (flow.state?.type === 'withdraw:fatal' &&
+            flow.error?.message?.includes('email')) || false,
         hasInsufficientBalance: flow.state?.type === 'withdraw:errorBalance',
         canRetry: flow.state?.type === 'withdraw:retrying',
+
+        // === Error Detection Helpers ===
+        hasAmountError: (flow.state?.type === 'quote:error' || flow.state?.type === 'withdraw:fatal') &&
+            (flow.error?.message?.toLowerCase().includes('amount') ||
+             flow.error?.message?.includes('minimum') ||
+             flow.error?.message?.includes('maximum')) || false,
+        hasAddressError: (flow.state?.type === 'quote:error' || flow.state?.type === 'withdraw:fatal') &&
+            (flow.error?.message?.toLowerCase().includes('address') ||
+             flow.error?.message?.toLowerCase().includes('invalid destination')) || false,
+        hasNetworkError: (flow.state?.type === 'quote:error' || flow.state?.type === 'withdraw:fatal') &&
+            flow.error?.message?.toLowerCase().includes('network') || false,
+        hasWalletNotFoundError: flow.state?.type === 'wallet:error' &&
+            flow.error?.message?.toLowerCase().includes('not found') || false,
+        hasInvalidCredentialsError: flow.state?.type === 'wallet:error' &&
+            (flow.error?.message?.toLowerCase().includes('invalid') &&
+             flow.error?.message?.toLowerCase().includes('credential')) || false,
+
+        // === Context Data ===
         invalid2FAAttempts: flow.context?.invalid2FAAttempts || 0,
+        retryAttempts: flow.context?.retryAttempts || 0,
+        maxRetryAttempts: flow.context?.maxRetryAttempts || 3,
 
         // Data
         exchanges: flow.context?.exchanges || exchanges,

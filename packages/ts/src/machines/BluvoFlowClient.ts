@@ -43,6 +43,7 @@ export interface BluvoFlowClientOptions {
         smsCode?: string;
     }) => Promise<Walletwithdrawquoteidexecutewithdraw200Response>;
     getWalletByIdFn: (walletId: string) => Promise<Pick<Wallet,'id'|'exchange'> | null>;
+    pingWalletByIdFn: (walletId: string) => Promise<any>;
     mkUUIDFn?: () => string;
     onWalletConnectedFn?: (walletId: string, exchange: string) => any;
 

@@ -116,9 +116,6 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
         cancel,
         testWithdrawalComplete, // TEST METHOD
 
-        isWalletError: flow.state?.type === 'wallet:error',
-
-        // Computed state helpers
         isExchangesLoading: exchangesLoading || flow.state?.type === 'exchanges:loading',
         isExchangesReady: flow.state?.type === 'exchanges:ready' || exchanges.length > 0,
         exchangesError: exchangesError || (flow.state?.type === 'exchanges:error' ? flow.error || null : null),
@@ -126,6 +123,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
         isOAuthComplete: flow.state?.type === 'oauth:completed',
         isOAuthWindowBeenClosedByTheUser: flow.state?.type === 'oauth:window_closed_by_user',
         isWalletLoading: flow.state?.type === 'wallet:loading',
+        isWalletError: flow.state?.type === 'wallet:error',
         isWalletReady: flow.state?.type === 'wallet:ready',
         isQuoteLoading: flow.state?.type === 'quote:requesting',
         isQuoteReady: flow.state?.type === 'quote:ready',

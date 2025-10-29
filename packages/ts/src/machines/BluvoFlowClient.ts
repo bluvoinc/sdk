@@ -76,6 +76,46 @@ export interface ResumeWithdrawalFlowOptions {
     walletId: string;
 }
 
+/**
+ * Options for silently resuming a withdrawal flow with preloaded balance data
+ *
+ * This interface allows you to resume a withdrawal flow for a wallet that
+ * has already been previewed, jumping directly to the wallet:ready state
+ * without requiring OAuth or re-fetching balance data.
+ */
+export interface SilentResumeWithdrawalFlowOptions {
+    /** Wallet ID to resume */
+    walletId: string;
+
+    /** Exchange this wallet is connected to */
+    exchange: string;
+
+    /** Pre-loaded balance data (if available from preview) */
+    preloadedBalances?: Array<{
+        asset: string;
+        balance: string;
+        balanceInFiat?: string;
+        networks?: Array<{
+            'id': string;
+            'name': string;
+            'displayName': string;
+            'minWithdrawal': string;
+            'maxWithdrawal'?: string;
+            'assetName': string;
+            'addressRegex'?: string;
+        }>;
+    }>;
+
+    /** Called when wallet is not found */
+    onWalletNotFound?: (walletId: string) => void;
+
+    /** Called when wallet has invalid API credentials */
+    onWalletInvalidApiCredentials?: (walletId: string) => void;
+
+    /** Called when wallet balance is loaded */
+    onWalletBalance?: (walletId: string, balances: any[]) => void;
+}
+
 export interface QuoteRequestOptions {
     asset: string;
     amount: string;
@@ -190,10 +230,35 @@ export class BluvoFlowClient {
                 this.loadWallet(message.walletId);
             },
             onError: (error) => {
-                this.flowMachine?.send({
-                    type: 'OAUTH_FAILED',
-                    error
-                });
+                // Extract error code to check for specific OAuth errors
+                const errorCode = extractErrorCode(error);
+
+                // Convert error to Error instance with appropriate message
+                let errorInstance: Error;
+                if (error instanceof Error) {
+                    errorInstance = error;
+                } else {
+                    const errorMessage = (error && typeof error === 'object' && 'message' in error)
+                        ? String((error as any).message)
+                        : 'OAuth authentication failed';
+                    errorInstance = new Error(errorMessage);
+                }
+
+                // Handle OAuth-specific errors
+                if (errorCode === ERROR_CODES.OAUTH_TOKEN_EXCHANGE_FAILED ||
+                    errorCode === ERROR_CODES.OAUTH_AUTHORIZATION_FAILED ||
+                    errorCode === ERROR_CODES.OAUTH_INVALID_STATE) {
+                    this.flowMachine?.send({
+                        type: 'OAUTH_FAILED',
+                        error: errorInstance
+                    });
+                } else {
+                    // For any other error during OAuth, also send OAUTH_FAILED
+                    this.flowMachine?.send({
+                        type: 'OAUTH_FAILED',
+                        error: errorInstance
+                    });
+                }
             }
         });
 
@@ -266,6 +331,119 @@ export class BluvoFlowClient {
 
         // Load wallet immediately
         this.loadWallet(flowOptions.walletId);
+
+        return {
+            machine: this.flowMachine
+        };
+    }
+
+    /**
+     * Silently resume a withdrawal flow with optional preloaded balance data
+     *
+     * This method allows you to resume a withdrawal flow for a wallet that has already
+     * been previewed, jumping directly to the wallet:ready state. If balance data is
+     * preloaded (from a preview), it will be used directly. Otherwise, the method will
+     * ping the wallet and fetch the balance data.
+     *
+     * This is useful for scenarios where users select a wallet from a preview list and
+     * want to continue directly to the withdrawal interface without re-authenticating.
+     *
+     * @param options Configuration for silent resume
+     * @returns Object containing the flow machine instance
+     */
+    async silentResumeWithdrawalFlow(options: SilentResumeWithdrawalFlowOptions) {
+        // Dispose any existing flow
+        this.dispose();
+
+        // Create new flow machine
+        this.flowMachine = createFlowMachine({
+            orgId: this.options.orgId,
+            projectId: this.options.projectId,
+            maxRetryAttempts: this.options.options?.maxRetryAttempts,
+            autoRefreshQuotation: this.options.options?.autoRefreshQuotation
+        });
+
+        let balances = options.preloadedBalances;
+
+        // If no preloaded balances, fetch them
+        if (!balances) {
+            try {
+                // Step 1: Ping wallet to validate
+                const pingResult = await this.options.pingWalletByIdFn(options.walletId);
+
+                // Check for invalid credentials
+                if (pingResult?.status === 'INVALID_API_CREDENTIALS') {
+                    options.onWalletInvalidApiCredentials?.(options.walletId);
+                    throw new Error('Invalid API credentials');
+                }
+
+                // Step 2: Fetch withdrawable balance
+                const balanceResponse = await this.options.fetchWithdrawableBalanceFn(options.walletId);
+
+                // Transform to expected format
+                balances = balanceResponse.balances.map((b: WithdrawableBalance) => ({
+                    asset: b.asset,
+                    balance: String(b.amount),
+                    networks: b.networks.map((n: WithdrawableBalanceNetwork) => ({
+                        id: n.id,
+                        name: n.name,
+                        displayName: n.displayName,
+                        minWithdrawal: n.minWithdrawal,
+                        maxWithdrawal: n.maxWithdrawal,
+                        assetName: n.assetName,
+                        ...(n.addressRegex !== null && n.addressRegex !== undefined ? { addressRegex: n.addressRegex } : {})
+                    })),
+                    ...(b.amountInFiat !== undefined ? { balanceInFiat: String(b.amountInFiat) } : {})
+                }));
+
+                // Call success callback
+                options.onWalletBalance?.(options.walletId, balances);
+
+            } catch (error: any) {
+                // Handle wallet not found
+                if (error?.status === 404 || error?.errorCode === 'WALLET_NOT_FOUND' || error?.code === 'WALLET_NOT_FOUND') {
+                    options.onWalletNotFound?.(options.walletId);
+                    throw error;
+                }
+
+                // Re-throw other errors
+                throw error;
+            }
+        }
+
+        // Transition through states to reach wallet:ready
+        // This ensures the state machine is in the correct state
+
+        // 1. Start OAuth (to set up context)
+        this.flowMachine.send({
+            type: 'START_OAUTH',
+            exchange: options.exchange,
+            walletId: options.walletId,
+            idem: this.generateId()
+        });
+
+        // 2. Mark OAuth window as opened
+        this.flowMachine.send({
+            type: 'OAUTH_WINDOW_OPENED'
+        });
+
+        // 3. Complete OAuth
+        this.flowMachine.send({
+            type: 'OAUTH_COMPLETED',
+            walletId: options.walletId,
+            exchange: options.exchange
+        });
+
+        // 4. Load wallet (transition to wallet:loading)
+        this.flowMachine.send({
+            type: 'LOAD_WALLET'
+        });
+
+        // 5. Set wallet as loaded with preloaded/fetched balances (transition to wallet:ready)
+        this.flowMachine.send({
+            type: 'WALLET_LOADED',
+            balances: balances as any // Type assertion to satisfy TypeScript
+        });
 
         return {
             machine: this.flowMachine

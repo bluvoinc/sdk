@@ -12,6 +12,12 @@ export * from './src/types/machine.types';
 export * from './src/types/flow.types';
 export * from './src/types/withdrawal.types';
 
+// Preview functionality (NEW - backwards compatible addition)
+export * from './src/types/preview.types';
+export { BluvoPreviewManager } from './src/machines/BluvoPreviewManager';
+export type { BluvoPreviewManagerOptions } from './src/machines/BluvoPreviewManager';
+export type { SilentResumeWithdrawalFlowOptions } from './src/machines/BluvoFlowClient';
+
 // API Types - Clean, self-explanatory type exports
 export * from './src/types/api.types';
 

@@ -3,6 +3,7 @@ import type {
     BluvoFlowClientOptions,
     WithdrawalFlowOptions,
     ResumeWithdrawalFlowOptions,
+    SilentResumeWithdrawalFlowOptions,
     QuoteRequestOptions,
     Machine,
     FlowState,
@@ -40,6 +41,12 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 
     const resumeWithdrawalFlow = useCallback(async (flowOptions: ResumeWithdrawalFlowOptions) => {
         const result = await flowClient.resumeWithdrawalFlow(flowOptions);
+        setFlowMachine(result.machine);
+        return result;
+    }, [flowClient]);
+
+    const silentResumeWithdrawalFlow = useCallback(async (flowOptions: SilentResumeWithdrawalFlowOptions) => {
+        const result = await flowClient.silentResumeWithdrawalFlow(flowOptions);
         setFlowMachine(result.machine);
         return result;
     }, [flowClient]);
@@ -109,6 +116,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
         listExchanges,
         startWithdrawalFlow,
         resumeWithdrawalFlow,
+        silentResumeWithdrawalFlow, // NEW - backwards compatible
         requestQuote,
         executeWithdrawal,
         submit2FA,
@@ -120,6 +128,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
         isExchangesReady: flow.state?.type === 'exchanges:ready' || exchanges.length > 0,
         exchangesError: exchangesError || (flow.state?.type === 'exchanges:error' ? flow.error || null : null),
         isOAuthPending: flow.state?.type === 'oauth:waiting' || flow.state?.type === 'oauth:processing',
+        isOAuthError: flow.state?.type === 'oauth:error',
         isOAuthComplete: flow.state?.type === 'oauth:completed',
         isOAuthWindowBeenClosedByTheUser: flow.state?.type === 'oauth:window_closed_by_user',
         isWalletLoading: flow.state?.type === 'wallet:loading',

@@ -1,23 +1,5 @@
-// import {
-// 	type Walletwithdrawbalancebalance200Response,
-// 	Walletwithdrawbalancebalance200ResponseBalancesInner,
-// 	type Walletwithdrawquoteidexecutewithdraw200Response,
-// 	type Walletwithdrawquotequotation200Response,
-// } from "../../generated";
-
-// import type {
-// 	ListCentralizedExchangesResponse,
-// 	ListCentralizedExchangesResponseStatusEnum,
-// 	Wallet,
-// 	WithdrawableBalance,
-// 	WithdrawableBalanceNetwork,
-// } from "../types/api.types";
 import type {
 	Oauth2ExchangeslistexchangesResponses,
-	WalletgetResponse as Wallet,
-	WalletwithdrawbalancebalanceResponse,
-	WalletwithdrawquoteidexecutewithdrawResponses,
-	WalletwithdrawquotequotationResponses,
 } from "../../generated";
 import type { BluvoClient } from "../BluvoClient";
 import { BluvoWebClient } from "../BluvoWebClient";
@@ -391,7 +373,11 @@ export class BluvoFlowClient {
 		if (!balances) {
 			try {
 				// Step 1: Ping wallet to validate
-				const pingResult = await this.options.pingWalletByIdFn(
+				const {
+                    data:pingResult,
+                    error,
+                    success
+                } = await this.options.pingWalletByIdFn(
 					options.walletId,
 				);
 
@@ -402,9 +388,13 @@ export class BluvoFlowClient {
 				}
 
 				// Step 2: Fetch withdrawable balance
-				const balanceResponse = await this.options.fetchWithdrawableBalanceFn(
+				const {
+                    data:balanceResponse,
+                    error,
+                    success,
+                } = await this.options.fetchWithdrawableBalanceFn(
 					options.walletId,
-				).then(response => response.data);
+				)
 
 				// Transform to expected format
 				balances = balanceResponse?.balances.map((b) => ({
@@ -425,7 +415,7 @@ export class BluvoFlowClient {
 						? { balanceInFiat: String(b.amountInFiat) }
 						: {}),
 					...(b.extra !== undefined ? { extra: b.extra } : {}),
-				}));
+				})) ?? [];
 
 				// Call success callback
 				options.onWalletBalance?.(options.walletId, balances);
@@ -492,15 +482,17 @@ export class BluvoFlowClient {
 		this.flowMachine.send({ type: "LOAD_WALLET" });
 
 		try {
-			const withdrawableBalanceInfo =
-				await this.options.fetchWithdrawableBalanceFn(walletId);
+			const {data: withdrawableBalanceInfo} = await this.options
+                .fetchWithdrawableBalanceFn(walletId);
+
+
 			this.flowMachine.send({
 				type: "WALLET_LOADED",
-				balances: withdrawableBalanceInfo.balances.map(
-					(b: WithdrawableBalance) => ({
+				balances: withdrawableBalanceInfo?.balances?.map(
+					(b: any) => ({
 						asset: b.asset,
 						balance: String(b.amount),
-						networks: b.networks.map((n: WithdrawableBalanceNetwork) => ({
+						networks: b.networks.map((n: any) => ({
 							id: n.id,
 							name: n.name,
 							displayName: n.displayName,
@@ -538,7 +530,7 @@ export class BluvoFlowClient {
 								}
 							: {}),
 					}),
-				),
+				) ?? [],
 			});
 		} catch (error) {
 			this.flowMachine.send({
@@ -577,7 +569,11 @@ export class BluvoFlowClient {
 		console.log("[SDK] REQUEST_QUOTE action sent to state machine");
 
 		try {
-			const quote = await this.options.requestQuotationFn(
+			const {
+                data: quote,
+                error,
+                success
+            } = await this.options.requestQuotationFn(
 				state.context.walletId,
 				{
 					asset: options.asset,
@@ -585,9 +581,17 @@ export class BluvoFlowClient {
 					address: options.destinationAddress,
 					network: options.network,
 					tag: options.tag,
-					includeFee: options.includeFee,
+					includeFee: options.includeFee ?? true,
 				},
 			);
+
+            if(!quote){
+                this.flowMachine.send({
+                    type: "QUOTE_FAILED",
+                    error: new Error("No quote returned from backend"),
+                });
+                return;
+            }
 
 			console.log(
 				"[SDK] Backend returned quote with ID:",
@@ -844,12 +848,16 @@ export class BluvoFlowClient {
 
 		// Execute withdrawal
 		try {
-			return await this.options.executeWithdrawalFn(
+			const res = await this.options.executeWithdrawalFn(
 				state.context.walletId,
 				quoteId,
 				quoteId,
 				{},
 			);
+
+            // if res.success is false, handle error
+
+            return res;
 		} catch (error: any) {
 			// IMMEDIATE ERROR HANDLING (i.e. wrong schema type, network error, etc)
 			console.error("executeWithdrawal error", error);
@@ -917,12 +925,16 @@ export class BluvoFlowClient {
 			const idem = this.generateId();
 
 			try {
-				return await this.options.executeWithdrawalFn(
+				const res = await this.options.executeWithdrawalFn(
 					state.context.walletId,
 					idem,
 					quote.id,
 					{ twofa: code },
 				);
+
+                // if res.success is false, handle error
+
+                return res;
 			} catch (error: any) {
 				// Handle errors same as in executeWithdrawal
 				this.handleWithdrawalError(error);
@@ -951,7 +963,7 @@ export class BluvoFlowClient {
 					state.context.walletId,
 					idem,
 					quote.id,
-					{ smsCode: code },
+					{},
 				);
 			} catch (error: any) {
 				this.handleWithdrawalError(error);

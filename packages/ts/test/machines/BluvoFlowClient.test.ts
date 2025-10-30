@@ -1,10 +1,6 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest';
 import {BluvoFlowClient} from '../../src/machines';
 import {ERROR_CODES, WITHDRAWAL_QUOTATION_ERROR_TYPES, WITHDRAWAL_EXECUTION_ERROR_TYPES} from '../../src/error-codes';
-import {
-    Walletwithdrawbalancebalance200Response,
-    Walletwithdrawquotequotation200Response,
-} from '../../generated';
 
 // Mock the BluvoWebClient module
 vi.mock('../../src/BluvoWebClient', () => {
@@ -41,7 +37,7 @@ describe('BluvoFlowClient Error Handling', () => {
         mkUUIDFn: () => 'test-uuid-123'
     };
 
-    const mockBalanceResponse: Walletwithdrawbalancebalance200Response = {
+    const mockBalanceResponse = {
         lastSyncAt: new Date().toISOString(),
         balances: [{
             asset: 'BTC',
@@ -58,7 +54,7 @@ describe('BluvoFlowClient Error Handling', () => {
         }]
     };
 
-    const mockQuoteResponse: Walletwithdrawquotequotation200Response = {
+    const mockQuoteResponse = {
         id: 'quote-123',
         asset: 'BTC',
         amountNoFee: 1.0,

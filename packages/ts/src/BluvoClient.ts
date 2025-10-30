@@ -410,8 +410,7 @@ export class BluvoClient {
 				idem: string,
 				quotationId: string,
 				args: WalletwithdrawquoteidexecutewithdrawData["body"],
-				// enforce legacy type for backwards compatibility
-			): Promise<WalletwithdrawquoteidexecutewithdrawResponse> => {
+			) => {
 				const response = await walletwithdrawquoteidexecutewithdraw({
 					client: this.client,
 					path: {
@@ -423,25 +422,21 @@ export class BluvoClient {
 					body: args,
 				}).then(transformResponse);
 
-				const data = response.data;
-				// we need to reconsile data object that has shape like this:
-				// {
-				//     success: boolean;
-				//     error?: string;
-				//     type?: TypeEnum2;
-				//     result?: unknown;
-				// }
-				const success = data?.success ?? response.success ?? false;
-				const error = data?.error ?? response.error?.error;
-				const type = data?.type ?? response.error?.type;
-				const result = data?.result;
+				// Return the standard format, enriching error object with type for extractErrorCode
+				if (!response.success && response.error) {
+					return {
+						data: null,
+						error: {
+							error: response.error.error || response.error,
+							type: response.error.type,
+							errorCode: response.error.type,
+							result: response.data?.result
+						},
+						success: false
+					};
+				}
 
-				return {
-					success,
-					error,
-					type,
-					result,
-				};
+				return response;
 			},
 		},
 	};

@@ -4,6 +4,7 @@ import type {
 import type { BluvoClient } from "../BluvoClient";
 import { BluvoWebClient } from "../BluvoWebClient";
 import {
+	type BluvoError,
 	ERROR_CODES,
 	extractErrorCode,
 	extractErrorResult,
@@ -781,7 +782,7 @@ export class BluvoFlowClient {
 					case ERROR_CODES.WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED:
 						this.flowMachine?.send({
 							type: "WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED",
-							result: extractErrorResult(error),
+							result: extractErrorResult(error) as { valid2FAMethods?: string[] } | undefined,
 						});
 						return;
 				}
@@ -835,7 +836,7 @@ export class BluvoFlowClient {
 				case ERROR_CODES.WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED:
 					this.flowMachine.send({
 						type: "WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED",
-						result: extractErrorResult(error),
+						result: extractErrorResult(error) as { valid2FAMethods?: string[] } | undefined,
 					});
 					break;
 				default:
@@ -934,7 +935,7 @@ export class BluvoFlowClient {
 		}
 	}
 
-	private handleWithdrawalError(error: any) {
+	private handleWithdrawalError(error: BluvoError) {
 		// Extract error code from the error object
 		const errorCode = extractErrorCode(error);
 
@@ -962,7 +963,7 @@ export class BluvoFlowClient {
 			case ERROR_CODES.WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED:
 				this.flowMachine?.send({
 					type: "WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED",
-					result: extractErrorResult(error),
+					result: extractErrorResult(error) as { valid2FAMethods?: string[] } | undefined,
 				});
 				break;
 			default:

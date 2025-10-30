@@ -9,55 +9,67 @@
  * Format: CATEGORY_SPECIFIC_ERROR
  */
 export const ERROR_CODES = {
-  // Generic errors
-  GENERIC_NOT_FOUND: 'GENERIC_NOT_FOUND',
-  GENERIC_UNAUTHORIZED: 'GENERIC_UNAUTHORIZED',
-  GENERIC_INTERNAL_SERVER_ERROR: 'GENERIC_INTERNAL_SERVER_ERROR',
-  GENERIC_VALIDATION_ERROR: 'GENERIC_VALIDATION_ERROR',
-  GENERIC_INVALID_REQUEST: 'GENERIC_INVALID_REQUEST',
+    // Generic errors
+    GENERIC_NOT_FOUND: 'GENERIC_NOT_FOUND',
+    GENERIC_UNAUTHORIZED: 'GENERIC_UNAUTHORIZED',
+    GENERIC_INTERNAL_SERVER_ERROR: 'GENERIC_INTERNAL_SERVER_ERROR',
+    GENERIC_VALIDATION_ERROR: 'GENERIC_VALIDATION_ERROR',
+    GENERIC_INVALID_REQUEST: 'GENERIC_INVALID_REQUEST',
 
-  // Wallet errors
-  WALLET_NOT_FOUND: 'WALLET_NOT_FOUND',
-  WALLET_INVALID_CREDENTIALS: 'WALLET_INVALID_CREDENTIALS',
+    // API Key errors
+    APIKEY_INSUFFICIENT_PERMISSIONS: 'APIKEY_INSUFFICIENT_PERMISSIONS',
 
-  // Quote errors
-  QUOTE_NOT_FOUND: 'QUOTE_NOT_FOUND',
-  QUOTE_EXPIRED: 'QUOTE_EXPIRED',
+    // Wallet errors
+    WALLET_NOT_FOUND: 'WALLET_NOT_FOUND',
+    WALLET_INVALID_CREDENTIALS: 'WALLET_INVALID_CREDENTIALS',
 
-  // Withdrawal errors - Balance
-  WITHDRAWAL_INSUFFICIENT_BALANCE: 'WITHDRAWAL_INSUFFICIENT_BALANCE',
-  WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE: 'WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE',
+    // Quote errors
+    QUOTE_NOT_FOUND: 'QUOTE_NOT_FOUND',
+    QUOTE_EXPIRED: 'QUOTE_EXPIRED',
 
-  // Withdrawal errors - Address
-  WITHDRAWAL_INVALID_ADDRESS: 'WITHDRAWAL_INVALID_ADDRESS',
-  WITHDRAWAL_NETWORK_NOT_SUPPORTED: 'WITHDRAWAL_NETWORK_NOT_SUPPORTED',
+    // Withdrawal errors - Balance
+    WITHDRAWAL_INSUFFICIENT_BALANCE: 'WITHDRAWAL_INSUFFICIENT_BALANCE',
+    WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE: 'WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE',
 
-  // Withdrawal errors - Amount
-  WITHDRAWAL_AMOUNT_BELOW_MINIMUM: 'WITHDRAWAL_AMOUNT_BELOW_MINIMUM',
-  WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM: 'WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM',
+    // Withdrawal errors - Address
+    WITHDRAWAL_INVALID_ADDRESS: 'WITHDRAWAL_INVALID_ADDRESS',
+    WITHDRAWAL_NETWORK_NOT_SUPPORTED: 'WITHDRAWAL_NETWORK_NOT_SUPPORTED',
+    WITHDRAWAL_TOO_MANY_ADDRESSES: 'WITHDRAWAL_TOO_MANY_ADDRESSES',
 
-  // Withdrawal errors - Asset
-  WITHDRAWAL_ASSET_NOT_SUPPORTED: 'WITHDRAWAL_ASSET_NOT_SUPPORTED',
+    // Withdrawal errors - Amount
+    WITHDRAWAL_AMOUNT_BELOW_MINIMUM: 'WITHDRAWAL_AMOUNT_BELOW_MINIMUM',
+    WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM: 'WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM',
 
-  // Withdrawal errors - 2FA
-  WITHDRAWAL_2FA_REQUIRED_TOTP: 'WITHDRAWAL_2FA_REQUIRED_TOTP',
-  WITHDRAWAL_2FA_REQUIRED_SMS: 'WITHDRAWAL_2FA_REQUIRED_SMS',
-  WITHDRAWAL_2FA_REQUIRED_YUBIKEY: 'WITHDRAWAL_2FA_REQUIRED_YUBIKEY',
-  WITHDRAWAL_2FA_REQUIRED_PASSPHRASE: 'WITHDRAWAL_2FA_REQUIRED_PASSPHRASE',
-  WITHDRAWAL_2FA_INVALID: 'WITHDRAWAL_2FA_INVALID',
-  WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED: 'WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED',
+    // Withdrawal errors - Asset
+    WITHDRAWAL_ASSET_NOT_SUPPORTED: 'WITHDRAWAL_ASSET_NOT_SUPPORTED',
 
-  // Withdrawal errors - Verification
-  WITHDRAWAL_KYC_REQUIRED: 'WITHDRAWAL_KYC_REQUIRED',
-  WITHDRAWAL_EMAIL_UNVERIFIED: 'WITHDRAWAL_EMAIL_UNVERIFIED',
+    // Withdrawal errors - Provider
+    WITHDRAWAL_PROVIDER_ERROR: 'WITHDRAWAL_PROVIDER_ERROR',
 
-  // OAuth errors
-  OAUTH_AUTHORIZATION_FAILED: 'OAUTH_AUTHORIZATION_FAILED',
-  OAUTH_TOKEN_EXCHANGE_FAILED: 'OAUTH_TOKEN_EXCHANGE_FAILED',
-  OAUTH_INVALID_STATE: 'OAUTH_INVALID_STATE',
+    // Withdrawal errors - 2FA
+    WITHDRAWAL_2FA_REQUIRED_TOTP: 'WITHDRAWAL_2FA_REQUIRED_TOTP',
+    WITHDRAWAL_2FA_REQUIRED_SMS: 'WITHDRAWAL_2FA_REQUIRED_SMS',
+    WITHDRAWAL_2FA_REQUIRED_YUBIKEY: 'WITHDRAWAL_2FA_REQUIRED_YUBIKEY',
+    WITHDRAWAL_2FA_REQUIRED_PASSPHRASE: 'WITHDRAWAL_2FA_REQUIRED_PASSPHRASE',
+    WITHDRAWAL_2FA_INVALID: 'WITHDRAWAL_2FA_INVALID',
+    WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED: 'WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED',
+
+    // Withdrawal errors - Verification
+    WITHDRAWAL_KYC_REQUIRED: 'WITHDRAWAL_KYC_REQUIRED',
+    WITHDRAWAL_EMAIL_UNVERIFIED: 'WITHDRAWAL_EMAIL_UNVERIFIED',
+
+    // Withdrawal errors - Rate Limiting
+    WITHDRAWAL_RATE_LIMIT_EXCEEDED: 'WITHDRAWAL_RATE_LIMIT_EXCEEDED',
+
+    // OAuth errors
+    OAUTH_AUTHORIZATION_FAILED: 'OAUTH_AUTHORIZATION_FAILED',
+    OAUTH_TOKEN_EXCHANGE_FAILED: 'OAUTH_TOKEN_EXCHANGE_FAILED',
+    OAUTH_INVALID_STATE: 'OAUTH_INVALID_STATE',
+    OAUTH_INSUFFICIENT_SCOPE: 'OAUTH_INSUFFICIENT_SCOPE',
 } as const;
 
 export type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES];
+
 /**
  * Serializable error format that can be passed through workflows
  * This preserves all error information without losing type safety
@@ -66,38 +78,81 @@ export interface SerializedError {
   code: ErrorCode;
   message: string;
   timestamp: string;
-  originalError?: any;
+  originalError?: unknown;
 }
+
+/**
+ * API error response format
+ */
+export interface ApiErrorResponse {
+  error?: string | { error?: string; type?: ErrorCode; errorCode?: ErrorCode };
+  type?: ErrorCode;
+  errorCode?: ErrorCode;
+  code?: ErrorCode;
+  result?: unknown;
+  message?: string;
+}
+
+/**
+ * Legacy Axios error format
+ */
+export interface LegacyAxiosError {
+  response?: {
+    data?: {
+      type?: ErrorCode;
+      result?: unknown;
+    };
+  };
+}
+
+/**
+ * Union type representing all possible error formats
+ */
+export type BluvoError =
+  | SerializedError
+  | ApiErrorResponse
+  | LegacyAxiosError
+  | Error
+  | unknown;
 
 /**
  * Check if an error object is a serialized error
  */
-export function isSerializedError(error: any): error is SerializedError {
-  return error &&
+export function isSerializedError(error: BluvoError): error is SerializedError {
+  return error != null &&
     typeof error === 'object' &&
     'code' in error &&
     'message' in error &&
-    Object.values(ERROR_CODES).includes(error.code);
+    Object.values(ERROR_CODES).includes((error as SerializedError).code);
 }
 
 /**
  * Extract error code from various error formats
  */
-export function extractErrorCode(error: any): ErrorCode | null {
+export function extractErrorCode(error: BluvoError): ErrorCode | null {
+  if (error == null) {
+    return null;
+  }
+
+  if (typeof error !== 'object') {
+    return null;
+  }
+
+  const err = error as Record<string, unknown>;
 
   // Check errorCode field (new format)
-  if(error?.errorCode && Object.values(ERROR_CODES).includes(error.errorCode)) {
-    return error.errorCode;
+  if (err.errorCode && Object.values(ERROR_CODES).includes(err.errorCode as ErrorCode)) {
+    return err.errorCode as ErrorCode;
   }
 
   // Check type field (new format)
-  if(error?.type && Object.values(ERROR_CODES).includes(error.type)) {
-    return error.type;
+  if (err.type && Object.values(ERROR_CODES).includes(err.type as ErrorCode)) {
+    return err.type as ErrorCode;
   }
 
   // Check code field
-  if (error?.code && Object.values(ERROR_CODES).includes(error.code)) {
-    return error.code;
+  if (err.code && Object.values(ERROR_CODES).includes(err.code as ErrorCode)) {
+    return err.code as ErrorCode;
   }
 
   // Check if it's a serialized error
@@ -106,8 +161,9 @@ export function extractErrorCode(error: any): ErrorCode | null {
   }
 
   // Check nested response.data.type (legacy axios format)
-  if (error?.response?.data?.type && Object.values(ERROR_CODES).includes(error.response.data.type)) {
-    return error.response.data.type;
+  const legacyError = err as LegacyAxiosError;
+  if (legacyError.response?.data?.type && Object.values(ERROR_CODES).includes(legacyError.response.data.type)) {
+    return legacyError.response.data.type;
   }
 
   return null;
@@ -116,20 +172,27 @@ export function extractErrorCode(error: any): ErrorCode | null {
 /**
  * Extract error result from various error formats
  */
-export function extractErrorResult(error: any): any {
+export function extractErrorResult(error: BluvoError): unknown {
+  if (error == null || typeof error !== 'object') {
+    return null;
+  }
+
+  const err = error as Record<string, unknown>;
+
   // Check if error has a result field directly
-  if (error?.result) {
-    return error.result;
+  if ('result' in err) {
+    return err.result;
   }
 
   // Check if error has nested result in response data
-  if (error?.response?.data?.result) {
-    return error.response.data.result;
+  const legacyError = err as LegacyAxiosError;
+  if (legacyError.response?.data?.result) {
+    return legacyError.response.data.result;
   }
 
   // Check in originalError if it's a serialized error
-  if (error?.originalError?.result) {
-    return error.originalError.result;
+  if ('originalError' in err && err.originalError != null && typeof err.originalError === 'object' && 'result' in err.originalError) {
+    return (err.originalError as Record<string, unknown>).result;
   }
 
   return null;

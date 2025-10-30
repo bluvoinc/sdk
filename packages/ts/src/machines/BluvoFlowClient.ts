@@ -161,7 +161,7 @@ export class BluvoFlowClient {
 				type: "EXCHANGES_FAILED",
 				error,
 			});
-			throw error;
+			return;
 		}
 
 		this.flowMachine.send({
@@ -386,12 +386,16 @@ export class BluvoFlowClient {
 				if (errorCode === ERROR_CODES.WALLET_NOT_FOUND) {
 					options.onWalletNotFound?.(options.walletId);
 				}
-				throw new Error((pingError as any)?.error || (pingError as any)?.message || "Failed to ping wallet");
+				// Silent failure - just log and return
+				console.warn("Failed to ping wallet:", (pingError as any)?.error || (pingError as any)?.message || "Failed to ping wallet");
+				return;
 			}
 
 			if (pingResult?.status === "INVALID_API_CREDENTIALS") {
 				options.onWalletInvalidApiCredentials?.(options.walletId);
-				throw new Error("Invalid API credentials");
+				// Silent failure - just log and return
+				console.warn("Invalid API credentials for wallet");
+				return;
 			}
 
 			// Step 2: Fetch withdrawable balance
@@ -408,7 +412,9 @@ export class BluvoFlowClient {
 				if (errorCode === ERROR_CODES.WALLET_NOT_FOUND) {
 					options.onWalletNotFound?.(options.walletId);
 				}
-				throw new Error((balanceError as any)?.error || (balanceError as any)?.message || "Failed to fetch withdrawable balance");
+				// Silent failure - just log and return
+				console.warn("Failed to fetch withdrawable balance:", (balanceError as any)?.error || (balanceError as any)?.message || "Failed to fetch withdrawable balance");
+				return;
 			}
 
 			// Transform to expected format

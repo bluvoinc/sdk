@@ -10,6 +10,7 @@
  * Do not edit the class manually.
  */
 
+import { Walletwithdrawbalancebalance200ResponseBalancesInnerExtra } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerExtra';
 import { Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
 import { HttpFile } from '../http/http';
 
@@ -18,6 +19,7 @@ export class Walletwithdrawbalancebalance200ResponseBalancesInner {
     'amount': number;
     'amountInFiat'?: number | null;
     'networks': Array<Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner>;
+    'extra'?: Walletwithdrawbalancebalance200ResponseBalancesInnerExtra;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -46,6 +48,12 @@ export class Walletwithdrawbalancebalance200ResponseBalancesInner {
             "name": "networks",
             "baseName": "networks",
             "type": "Array<Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner>",
+            "format": ""
+        },
+        {
+            "name": "extra",
+            "baseName": "extra",
+            "type": "Walletwithdrawbalancebalance200ResponseBalancesInnerExtra",
             "format": ""
         }    ];
 

@@ -10,6 +10,7 @@
  * Do not edit the class manually.
  */
 
+import { Walletget200ResponseBalancesValue } from '../models/Walletget200ResponseBalancesValue';
 import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
 import { Walletlistlistwallets200ResponseWalletsInnerInvalidApi } from '../models/Walletlistlistwallets200ResponseWalletsInnerInvalidApi';
 import { HttpFile } from '../http/http';
@@ -22,7 +23,7 @@ export class Walletlistlistwallets200ResponseWalletsInner {
     'lastSyncAt'?: Walletget200ResponseCreatedAt | null;
     'expiresAt'?: Walletget200ResponseCreatedAt | null;
     'exchange': Walletlistlistwallets200ResponseWalletsInnerExchangeEnum;
-    'balances': { [key: string]: number; };
+    'balances': { [key: string]: Walletget200ResponseBalancesValue; };
     'ipPool'?: Array<string> | null;
     'invalidApi'?: Walletlistlistwallets200ResponseWalletsInnerInvalidApi | null;
 
@@ -76,7 +77,7 @@ export class Walletlistlistwallets200ResponseWalletsInner {
         {
             "name": "balances",
             "baseName": "balances",
-            "type": "{ [key: string]: number; }",
+            "type": "{ [key: string]: Walletget200ResponseBalancesValue; }",
             "format": ""
         },
         {

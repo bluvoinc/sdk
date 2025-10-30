@@ -24,6 +24,10 @@ export interface PreviewWalletBalance {
     asset: string;
     balance: string;
     balanceInFiat?: string;
+    extra?: {
+        slug?: string;
+        assetId?: string;
+    };
 }
 
 /**

@@ -6,8 +6,12 @@ import {mergeMap, map} from  '../rxjsStub';
 import { Oauth2exchangeslistexchanges200Response } from '../models/Oauth2exchangeslistexchanges200Response';
 import { Oauth2exchangeslistexchanges200ResponseExchangesInner } from '../models/Oauth2exchangeslistexchanges200ResponseExchangesInner';
 import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlgeturl200Response';
+import { Organizationapikeygetapikeyinfo200Response } from '../models/Organizationapikeygetapikeyinfo200Response';
+import { Organizationapikeygetapikeyinfo200ResponsePermissions } from '../models/Organizationapikeygetapikeyinfo200ResponsePermissions';
+import { Organizationapikeygetapikeyinfo200ResponseRateLimit } from '../models/Organizationapikeygetapikeyinfo200ResponseRateLimit';
 import { Walletdelete200Response } from '../models/Walletdelete200Response';
 import { Walletget200Response } from '../models/Walletget200Response';
+import { Walletget200ResponseBalancesValue } from '../models/Walletget200ResponseBalancesValue';
 import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
 import { Walletget403Response } from '../models/Walletget403Response';
 import { Walletget404Response } from '../models/Walletget404Response';
@@ -21,6 +25,7 @@ import { Wallettransactionslisttransactions200ResponsePagination } from '../mode
 import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
 import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
 import { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
+import { Walletwithdrawbalancebalance200ResponseBalancesInnerExtra } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerExtra';
 import { Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
 import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
@@ -29,6 +34,56 @@ import { Walletwithdrawquotequotation200ResponseAdditionalInfo } from '../models
 import { Walletwithdrawquotequotation200ResponseFeeDetailsInner } from '../models/Walletwithdrawquotequotation200ResponseFeeDetailsInner';
 import { Walletwithdrawquotequotation400Response } from '../models/Walletwithdrawquotequotation400Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
+
+import { APIKeysApiRequestFactory, APIKeysApiResponseProcessor} from "../apis/APIKeysApi";
+export class ObservableAPIKeysApi {
+    private requestFactory: APIKeysApiRequestFactory;
+    private responseProcessor: APIKeysApiResponseProcessor;
+    private configuration: Configuration;
+
+    public constructor(
+        configuration: Configuration,
+        requestFactory?: APIKeysApiRequestFactory,
+        responseProcessor?: APIKeysApiResponseProcessor
+    ) {
+        this.configuration = configuration;
+        this.requestFactory = requestFactory || new APIKeysApiRequestFactory(configuration);
+        this.responseProcessor = responseProcessor || new APIKeysApiResponseProcessor();
+    }
+
+    /**
+     * Get information about the current API key, including its permissions and rate limit configuration.  **🔒 Authentication:** This endpoint requires a valid API key.
+     * Get API Key Info
+     */
+    public organizationapikeygetapikeyinfoWithHttpInfo(_options?: ConfigurationOptions): Observable<HttpInfo<Organizationapikeygetapikeyinfo200Response>> {
+        const _config = mergeConfiguration(this.configuration, _options);
+
+        const requestContextPromise = this.requestFactory.organizationapikeygetapikeyinfo(_config);
+        // build promise chain
+        let middlewarePreObservable = from<RequestContext>(requestContextPromise);
+        for (const middleware of _config.middleware) {
+            middlewarePreObservable = middlewarePreObservable.pipe(mergeMap((ctx: RequestContext) => middleware.pre(ctx)));
+        }
+
+        return middlewarePreObservable.pipe(mergeMap((ctx: RequestContext) => _config.httpApi.send(ctx))).
+            pipe(mergeMap((response: ResponseContext) => {
+                let middlewarePostObservable = of(response);
+                for (const middleware of _config.middleware.reverse()) {
+                    middlewarePostObservable = middlewarePostObservable.pipe(mergeMap((rsp: ResponseContext) => middleware.post(rsp)));
+                }
+                return middlewarePostObservable.pipe(map((rsp: ResponseContext) => this.responseProcessor.organizationapikeygetapikeyinfoWithHttpInfo(rsp)));
+            }));
+    }
+
+    /**
+     * Get information about the current API key, including its permissions and rate limit configuration.  **🔒 Authentication:** This endpoint requires a valid API key.
+     * Get API Key Info
+     */
+    public organizationapikeygetapikeyinfo(_options?: ConfigurationOptions): Observable<Organizationapikeygetapikeyinfo200Response> {
+        return this.organizationapikeygetapikeyinfoWithHttpInfo(_options).pipe(map((apiResponse: HttpInfo<Organizationapikeygetapikeyinfo200Response>) => apiResponse.data));
+    }
+
+}
 
 import { OAuth2ApiRequestFactory, OAuth2ApiResponseProcessor} from "../apis/OAuth2Api";
 export class ObservableOAuth2Api {

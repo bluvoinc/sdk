@@ -1,8 +1,12 @@
 export * from '../models/Oauth2exchangeslistexchanges200Response';
 export * from '../models/Oauth2exchangeslistexchanges200ResponseExchangesInner';
 export * from '../models/Oauth2exchangeurlgeturl200Response';
+export * from '../models/Organizationapikeygetapikeyinfo200Response';
+export * from '../models/Organizationapikeygetapikeyinfo200ResponsePermissions';
+export * from '../models/Organizationapikeygetapikeyinfo200ResponseRateLimit';
 export * from '../models/Walletdelete200Response';
 export * from '../models/Walletget200Response';
+export * from '../models/Walletget200ResponseBalancesValue';
 export * from '../models/Walletget200ResponseCreatedAt';
 export * from '../models/Walletget403Response';
 export * from '../models/Walletget404Response';
@@ -16,6 +20,7 @@ export * from '../models/Wallettransactionslisttransactions200ResponsePagination
 export * from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
 export * from '../models/Walletwithdrawbalancebalance200Response';
 export * from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
+export * from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerExtra';
 export * from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
 export * from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
 export * from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
@@ -28,8 +33,12 @@ export * from '../models/WalletwithdrawquotequotationRequest';
 import { Oauth2exchangeslistexchanges200Response } from '../models/Oauth2exchangeslistexchanges200Response';
 import { Oauth2exchangeslistexchanges200ResponseExchangesInner   , Oauth2exchangeslistexchanges200ResponseExchangesInnerStatusEnum   } from '../models/Oauth2exchangeslistexchanges200ResponseExchangesInner';
 import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlgeturl200Response';
+import { Organizationapikeygetapikeyinfo200Response } from '../models/Organizationapikeygetapikeyinfo200Response';
+import { Organizationapikeygetapikeyinfo200ResponsePermissions } from '../models/Organizationapikeygetapikeyinfo200ResponsePermissions';
+import { Organizationapikeygetapikeyinfo200ResponseRateLimit } from '../models/Organizationapikeygetapikeyinfo200ResponseRateLimit';
 import { Walletdelete200Response } from '../models/Walletdelete200Response';
 import { Walletget200Response , Walletget200ResponseExchangeEnum          } from '../models/Walletget200Response';
+import { Walletget200ResponseBalancesValue } from '../models/Walletget200ResponseBalancesValue';
 import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
 import { Walletget403Response , Walletget403ResponseTypeEnum    } from '../models/Walletget403Response';
 import { Walletget404Response , Walletget404ResponseTypeEnum    } from '../models/Walletget404Response';
@@ -43,6 +52,7 @@ import { Wallettransactionslisttransactions200ResponsePagination } from '../mode
 import { Wallettransactionslisttransactions200ResponseTransactionsInner     , Wallettransactionslisttransactions200ResponseTransactionsInnerTypeEnum    , Wallettransactionslisttransactions200ResponseTransactionsInnerDirectionEnum      , Wallettransactionslisttransactions200ResponseTransactionsInnerFiatCurrencyEnum  , Wallettransactionslisttransactions200ResponseTransactionsInnerStatusEnum      } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
 import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
 import { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
+import { Walletwithdrawbalancebalance200ResponseBalancesInnerExtra } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerExtra';
 import { Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner, Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInnerChainIdEnum  , Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInnerTokenAddressEnum            } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
 import { Walletwithdrawquoteidexecutewithdraw200Response  , Walletwithdrawquoteidexecutewithdraw200ResponseTypeEnum    } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
@@ -87,8 +97,12 @@ let typeMap: {[index: string]: any} = {
     "Oauth2exchangeslistexchanges200Response": Oauth2exchangeslistexchanges200Response,
     "Oauth2exchangeslistexchanges200ResponseExchangesInner": Oauth2exchangeslistexchanges200ResponseExchangesInner,
     "Oauth2exchangeurlgeturl200Response": Oauth2exchangeurlgeturl200Response,
+    "Organizationapikeygetapikeyinfo200Response": Organizationapikeygetapikeyinfo200Response,
+    "Organizationapikeygetapikeyinfo200ResponsePermissions": Organizationapikeygetapikeyinfo200ResponsePermissions,
+    "Organizationapikeygetapikeyinfo200ResponseRateLimit": Organizationapikeygetapikeyinfo200ResponseRateLimit,
     "Walletdelete200Response": Walletdelete200Response,
     "Walletget200Response": Walletget200Response,
+    "Walletget200ResponseBalancesValue": Walletget200ResponseBalancesValue,
     "Walletget200ResponseCreatedAt": Walletget200ResponseCreatedAt,
     "Walletget403Response": Walletget403Response,
     "Walletget404Response": Walletget404Response,
@@ -102,6 +116,7 @@ let typeMap: {[index: string]: any} = {
     "Wallettransactionslisttransactions200ResponseTransactionsInner": Wallettransactionslisttransactions200ResponseTransactionsInner,
     "Walletwithdrawbalancebalance200Response": Walletwithdrawbalancebalance200Response,
     "Walletwithdrawbalancebalance200ResponseBalancesInner": Walletwithdrawbalancebalance200ResponseBalancesInner,
+    "Walletwithdrawbalancebalance200ResponseBalancesInnerExtra": Walletwithdrawbalancebalance200ResponseBalancesInnerExtra,
     "Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner": Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner,
     "Walletwithdrawquoteidexecutewithdraw200Response": Walletwithdrawquoteidexecutewithdraw200Response,
     "WalletwithdrawquoteidexecutewithdrawRequest": WalletwithdrawquoteidexecutewithdrawRequest,

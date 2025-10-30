@@ -82,6 +82,7 @@ export {
 import type { Walletwithdrawquotequotation200Response } from '../../generated';
 import type { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../../generated';
 import type { Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner } from '../../generated';
+import type { Walletwithdrawbalancebalance200ResponseBalancesInnerExtra } from '../../generated';
 import type {
     Walletwithdrawquotequotation200ResponseFeeDetailsInner,
     Walletwithdrawquotequotation200ResponseFeeDetailsInnerCategoryEnum
@@ -96,6 +97,11 @@ export type WithdrawalQuotation = Walletwithdrawquotequotation200Response;
  * Balance available for withdrawal for a specific cryptocurrency
  */
 export type WithdrawableBalance = Walletwithdrawbalancebalance200ResponseBalancesInner;
+
+/**
+ * Extra metadata for a withdrawable balance (slug, assetId, etc.)
+ */
+export type WithdrawableBalanceExtra = Walletwithdrawbalancebalance200ResponseBalancesInnerExtra;
 
 export type ChainId = Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner['chainId'];
 export type TokenAddress = Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner['tokenAddress'];

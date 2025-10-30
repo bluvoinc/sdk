@@ -63,6 +63,10 @@ export interface FlowContext {
       'assetName': string;
       'addressRegex'?: string | null;
     }>;
+    extra?: {
+      'slug'?: string;
+      'assetId'?: string;
+    };
   }>;
   quote?: {
     id: string;
@@ -126,6 +130,10 @@ export type FlowActionType =
       'contractAddress'?: string | null;
       'contractAddressVerified'?: boolean | null;
     }>;
+    extra?: {
+      'slug'?: string;
+      'assetId'?: string;
+    };
   }> }
   | { type: 'WALLET_FAILED'; error: Error }
   | { type: 'REQUEST_QUOTE'; asset: string; amount: string; destinationAddress: string; network?: string }

@@ -111,7 +111,8 @@ export class BluvoPreviewManager {
             const balances: Array<PreviewWalletBalance> = balanceResponse.balances.map(b => ({
                 asset: b.asset,
                 balance: String(b.amount),
-                ...(b.amountInFiat !== undefined ? { balanceInFiat: String(b.amountInFiat) } : {})
+                ...(b.amountInFiat !== undefined ? { balanceInFiat: String(b.amountInFiat) } : {}),
+                ...(b.extra !== undefined ? { extra: b.extra } : {})
             }));
 
             // Update state to ready

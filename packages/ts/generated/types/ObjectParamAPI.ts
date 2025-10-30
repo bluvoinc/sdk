@@ -5,8 +5,12 @@ import type { Middleware } from '../middleware';
 import { Oauth2exchangeslistexchanges200Response } from '../models/Oauth2exchangeslistexchanges200Response';
 import { Oauth2exchangeslistexchanges200ResponseExchangesInner } from '../models/Oauth2exchangeslistexchanges200ResponseExchangesInner';
 import { Oauth2exchangeurlgeturl200Response } from '../models/Oauth2exchangeurlgeturl200Response';
+import { Organizationapikeygetapikeyinfo200Response } from '../models/Organizationapikeygetapikeyinfo200Response';
+import { Organizationapikeygetapikeyinfo200ResponsePermissions } from '../models/Organizationapikeygetapikeyinfo200ResponsePermissions';
+import { Organizationapikeygetapikeyinfo200ResponseRateLimit } from '../models/Organizationapikeygetapikeyinfo200ResponseRateLimit';
 import { Walletdelete200Response } from '../models/Walletdelete200Response';
 import { Walletget200Response } from '../models/Walletget200Response';
+import { Walletget200ResponseBalancesValue } from '../models/Walletget200ResponseBalancesValue';
 import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
 import { Walletget403Response } from '../models/Walletget403Response';
 import { Walletget404Response } from '../models/Walletget404Response';
@@ -20,6 +24,7 @@ import { Wallettransactionslisttransactions200ResponsePagination } from '../mode
 import { Wallettransactionslisttransactions200ResponseTransactionsInner } from '../models/Wallettransactionslisttransactions200ResponseTransactionsInner';
 import { Walletwithdrawbalancebalance200Response } from '../models/Walletwithdrawbalancebalance200Response';
 import { Walletwithdrawbalancebalance200ResponseBalancesInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInner';
+import { Walletwithdrawbalancebalance200ResponseBalancesInnerExtra } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerExtra';
 import { Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner } from '../models/Walletwithdrawbalancebalance200ResponseBalancesInnerNetworksInner';
 import { Walletwithdrawquoteidexecutewithdraw200Response } from '../models/Walletwithdrawquoteidexecutewithdraw200Response';
 import { WalletwithdrawquoteidexecutewithdrawRequest } from '../models/WalletwithdrawquoteidexecutewithdrawRequest';
@@ -28,6 +33,39 @@ import { Walletwithdrawquotequotation200ResponseAdditionalInfo } from '../models
 import { Walletwithdrawquotequotation200ResponseFeeDetailsInner } from '../models/Walletwithdrawquotequotation200ResponseFeeDetailsInner';
 import { Walletwithdrawquotequotation400Response } from '../models/Walletwithdrawquotequotation400Response';
 import { WalletwithdrawquotequotationRequest } from '../models/WalletwithdrawquotequotationRequest';
+
+import { ObservableAPIKeysApi } from "./ObservableAPI";
+import { APIKeysApiRequestFactory, APIKeysApiResponseProcessor} from "../apis/APIKeysApi";
+
+export interface APIKeysApiOrganizationapikeygetapikeyinfoRequest {
+}
+
+export class ObjectAPIKeysApi {
+    private api: ObservableAPIKeysApi
+
+    public constructor(configuration: Configuration, requestFactory?: APIKeysApiRequestFactory, responseProcessor?: APIKeysApiResponseProcessor) {
+        this.api = new ObservableAPIKeysApi(configuration, requestFactory, responseProcessor);
+    }
+
+    /**
+     * Get information about the current API key, including its permissions and rate limit configuration.  **🔒 Authentication:** This endpoint requires a valid API key.
+     * Get API Key Info
+     * @param param the request object
+     */
+    public organizationapikeygetapikeyinfoWithHttpInfo(param: APIKeysApiOrganizationapikeygetapikeyinfoRequest = {}, options?: ConfigurationOptions): Promise<HttpInfo<Organizationapikeygetapikeyinfo200Response>> {
+        return this.api.organizationapikeygetapikeyinfoWithHttpInfo( options).toPromise();
+    }
+
+    /**
+     * Get information about the current API key, including its permissions and rate limit configuration.  **🔒 Authentication:** This endpoint requires a valid API key.
+     * Get API Key Info
+     * @param param the request object
+     */
+    public organizationapikeygetapikeyinfo(param: APIKeysApiOrganizationapikeygetapikeyinfoRequest = {}, options?: ConfigurationOptions): Promise<Organizationapikeygetapikeyinfo200Response> {
+        return this.api.organizationapikeygetapikeyinfo( options).toPromise();
+    }
+
+}
 
 import { ObservableOAuth2Api } from "./ObservableAPI";
 import { OAuth2ApiRequestFactory, OAuth2ApiResponseProcessor} from "../apis/OAuth2Api";

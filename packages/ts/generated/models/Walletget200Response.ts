@@ -10,13 +10,14 @@
  * Do not edit the class manually.
  */
 
+import { Walletget200ResponseBalancesValue } from '../models/Walletget200ResponseBalancesValue';
 import { Walletget200ResponseCreatedAt } from '../models/Walletget200ResponseCreatedAt';
 import { HttpFile } from '../http/http';
 
 export class Walletget200Response {
     'id': string;
     'exchange': Walletget200ResponseExchangeEnum;
-    'balances': { [key: string]: number; };
+    'balances': { [key: string]: Walletget200ResponseBalancesValue; };
     'ipPool'?: Array<string> | null;
     'invalidApi'?: boolean | null;
     'createdAt'?: Walletget200ResponseCreatedAt | null;
@@ -44,7 +45,7 @@ export class Walletget200Response {
         {
             "name": "balances",
             "baseName": "balances",
-            "type": "{ [key: string]: number; }",
+            "type": "{ [key: string]: Walletget200ResponseBalancesValue; }",
             "format": ""
         },
         {

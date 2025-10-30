@@ -104,6 +104,10 @@ export interface SilentResumeWithdrawalFlowOptions {
             'assetName': string;
             'addressRegex'?: string;
         }>;
+        extra?: {
+            'slug'?: string;
+            'assetId'?: string;
+        };
     }>;
 
     /** Called when wallet is not found */
@@ -393,7 +397,8 @@ export class BluvoFlowClient {
                         assetName: n.assetName,
                         ...(n.addressRegex !== null && n.addressRegex !== undefined ? { addressRegex: n.addressRegex } : {})
                     })),
-                    ...(b.amountInFiat !== undefined ? { balanceInFiat: String(b.amountInFiat) } : {})
+                    ...(b.amountInFiat !== undefined ? { balanceInFiat: String(b.amountInFiat) } : {}),
+                    ...(b.extra !== undefined ? { extra: b.extra } : {})
                 }));
 
                 // Call success callback
@@ -483,6 +488,11 @@ export class BluvoFlowClient {
                     // if amountInFiat is present (including 0), include balanceInFiat
                     ...(b.amountInFiat !== undefined ? {
                         balanceInFiat: String(b.amountInFiat),
+                    } : {}),
+
+                    // if extra is present, include it as is
+                    ...(b.extra !== undefined ? {
+                        extra: b.extra
                     } : {})
                 }))
             });

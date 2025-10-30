@@ -354,7 +354,7 @@ export class BluvoClient {
 			 */
 
 			list: async (
-				walletId?: Required<WallettransactionslisttransactionsData>["query"]["walletId"],
+				walletId?: string,
 				page?: Required<WallettransactionslisttransactionsData>["query"]["page"],
 				limit?: Required<WallettransactionslisttransactionsData>["query"]["limit"],
 				sinceDate?: Required<WallettransactionslisttransactionsData>["query"]["sinceDate"],
@@ -362,7 +362,6 @@ export class BluvoClient {
 				const response = await wallettransactionslisttransactions({
 					client: this.client,
 					query: {
-						walletId,
 						page,
 						limit,
 						sinceDate,

@@ -5,19 +5,15 @@ import type {
 	PreviewWalletInput,
 	WalletPreviewState,
 } from "../types/preview.types";
+import type {BluvoClient} from "../BluvoClient";
+import {BluvoFlowClientOptions} from "./BluvoFlowClient";
+import { ERROR_CODES, extractErrorCode } from "../error-codes";
 
 /**
  * Options for creating a BluvoPreviewManager
  */
-export interface BluvoPreviewManagerOptions {
-	/** Function to ping a wallet and validate its existence and credentials */
-	pingWalletByIdFn: (walletId: string) => Promise<any>;
+export type BluvoPreviewManagerOptions = Pick<BluvoFlowClientOptions, "fetchWithdrawableBalanceFn"|"pingWalletByIdFn">;
 
-	/** Function to fetch withdrawable balance for a wallet */
-	fetchWithdrawableBalanceFn: (
-		walletId: string,
-	) => Promise<WalletwithdrawbalancebalanceResponse>;
-}
 
 /**
  * Manager for wallet preview states
@@ -88,57 +84,18 @@ export class BluvoPreviewManager {
 			lastUpdated: Date.now(),
 		});
 
-		try {
-			// Step 1: Ping wallet to validate
-			const pingResult = await this.options.pingWalletByIdFn(walletId);
+		// Step 1: Ping wallet to validate
+		const {
+			data: pingResult,
+			error: pingError,
+			success: pingSuccess
+		} = await this.options.pingWalletByIdFn(walletId);
 
-			// Check ping result for specific error cases
-			// The ping API returns {status: "SUCCESS" | "INVALID_API_CREDENTIALS"}
-			if (pingResult?.status === "INVALID_API_CREDENTIALS") {
-				this.updateState(walletId, {
-					walletId,
-					exchange,
-					status: "error_invalid_credentials",
-					error: new Error("Invalid API credentials"),
-					lastUpdated: Date.now(),
-				});
+		// Check for ping errors
+		if (!pingSuccess) {
+			const errorCode = extractErrorCode(pingError);
 
-				callbacks?.onWalletInvalidApiCredentials?.(walletId);
-				return;
-			}
-
-			// Step 2: Fetch withdrawable balance
-			const balanceResponse =
-				await this.options.fetchWithdrawableBalanceFn(walletId);
-
-			// Transform balance data to preview format
-			const balances: Array<PreviewWalletBalance> =
-				balanceResponse.balances.map((b) => ({
-					asset: b.asset,
-					balance: String(b.amount),
-					...(b.amountInFiat !== undefined
-						? { balanceInFiat: String(b.amountInFiat) }
-						: {}),
-					...(b.extra !== undefined ? { extra: b.extra } : {}),
-				}));
-
-			// Update state to ready
-			this.updateState(walletId, {
-				walletId,
-				exchange,
-				status: "ready",
-				balances,
-				lastUpdated: Date.now(),
-			});
-
-			callbacks?.onWalletBalance?.(walletId, balances);
-		} catch (error: any) {
-			// Handle specific error cases
-			if (
-				error?.status === 404 ||
-				error?.errorCode === "WALLET_NOT_FOUND" ||
-				error?.code === "WALLET_NOT_FOUND"
-			) {
+			if (errorCode === ERROR_CODES.WALLET_NOT_FOUND) {
 				this.updateState(walletId, {
 					walletId,
 					exchange,
@@ -146,19 +103,100 @@ export class BluvoPreviewManager {
 					error: new Error("Wallet not found"),
 					lastUpdated: Date.now(),
 				});
-
 				callbacks?.onWalletNotFound?.(walletId);
-			} else {
-				// Unknown error
+				return;
+			}
+
+			// Unknown ping error
+			this.updateState(walletId, {
+				walletId,
+				exchange,
+				status: "error_unknown",
+				error: pingError instanceof Error ? pingError : new Error((pingError as any)?.error || (pingError as any)?.message || "Failed to ping wallet"),
+				lastUpdated: Date.now(),
+			});
+			return;
+		}
+
+		// Check ping result for specific error cases
+		// The ping API returns {status: "SUCCESS" | "INVALID_API_CREDENTIALS"}
+		if (pingResult?.status === "INVALID_API_CREDENTIALS") {
+			this.updateState(walletId, {
+				walletId,
+				exchange,
+				status: "error_invalid_credentials",
+				error: new Error("Invalid API credentials"),
+				lastUpdated: Date.now(),
+			});
+			callbacks?.onWalletInvalidApiCredentials?.(walletId);
+			return;
+		}
+
+		// Step 2: Fetch withdrawable balance
+		const {
+			success: balanceSuccess,
+			data: balanceResponse,
+			error: balanceError
+		} = await this.options.fetchWithdrawableBalanceFn(walletId);
+
+		if (!balanceSuccess) {
+			const errorCode = extractErrorCode(balanceError);
+
+			if (errorCode === ERROR_CODES.WALLET_NOT_FOUND) {
 				this.updateState(walletId, {
 					walletId,
 					exchange,
-					status: "error_unknown",
-					error: error instanceof Error ? error : new Error("Unknown error"),
+					status: "error_not_found",
+					error: new Error("Wallet not found"),
 					lastUpdated: Date.now(),
 				});
+				callbacks?.onWalletNotFound?.(walletId);
+				return;
 			}
+
+			// Unknown balance error
+			this.updateState(walletId, {
+				walletId,
+				exchange,
+				status: "error_unknown",
+				error: balanceError instanceof Error ? balanceError : new Error((balanceError as any)?.error || (balanceError as any)?.message || "Failed to fetch balance"),
+				lastUpdated: Date.now(),
+			});
+			return;
 		}
+
+		if (!balanceResponse?.balances) {
+			this.updateState(walletId, {
+				walletId,
+				exchange,
+				status: "error_unknown",
+				error: new Error("No balance data returned"),
+				lastUpdated: Date.now(),
+			});
+			return;
+		}
+
+		// Transform balance data to preview format
+		const balances: Array<PreviewWalletBalance> =
+			balanceResponse.balances.map((b) => ({
+				asset: b.asset,
+				balance: String(b.amount),
+				...(b.amountInFiat !== undefined
+					? { balanceInFiat: String(b.amountInFiat) }
+					: {}),
+				...(b.extra !== undefined ? { extra: b.extra } : {}),
+			}));
+
+		// Update state to ready
+		this.updateState(walletId, {
+			walletId,
+			exchange,
+			status: "ready",
+			balances,
+			lastUpdated: Date.now(),
+		});
+
+		callbacks?.onWalletBalance?.(walletId, balances);
 	}
 
 	/**

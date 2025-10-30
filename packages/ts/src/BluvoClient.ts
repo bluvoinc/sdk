@@ -173,7 +173,6 @@ export class BluvoClient {
 				},
 			});
 			const success = !response.error;
-
 			return {
 				...response,
 				success,

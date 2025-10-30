@@ -27,7 +27,16 @@ describe('BluvoFlowClient Error Handling', () => {
         requestQuotationFn: vi.fn(),
         executeWithdrawalFn: vi.fn(),
 
-        getWalletByIdFn: vi.fn(),
+        getWalletByIdFn: vi.fn().mockResolvedValue({
+            data: null,
+            error: { error: 'Wallet not found', type: 'WALLET_NOT_FOUND' },
+            success: false
+        }),
+        pingWalletByIdFn: vi.fn().mockResolvedValue({
+            data: { status: 'OK' },
+            error: null,
+            success: true
+        }),
         listExchangesFn: vi.fn(),
         mkUUIDFn: () => 'test-uuid-123'
     };
@@ -74,7 +83,11 @@ describe('BluvoFlowClient Error Handling', () => {
         it('should handle generic error in fetchWithdrawableBalance using resumeWithdrawalFlow', async () => {
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockRejectedValue(new Error('Network error'))
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Network error', type: 'GENERIC_INTERNAL_SERVER_ERROR' },
+                    success: false
+                })
             });
 
             // Use resumeWithdrawalFlow which calls loadWallet immediately
@@ -92,12 +105,13 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle wallet not found error using resumeWithdrawalFlow', async () => {
-            const error = new Error('Wallet not found');
-            (error as any).errorCode = ERROR_CODES.WALLET_NOT_FOUND;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockRejectedValue(error)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Wallet not found', type: ERROR_CODES.WALLET_NOT_FOUND },
+                    success: false
+                })
             });
 
             // Use resumeWithdrawalFlow which calls loadWallet immediately
@@ -117,13 +131,18 @@ describe('BluvoFlowClient Error Handling', () => {
 
     describe('requestQuotation error handling - Insufficient Balance', () => {
         it('should handle WITHDRAWAL_INSUFFICIENT_BALANCE error', async () => {
-            const error = new Error('Insufficient balance');
-            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockRejectedValue(error)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Insufficient balance', type: ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE, errorCode: ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -144,13 +163,18 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE error', async () => {
-            const error = new Error('Insufficient balance for fee');
-            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockRejectedValue(error)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Insufficient balance for fee', type: ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE, errorCode: ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -170,13 +194,18 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle legacy INSUFFICIENT_BALANCE error type', async () => {
-            const error = new Error('Legacy insufficient balance');
-            (error as any).type = WITHDRAWAL_QUOTATION_ERROR_TYPES.INSUFFICIENT_BALANCE;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockRejectedValue(error)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Legacy insufficient balance', type: WITHDRAWAL_QUOTATION_ERROR_TYPES.INSUFFICIENT_BALANCE },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -196,13 +225,18 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle legacy INSUFFICIENT_BALANCE_CANNOT_COVER_FEE error type', async () => {
-            const error = new Error('Legacy insufficient balance for fee');
-            (error as any).code = WITHDRAWAL_QUOTATION_ERROR_TYPES.INSUFFICIENT_BALANCE_CANNOT_COVER_FEE;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockRejectedValue(error)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Legacy insufficient balance for fee', code: WITHDRAWAL_QUOTATION_ERROR_TYPES.INSUFFICIENT_BALANCE_CANNOT_COVER_FEE },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -224,13 +258,18 @@ describe('BluvoFlowClient Error Handling', () => {
 
     describe('requestQuotation error handling - Amount Validation', () => {
         it('should handle WITHDRAWAL_AMOUNT_BELOW_MINIMUM error', async () => {
-            const error = new Error('Amount too small');
-            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_AMOUNT_BELOW_MINIMUM;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockRejectedValue(error)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Amount too small', type: ERROR_CODES.WITHDRAWAL_AMOUNT_BELOW_MINIMUM, errorCode: ERROR_CODES.WITHDRAWAL_AMOUNT_BELOW_MINIMUM },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -250,13 +289,18 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM error', async () => {
-            const error = new Error('Amount too large');
-            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockRejectedValue(error)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Amount too large', type: ERROR_CODES.WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM, errorCode: ERROR_CODES.WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -276,17 +320,25 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle legacy amount validation error types', async () => {
-            const error = new Error('Legacy amount error');
-            (error as any).response = {
-                data: {
-                    type: WITHDRAWAL_QUOTATION_ERROR_TYPES.AMOUNT_BELOW_MINIMUM
-                }
-            };
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockRejectedValue(error)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: {
+                        error: 'Legacy amount error',
+                        response: {
+                            data: {
+                                type: WITHDRAWAL_QUOTATION_ERROR_TYPES.AMOUNT_BELOW_MINIMUM
+                            }
+                        }
+                    },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -308,13 +360,18 @@ describe('BluvoFlowClient Error Handling', () => {
 
     describe('requestQuotation error handling - Address and Network', () => {
         it('should handle WITHDRAWAL_INVALID_ADDRESS error', async () => {
-            const error = new Error('Invalid address format');
-            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_INVALID_ADDRESS;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockRejectedValue(error)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Invalid address format', type: ERROR_CODES.WITHDRAWAL_INVALID_ADDRESS, errorCode: ERROR_CODES.WITHDRAWAL_INVALID_ADDRESS },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -334,13 +391,18 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle WITHDRAWAL_NETWORK_NOT_SUPPORTED error', async () => {
-            const error = new Error('Network not supported');
-            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_NETWORK_NOT_SUPPORTED;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockRejectedValue(error)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Network not supported', type: ERROR_CODES.WITHDRAWAL_NETWORK_NOT_SUPPORTED, errorCode: ERROR_CODES.WITHDRAWAL_NETWORK_NOT_SUPPORTED },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -363,17 +425,26 @@ describe('BluvoFlowClient Error Handling', () => {
 
     describe('executeWithdrawal error handling - 2FA Errors', () => {
         beforeEach(() => {
-            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
-            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
+            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue({
+                data: mockBalanceResponse,
+                error: null,
+                success: true
+            });
+            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue({
+                data: mockQuoteResponse,
+                error: null,
+                success: true
+            });
         });
 
         it('should handle WITHDRAWAL_2FA_REQUIRED_TOTP error', async () => {
-            const error = new Error('TOTP required');
-            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+                executeWithdrawalFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'TOTP required', type: ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP, errorCode: ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -397,12 +468,13 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle WITHDRAWAL_2FA_REQUIRED_SMS error', async () => {
-            const error = new Error('SMS code required');
-            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+                executeWithdrawalFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'SMS code required', type: ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS, errorCode: ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -426,12 +498,13 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle legacy TWO_FACTOR_REQUIRED error type', async () => {
-            const error = new Error('Legacy 2FA required');
-            (error as any).type = WITHDRAWAL_EXECUTION_ERROR_TYPES.TWO_FACTOR_REQUIRED;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+                executeWithdrawalFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Legacy 2FA required', type: WITHDRAWAL_EXECUTION_ERROR_TYPES.TWO_FACTOR_REQUIRED },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -455,12 +528,13 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle legacy SMS_CODE_REQUIRED error type', async () => {
-            const error = new Error('Legacy SMS required');
-            (error as any).code = WITHDRAWAL_EXECUTION_ERROR_TYPES.SMS_CODE_REQUIRED;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+                executeWithdrawalFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Legacy SMS required', code: WITHDRAWAL_EXECUTION_ERROR_TYPES.SMS_CODE_REQUIRED },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -486,17 +560,26 @@ describe('BluvoFlowClient Error Handling', () => {
 
     describe('executeWithdrawal error handling - KYC and Balance', () => {
         beforeEach(() => {
-            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
-            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
+            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue({
+                data: mockBalanceResponse,
+                error: null,
+                success: true
+            });
+            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue({
+                data: mockQuoteResponse,
+                error: null,
+                success: true
+            });
         });
 
         it('should handle WITHDRAWAL_KYC_REQUIRED error', async () => {
-            const error = new Error('KYC verification required');
-            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_KYC_REQUIRED;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+                executeWithdrawalFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'KYC verification required', type: ERROR_CODES.WITHDRAWAL_KYC_REQUIRED, errorCode: ERROR_CODES.WITHDRAWAL_KYC_REQUIRED },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -520,12 +603,13 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle WITHDRAWAL_INSUFFICIENT_BALANCE during execution', async () => {
-            const error = new Error('Balance changed - insufficient funds');
-            (error as any).errorCode = ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+                executeWithdrawalFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Balance changed - insufficient funds', type: ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE, errorCode: ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -549,16 +633,20 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle legacy KYC_REQUIRED error type', async () => {
-            const error = new Error('Legacy KYC required');
-            (error as any).response = {
-                data: {
-                    type: WITHDRAWAL_EXECUTION_ERROR_TYPES.KYC_REQUIRED
-                }
-            };
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+                executeWithdrawalFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: {
+                        error: 'Legacy KYC required',
+                        response: {
+                            data: {
+                                type: WITHDRAWAL_EXECUTION_ERROR_TYPES.KYC_REQUIRED
+                            }
+                        }
+                    },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -584,17 +672,26 @@ describe('BluvoFlowClient Error Handling', () => {
 
     describe('executeWithdrawal error handling - Quote Expired', () => {
         beforeEach(() => {
-            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
-            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
+            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue({
+                data: mockBalanceResponse,
+                error: null,
+                success: true
+            });
+            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue({
+                data: mockQuoteResponse,
+                error: null,
+                success: true
+            });
         });
 
         it('should handle QUOTE_EXPIRED error', async () => {
-            const error = new Error('Quote has expired');
-            (error as any).errorCode = ERROR_CODES.QUOTE_EXPIRED;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+                executeWithdrawalFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Quote has expired', type: ERROR_CODES.QUOTE_EXPIRED, errorCode: ERROR_CODES.QUOTE_EXPIRED },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -619,12 +716,13 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle legacy RESOURCE_EXHAUSTED error type', async () => {
-            const error = new Error('Legacy quote expired');
-            (error as any).type = WITHDRAWAL_EXECUTION_ERROR_TYPES.RESOURCE_EXHAUSTED;
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+                executeWithdrawalFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Legacy quote expired', type: WITHDRAWAL_EXECUTION_ERROR_TYPES.RESOURCE_EXHAUSTED },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -651,16 +749,26 @@ describe('BluvoFlowClient Error Handling', () => {
 
     describe('executeWithdrawal error handling - Fatal Errors', () => {
         beforeEach(() => {
-            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
-            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
+            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue({
+                data: mockBalanceResponse,
+                error: null,
+                success: true
+            });
+            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue({
+                data: mockQuoteResponse,
+                error: null,
+                success: true
+            });
         });
 
         it('should handle unknown error as fatal', async () => {
-            const error = new Error('Unknown error occurred');
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                executeWithdrawalFn: vi.fn().mockRejectedValue(error)
+                executeWithdrawalFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Unknown error occurred' },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -687,7 +795,11 @@ describe('BluvoFlowClient Error Handling', () => {
         it('should handle non-Error objects as fatal', async () => {
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                executeWithdrawalFn: vi.fn().mockRejectedValue('String error')
+                executeWithdrawalFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: 'String error',
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -714,20 +826,30 @@ describe('BluvoFlowClient Error Handling', () => {
 
     describe('Error handling in submit2FA and submitSMS', () => {
         beforeEach(() => {
-            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue(mockBalanceResponse);
-            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue(mockQuoteResponse);
+            defaultOptions.fetchWithdrawableBalanceFn = vi.fn().mockResolvedValue({
+                data: mockBalanceResponse,
+                error: null,
+                success: true
+            });
+            defaultOptions.requestQuotationFn = vi.fn().mockResolvedValue({
+                data: mockQuoteResponse,
+                error: null,
+                success: true
+            });
         });
 
         it('should handle invalid 2FA code error in submit2FA', async () => {
-            const initialError = new Error('2FA required');
-            (initialError as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP;
-
-            const invalidCodeError = new Error('Invalid 2FA code');
-            (invalidCodeError as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_INVALID;
-
             const executeWithdrawalFn = vi.fn()
-                .mockRejectedValueOnce(initialError)
-                .mockRejectedValueOnce(invalidCodeError);
+                .mockResolvedValueOnce({
+                    data: null,
+                    error: { error: '2FA required', type: ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP, errorCode: ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP },
+                    success: false
+                })
+                .mockResolvedValueOnce({
+                    data: null,
+                    error: { error: 'Invalid 2FA code', type: ERROR_CODES.WITHDRAWAL_2FA_INVALID, errorCode: ERROR_CODES.WITHDRAWAL_2FA_INVALID },
+                    success: false
+                });
 
             const client = new BluvoFlowClient({
                 ...defaultOptions,
@@ -764,15 +886,17 @@ describe('BluvoFlowClient Error Handling', () => {
         });
 
         it('should handle error in submitSMS and transition correctly', async () => {
-            const initialError = new Error('SMS required');
-            (initialError as any).errorCode = ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS;
-
-            const kycError = new Error('KYC required after SMS');
-            (kycError as any).errorCode = ERROR_CODES.WITHDRAWAL_KYC_REQUIRED;
-
             const executeWithdrawalFn = vi.fn()
-                .mockRejectedValueOnce(initialError)
-                .mockRejectedValueOnce(kycError);
+                .mockResolvedValueOnce({
+                    data: null,
+                    error: { error: 'SMS required', type: ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS, errorCode: ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS },
+                    success: false
+                })
+                .mockResolvedValueOnce({
+                    data: null,
+                    error: { error: 'KYC required after SMS', type: ERROR_CODES.WITHDRAWAL_KYC_REQUIRED, errorCode: ERROR_CODES.WITHDRAWAL_KYC_REQUIRED },
+                    success: false
+                });
 
             const client = new BluvoFlowClient({
                 ...defaultOptions,
@@ -810,17 +934,19 @@ describe('BluvoFlowClient Error Handling', () => {
 
     describe('Complex error scenarios', () => {
         it('should handle multiple error types in sequence', async () => {
-            const balanceError = new Error('Insufficient balance');
-            (balanceError as any).errorCode = ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE;
-
-            const minAmountError = new Error('Amount below minimum');
-            (minAmountError as any).errorCode = ERROR_CODES.WITHDRAWAL_AMOUNT_BELOW_MINIMUM;
-
             // Create separate client instances to avoid call count confusion
             const client1 = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockRejectedValue(balanceError)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Insufficient balance', type: ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE, errorCode: ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE },
+                    success: false
+                })
             });
 
             const {machine: machine1} = await client1.resumeWithdrawalFlow({
@@ -841,8 +967,16 @@ describe('BluvoFlowClient Error Handling', () => {
             // Second client with different error
             const client2 = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockRejectedValue(minAmountError)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: { error: 'Amount below minimum', type: ERROR_CODES.WITHDRAWAL_AMOUNT_BELOW_MINIMUM, errorCode: ERROR_CODES.WITHDRAWAL_AMOUNT_BELOW_MINIMUM },
+                    success: false
+                })
             });
 
             const {machine: machine2} = await client2.resumeWithdrawalFlow({
@@ -862,8 +996,16 @@ describe('BluvoFlowClient Error Handling', () => {
             // Third client with success
             const client3 = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: mockQuoteResponse,
+                    error: null,
+                    success: true
+                })
             });
 
             const {machine: machine3} = await client3.resumeWithdrawalFlow({
@@ -892,8 +1034,16 @@ describe('BluvoFlowClient Error Handling', () => {
                 options: {
                     autoRefreshQuotation: false // Disable auto-refresh to test expiration behavior
                 },
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockResolvedValue(shortExpiryQuote)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: shortExpiryQuote,
+                    error: null,
+                    success: true
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -918,19 +1068,25 @@ describe('BluvoFlowClient Error Handling', () => {
 
     describe('Error code extraction edge cases', () => {
         it('should handle error with code in response.data.type', async () => {
-            const error = {
-                message: 'API Error',
-                response: {
-                    data: {
-                        type: ERROR_CODES.WITHDRAWAL_INVALID_ADDRESS
-                    }
-                }
-            };
-
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
-                requestQuotationFn: vi.fn().mockRejectedValue(error)
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: mockBalanceResponse,
+                    error: null,
+                    success: true
+                }),
+                requestQuotationFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: {
+                        error: 'API Error',
+                        response: {
+                            data: {
+                                type: ERROR_CODES.WITHDRAWAL_INVALID_ADDRESS
+                            }
+                        }
+                    },
+                    success: false
+                })
             });
 
             const {machine} = await client.resumeWithdrawalFlow({
@@ -952,7 +1108,11 @@ describe('BluvoFlowClient Error Handling', () => {
         it('should handle null/undefined errors gracefully', async () => {
             const client = new BluvoFlowClient({
                 ...defaultOptions,
-                fetchWithdrawableBalanceFn: vi.fn().mockRejectedValue(null),
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue({
+                    data: null,
+                    error: null,
+                    success: false
+                }),
             });
 
             // Use resumeWithdrawalFlow for more predictable timing

@@ -85,18 +85,29 @@ export function isSerializedError(error: any): error is SerializedError {
  */
 export function extractErrorCode(error: any): ErrorCode | null {
 
-  if(error.errorCode) {
+  // Check errorCode field (new format)
+  if(error?.errorCode && Object.values(ERROR_CODES).includes(error.errorCode)) {
     return error.errorCode;
   }
 
-  // If it's already a serialized error with a code
+  // Check type field (new format)
+  if(error?.type && Object.values(ERROR_CODES).includes(error.type)) {
+    return error.type;
+  }
+
+  // Check code field
   if (error?.code && Object.values(ERROR_CODES).includes(error.code)) {
     return error.code;
   }
 
-  // If it's a serialized error
+  // Check if it's a serialized error
   if (isSerializedError(error)) {
     return error.code;
+  }
+
+  // Check nested response.data.type (legacy axios format)
+  if (error?.response?.data?.type && Object.values(ERROR_CODES).includes(error.response.data.type)) {
+    return error.response.data.type;
   }
 
   return null;

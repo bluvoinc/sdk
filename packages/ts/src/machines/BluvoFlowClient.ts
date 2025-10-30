@@ -151,41 +151,40 @@ export class BluvoFlowClient {
 
 		this.flowMachine.send({ type: "LOAD_EXCHANGES" });
 
-		try {
-			const exchanges = await this.options.listExchangesFn(status);
-			this.flowMachine.send({
-				type: "EXCHANGES_LOADED",
-				exchanges,
-			});
-			return exchanges;
-		} catch (error) {
+		// Note: listExchangesFn returns the exchanges array directly, not {data, error, success}
+		const exchanges = await this.options.listExchangesFn(status);
+
+		if (!exchanges || !Array.isArray(exchanges)) {
+			const error = new Error("Failed to load exchanges");
 			this.flowMachine.send({
 				type: "EXCHANGES_FAILED",
-				error:
-					error instanceof Error
-						? error
-						: new Error("Failed to load exchanges"),
+				error,
 			});
 			throw error;
 		}
+
+		this.flowMachine.send({
+			type: "EXCHANGES_LOADED",
+			exchanges,
+		});
+		return exchanges;
 	}
 
 	async startWithdrawalFlow(flowOptions: WithdrawalFlowOptions) {
 		// Check if wallet already exists
-		try {
-			const existingWallet = await this.options
-				.getWalletByIdFn(flowOptions.walletId)
-				.then((response) => response.data?.exchange);
-			if (existingWallet) {
-				// Wallet exists, redirect to resumeWithdrawalFlow
-				return this.resumeWithdrawalFlow({
-					exchange: existingWallet,
-					walletId: flowOptions.walletId,
-				});
-			}
-		} catch (error) {
-			// If getWalletByIdFn fails, continue with normal flow
-			console.warn("Error checking wallet existence:", error);
+		const { data, error, success } = await this.options.getWalletByIdFn(flowOptions.walletId);
+
+		if (success && data?.exchange) {
+			// Wallet exists, redirect to resumeWithdrawalFlow
+			return this.resumeWithdrawalFlow({
+				exchange: data.exchange,
+				walletId: flowOptions.walletId,
+			});
+		}
+
+		// If wallet doesn't exist or check failed, continue with normal OAuth flow
+		if (!success) {
+			console.warn("Error checking wallet existence:", (error as any)?.error || (error as any)?.message || "Unknown error");
 		}
 
 		// Dispose any existing flow
@@ -371,68 +370,69 @@ export class BluvoFlowClient {
 
 		// If no preloaded balances, fetch them
 		if (!balances) {
-			try {
-				// Step 1: Ping wallet to validate
-				const {
-                    data:pingResult,
-                    error,
-                    success
-                } = await this.options.pingWalletByIdFn(
-					options.walletId,
-				);
+			// Step 1: Ping wallet to validate
+			const {
+				data: pingResult,
+				error: pingError,
+				success: pingSuccess
+			} = await this.options.pingWalletByIdFn(
+				options.walletId,
+			);
 
-				// Check for invalid credentials
-				if (pingResult?.status === "INVALID_API_CREDENTIALS") {
-					options.onWalletInvalidApiCredentials?.(options.walletId);
-					throw new Error("Invalid API credentials");
-				}
-
-				// Step 2: Fetch withdrawable balance
-				const {
-                    data:balanceResponse,
-                    error,
-                    success,
-                } = await this.options.fetchWithdrawableBalanceFn(
-					options.walletId,
-				)
-
-				// Transform to expected format
-				balances = balanceResponse?.balances.map((b) => ({
-					asset: b.asset,
-					balance: String(b.amount),
-					networks: b.networks.map((n) => ({
-						id: n.id,
-						name: n.name,
-						displayName: n.displayName,
-						minWithdrawal: n.minWithdrawal,
-						maxWithdrawal: n.maxWithdrawal,
-						assetName: n.assetName,
-						...(n.addressRegex !== null && n.addressRegex !== undefined
-							? { addressRegex: n.addressRegex }
-							: {}),
-					})),
-					...(b.amountInFiat !== undefined
-						? { balanceInFiat: String(b.amountInFiat) }
-						: {}),
-					...(b.extra !== undefined ? { extra: b.extra } : {}),
-				})) ?? [];
-
-				// Call success callback
-				options.onWalletBalance?.(options.walletId, balances);
-			} catch (error: any) {
-				// Handle wallet not found
-				if (
-					error?.status === 404 ||
-					error?.errorCode === "WALLET_NOT_FOUND" ||
-					error?.code === "WALLET_NOT_FOUND"
-				) {
+			// Check for invalid credentials
+			if (!pingSuccess) {
+				const errorCode = extractErrorCode(pingError);
+				if (errorCode === ERROR_CODES.WALLET_NOT_FOUND) {
 					options.onWalletNotFound?.(options.walletId);
-					throw error;
 				}
-
-				// Re-throw other errors
-				throw error;
+				throw new Error((pingError as any)?.error || (pingError as any)?.message || "Failed to ping wallet");
 			}
+
+			if (pingResult?.status === "INVALID_API_CREDENTIALS") {
+				options.onWalletInvalidApiCredentials?.(options.walletId);
+				throw new Error("Invalid API credentials");
+			}
+
+			// Step 2: Fetch withdrawable balance
+			const {
+				data: balanceResponse,
+				error: balanceError,
+				success: balanceSuccess,
+			} = await this.options.fetchWithdrawableBalanceFn(
+				options.walletId,
+			);
+
+			if (!balanceSuccess) {
+				const errorCode = extractErrorCode(balanceError);
+				if (errorCode === ERROR_CODES.WALLET_NOT_FOUND) {
+					options.onWalletNotFound?.(options.walletId);
+				}
+				throw new Error((balanceError as any)?.error || (balanceError as any)?.message || "Failed to fetch withdrawable balance");
+			}
+
+			// Transform to expected format
+			balances = balanceResponse?.balances.map((b) => ({
+				asset: b.asset,
+				balance: String(b.amount),
+				networks: b.networks.map((n) => ({
+					id: n.id,
+					name: n.name,
+					displayName: n.displayName,
+					minWithdrawal: n.minWithdrawal,
+					maxWithdrawal: n.maxWithdrawal,
+					assetName: n.assetName,
+					...(n.addressRegex !== null && n.addressRegex !== undefined
+						? { addressRegex: n.addressRegex }
+						: {}),
+				})),
+				...(b.amountInFiat !== undefined
+					? { balanceInFiat: String(b.amountInFiat) }
+					: {}),
+				...(b.extra !== undefined ? { extra: b.extra } : {}),
+			})) ?? [];
+
+			// Call success callback
+			options.onWalletBalance?.(options.walletId, balances);
 		}
 
 		// Transition through states to reach wallet:ready
@@ -481,64 +481,71 @@ export class BluvoFlowClient {
 
 		this.flowMachine.send({ type: "LOAD_WALLET" });
 
-		try {
-			const {data: withdrawableBalanceInfo} = await this.options
-                .fetchWithdrawableBalanceFn(walletId);
+		const { data: withdrawableBalanceInfo, error, success } = await this.options
+			.fetchWithdrawableBalanceFn(walletId);
 
-
-			this.flowMachine.send({
-				type: "WALLET_LOADED",
-				balances: withdrawableBalanceInfo?.balances?.map(
-					(b: any) => ({
-						asset: b.asset,
-						balance: String(b.amount),
-						networks: b.networks.map((n: any) => ({
-							id: n.id,
-							name: n.name,
-							displayName: n.displayName,
-							minWithdrawal: n.minWithdrawal,
-							maxWithdrawal: n.maxWithdrawal,
-							assetName: n.assetName,
-							// Only include optional fields if they have meaningful values (not null or undefined)
-							...(n.addressRegex !== null && n.addressRegex !== undefined
-								? { addressRegex: n.addressRegex }
-								: {}),
-							...(n.chainId !== null && n.chainId !== undefined
-								? { chainId: n.chainId }
-								: {}),
-							...(n.tokenAddress !== null && n.tokenAddress !== undefined
-								? { tokenAddress: n.tokenAddress }
-								: {}),
-							...(n.contractAddress !== null && n.contractAddress !== undefined
-								? { contractAddress: n.contractAddress }
-								: {}),
-							// contractAddressVerified defaults to true if null or undefined
-							contractAddressVerified: n.contractAddressVerified ?? true,
-						})),
-
-						// if amountInFiat is present (including 0), include balanceInFiat
-						...(b.amountInFiat !== undefined
-							? {
-									balanceInFiat: String(b.amountInFiat),
-								}
-							: {}),
-
-						// if extra is present, include it as is
-						...(b.extra !== undefined
-							? {
-									extra: b.extra,
-								}
-							: {}),
-					}),
-				) ?? [],
-			});
-		} catch (error) {
+		if (!success) {
 			this.flowMachine.send({
 				type: "WALLET_FAILED",
-				error:
-					error instanceof Error ? error : new Error("Failed to load wallet"),
+				error: error instanceof Error ? error : new Error((error as any)?.error || (error as any)?.message || "Failed to load wallet"),
 			});
+			return;
 		}
+
+		if (!withdrawableBalanceInfo?.balances) {
+			this.flowMachine.send({
+				type: "WALLET_FAILED",
+				error: new Error("No balance data returned"),
+			});
+			return;
+		}
+
+		this.flowMachine.send({
+			type: "WALLET_LOADED",
+			balances: withdrawableBalanceInfo.balances.map(
+				(b: any) => ({
+					asset: b.asset,
+					balance: String(b.amount),
+					networks: b.networks.map((n: any) => ({
+						id: n.id,
+						name: n.name,
+						displayName: n.displayName,
+						minWithdrawal: n.minWithdrawal,
+						maxWithdrawal: n.maxWithdrawal,
+						assetName: n.assetName,
+						// Only include optional fields if they have meaningful values (not null or undefined)
+						...(n.addressRegex !== null && n.addressRegex !== undefined
+							? { addressRegex: n.addressRegex }
+							: {}),
+						...(n.chainId !== null && n.chainId !== undefined
+							? { chainId: n.chainId }
+							: {}),
+						...(n.tokenAddress !== null && n.tokenAddress !== undefined
+							? { tokenAddress: n.tokenAddress }
+							: {}),
+						...(n.contractAddress !== null && n.contractAddress !== undefined
+							? { contractAddress: n.contractAddress }
+							: {}),
+						// contractAddressVerified defaults to true if null or undefined
+						contractAddressVerified: n.contractAddressVerified ?? true,
+					})),
+
+					// if amountInFiat is present (including 0), include balanceInFiat
+					...(b.amountInFiat !== undefined
+						? {
+								balanceInFiat: String(b.amountInFiat),
+							}
+						: {}),
+
+					// if extra is present, include it as is
+					...(b.extra !== undefined
+						? {
+								extra: b.extra,
+							}
+						: {}),
+				}),
+			),
+		});
 	}
 
 	async requestQuote(options: QuoteRequestOptions) {
@@ -568,114 +575,26 @@ export class BluvoFlowClient {
 
 		console.log("[SDK] REQUEST_QUOTE action sent to state machine");
 
-		try {
-			const {
-                data: quote,
-                error,
-                success
-            } = await this.options.requestQuotationFn(
-				state.context.walletId,
-				{
-					asset: options.asset,
-					amount: options.amount,
-					address: options.destinationAddress,
-					network: options.network,
-					tag: options.tag,
-					includeFee: options.includeFee ?? true,
-				},
-			);
+		const {
+			data: quote,
+			error,
+			success
+		} = await this.options.requestQuotationFn(
+			state.context.walletId,
+			{
+				asset: options.asset,
+				amount: options.amount,
+				address: options.destinationAddress,
+				network: options.network,
+				tag: options.tag,
+				includeFee: options.includeFee ?? true,
+			},
+		);
 
-            if(!quote){
-                this.flowMachine.send({
-                    type: "QUOTE_FAILED",
-                    error: new Error("No quote returned from backend"),
-                });
-                return;
-            }
-
-			console.log(
-				"[SDK] Backend returned quote with ID:",
-				quote.id,
-				"ExpiresAt:",
-				quote.expiresAt,
-			);
-
-			const quoteData = {
-				id: quote.id,
-				asset: quote.asset,
-				amount: String(quote.amountNoFee),
-				estimatedFee: String(quote.estimatedFee),
-				estimatedTotal: String(quote.estimatedTotal),
-
-				amountWithFeeInFiat: String(quote.amountWithFeeInFiat),
-				amountNoFeeInFiat: String(quote.amountNoFeeInFiat),
-				estimatedFeeInFiat: String(quote.estimatedFeeInFiat),
-
-				additionalInfo: quote.additionalInfo,
-
-				expiresAt: new Date(quote.expiresAt).getTime(),
-			};
-
-			console.log(
-				"[SDK] Sending QUOTE_RECEIVED action with new quote ID:",
-				quoteData.id,
-				"ExpiresAt:",
-				new Date(quoteData.expiresAt).toLocaleTimeString(),
-			);
-
-			this.flowMachine.send({
-				type: "QUOTE_RECEIVED",
-				quote: quoteData,
-			});
-
-			// Clear any existing quote refresh timer
-			if (this.quoteRefreshTimer) {
-				clearTimeout(this.quoteRefreshTimer);
-			}
-
-			// Set up quote expiration timer
-			const expiresIn = new Date(quote.expiresAt).getTime() - Date.now();
-			if (expiresIn > 0) {
-				this.quoteRefreshTimer = setTimeout(() => {
-					const currentState = this.flowMachine?.getState();
-					if (
-						currentState?.type === "quote:ready" &&
-						currentState.context.quote?.id === quote.id
-					) {
-						// Check if auto-refresh is enabled
-						const autoRefresh =
-							currentState.context.autoRefreshQuotation !== undefined
-								? currentState.context.autoRefreshQuotation
-								: true; // Default to true
-
-						if (autoRefresh && currentState.context.lastQuoteRequest) {
-							// Auto-refresh the quote
-							console.log("[SDK] Quote expired, auto-refreshing...");
-							this.requestQuote(currentState.context.lastQuoteRequest);
-						} else {
-							// No auto-refresh, transition to expired state
-							console.log(
-								"[SDK] Quote expired, transitioning to expired state",
-							);
-							this.flowMachine?.send({ type: "QUOTE_EXPIRED" });
-						}
-					}
-				}, expiresIn);
-			}
-
-			// return the quote
-			return {
-				rawQuote: quote,
-				quoteData,
-			};
-		} catch (error: any) {
-			// Extract error code from new format or legacy format
-			const errorCode =
-				extractErrorCode(error) ||
-				error.code ||
-				error.type ||
-				error.response?.data?.type;
-			let flowError = error;
+		if (!success) {
+			// Extract error code from the error object
+			const errorCode = extractErrorCode(error);
+			let flowError: Error;
 
 			if (errorCode) {
 				switch (errorCode) {
@@ -701,17 +620,103 @@ export class BluvoFlowClient {
 					case WITHDRAWAL_QUOTATION_ERROR_TYPES.NETWORK_NOT_SUPPORTED: // Legacy compatibility
 						flowError = new Error("Network not supported");
 						break;
+					default:
+						flowError = error instanceof Error ? error : new Error((error as any)?.error || (error as any)?.message || "Failed to get quote");
 				}
+			} else {
+				flowError = error instanceof Error ? error : new Error((error as any)?.error || (error as any)?.message || "Failed to get quote");
 			}
 
 			this.flowMachine.send({
 				type: "QUOTE_FAILED",
-				error:
-					flowError instanceof Error
-						? flowError
-						: new Error("Failed to get quote"),
+				error: flowError,
 			});
+			return;
 		}
+
+		if (!quote) {
+			this.flowMachine.send({
+				type: "QUOTE_FAILED",
+				error: new Error("No quote returned from backend"),
+			});
+			return;
+		}
+
+		console.log(
+			"[SDK] Backend returned quote with ID:",
+			quote.id,
+			"ExpiresAt:",
+			quote.expiresAt,
+		);
+
+		const quoteData = {
+			id: quote.id,
+			asset: quote.asset,
+			amount: String(quote.amountNoFee),
+			estimatedFee: String(quote.estimatedFee),
+			estimatedTotal: String(quote.estimatedTotal),
+
+			amountWithFeeInFiat: String(quote.amountWithFeeInFiat),
+			amountNoFeeInFiat: String(quote.amountNoFeeInFiat),
+			estimatedFeeInFiat: String(quote.estimatedFeeInFiat),
+
+			additionalInfo: quote.additionalInfo,
+
+			expiresAt: new Date(quote.expiresAt).getTime(),
+		};
+
+		console.log(
+			"[SDK] Sending QUOTE_RECEIVED action with new quote ID:",
+			quoteData.id,
+			"ExpiresAt:",
+			new Date(quoteData.expiresAt).toLocaleTimeString(),
+		);
+
+		this.flowMachine.send({
+			type: "QUOTE_RECEIVED",
+			quote: quoteData,
+		});
+
+		// Clear any existing quote refresh timer
+		if (this.quoteRefreshTimer) {
+			clearTimeout(this.quoteRefreshTimer);
+		}
+
+		// Set up quote expiration timer
+		const expiresIn = new Date(quote.expiresAt).getTime() - Date.now();
+		if (expiresIn > 0) {
+			this.quoteRefreshTimer = setTimeout(() => {
+				const currentState = this.flowMachine?.getState();
+				if (
+					currentState?.type === "quote:ready" &&
+					currentState.context.quote?.id === quote.id
+				) {
+					// Check if auto-refresh is enabled
+					const autoRefresh =
+						currentState.context.autoRefreshQuotation !== undefined
+							? currentState.context.autoRefreshQuotation
+							: true; // Default to true
+
+					if (autoRefresh && currentState.context.lastQuoteRequest) {
+						// Auto-refresh the quote
+						console.log("[SDK] Quote expired, auto-refreshing...");
+						this.requestQuote(currentState.context.lastQuoteRequest);
+					} else {
+						// No auto-refresh, transition to expired state
+						console.log(
+							"[SDK] Quote expired, transitioning to expired state",
+						);
+						this.flowMachine?.send({ type: "QUOTE_EXPIRED" });
+					}
+				}
+			}, expiresIn);
+		}
+
+		// return the quote
+		return {
+			rawQuote: quote,
+			quoteData,
+		};
 	}
 
 	async executeWithdrawal(quoteId: string) {
@@ -847,27 +852,19 @@ export class BluvoFlowClient {
 		});
 
 		// Execute withdrawal
-		try {
-			const res = await this.options.executeWithdrawalFn(
-				state.context.walletId,
-				quoteId,
-				quoteId,
-				{},
-			);
+		const { data: res, error, success } = await this.options.executeWithdrawalFn(
+			state.context.walletId,
+			quoteId,
+			quoteId,
+			{},
+		);
 
-            // if res.success is false, handle error
-
-            return res;
-		} catch (error: any) {
+		if (!success) {
 			// IMMEDIATE ERROR HANDLING (i.e. wrong schema type, network error, etc)
 			console.error("executeWithdrawal error", error);
 
-			// Extract error code from new format or legacy format
-			const errorCode =
-				extractErrorCode(error) ||
-				error.code ||
-				error.type ||
-				error.response?.data?.type;
+			// Extract error code from the error object
+			const errorCode = extractErrorCode(error);
 
 			switch (errorCode) {
 				case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP:
@@ -902,10 +899,14 @@ export class BluvoFlowClient {
 						error:
 							error instanceof Error
 								? error
-								: new Error("Failed to execute withdrawal"),
+								: new Error((error as any)?.error || (error as any)?.message || "Failed to execute withdrawal"),
 					});
 			}
+			return;
 		}
+
+		// Withdrawal is in progress, will be handled by WebSocket callbacks
+		return res;
 	}
 
 	async submit2FA(code: string) {
@@ -924,21 +925,21 @@ export class BluvoFlowClient {
 		if (quote && state.context.walletId) {
 			const idem = this.generateId();
 
-			try {
-				const res = await this.options.executeWithdrawalFn(
-					state.context.walletId,
-					idem,
-					quote.id,
-					{ twofa: code },
-				);
+			const { data: res, error, success } = await this.options.executeWithdrawalFn(
+				state.context.walletId,
+				idem,
+				quote.id,
+				{ twofa: code },
+			);
 
-                // if res.success is false, handle error
-
-                return res;
-			} catch (error: any) {
+			if (!success) {
 				// Handle errors same as in executeWithdrawal
 				this.handleWithdrawalError(error);
+				return;
 			}
+
+			// Withdrawal is in progress, will be handled by WebSocket callbacks
+			return res;
 		}
 	}
 
@@ -958,16 +959,20 @@ export class BluvoFlowClient {
 		if (quote && state.context.walletId) {
 			const idem = this.generateId();
 
-			try {
-				return await this.options.executeWithdrawalFn(
-					state.context.walletId,
-					idem,
-					quote.id,
-					{},
-				);
-			} catch (error: any) {
+			const { data: res, error, success } = await this.options.executeWithdrawalFn(
+				state.context.walletId,
+				idem,
+				quote.id,
+				{},
+			);
+
+			if (!success) {
 				this.handleWithdrawalError(error);
+				return;
 			}
+
+			// Withdrawal is in progress, will be handled by WebSocket callbacks
+			return res;
 		}
 	}
 
@@ -987,9 +992,8 @@ export class BluvoFlowClient {
 	}
 
 	private handleWithdrawalError(error: any) {
-		// Extract error code from new format or legacy format
-		const errorCode =
-			extractErrorCode(error) || error.code || error.response?.data?.type;
+		// Extract error code from the error object
+		const errorCode = extractErrorCode(error);
 
 		switch (errorCode) {
 			case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP:
@@ -1024,7 +1028,7 @@ export class BluvoFlowClient {
 					error:
 						error instanceof Error
 							? error
-							: new Error("Failed to execute withdrawal"),
+							: new Error((error as any)?.error || (error as any)?.message || "Failed to execute withdrawal"),
 				});
 		}
 	}

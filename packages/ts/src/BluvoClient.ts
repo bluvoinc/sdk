@@ -1,10 +1,31 @@
 import {
-    createConfiguration, OAuth2Api,
-    PromiseConfigurationOptions, server1, server2,
-    ServerConfiguration,
-    WalletsApi, WithdrawalsApi,
+	type Oauth2ExchangeslistexchangesData,
+	type Oauth2ExchangeslistexchangesResponses,
+	type Oauth2ExchangeurlgeturlData,
+	oauth2Exchangeslistexchanges,
+	oauth2Exchangeurlgeturl,
+	WalletgetErrors,
+	type WalletlistlistwalletsData,
+	type WallettransactionslisttransactionsData,
+	type WalletwithdrawbalancebalanceData,
+	type WalletwithdrawquoteidexecutewithdrawData,
+	type WalletwithdrawquotequotationData,
+	walletdelete,
+	walletget,
+	walletlistlistwallets,
+	walletpingping,
+	wallettransactionslisttransactions,
+	walletwithdrawbalancebalance,
+	walletwithdrawquoteidexecutewithdraw,
+	walletwithdrawquotequotation,
 } from "../generated";
-import {ListCentralizedExchangesResponseStatusEnum} from "./types/api.types";
+import { createClient, createConfig } from "../generated/client";
+import type {
+	Client,
+	ClientOptions as ClientOptions2,
+	RequestResult,
+} from "../generated/client/types.gen";
+
 /**
  * The core client class for interacting with Bluvo's cryptocurrency exchange integration platform.
  *
@@ -16,404 +37,458 @@ import {ListCentralizedExchangesResponseStatusEnum} from "./types/api.types";
  * This class is not typically instantiated directly; use the `createClient` function instead.
  */
 export class BluvoClient {
-    private readonly wsBase: string;
-    private readonly apiBase?: string;
+	private readonly wsBase: string;
+	private readonly apiBase?: string;
+	private readonly client: Client;
 
-    /**
-     * Creates a new BluvoClient instance with the specified credentials.
-     *
-     * @param orgId Your Bluvo organization identifier.
-     * @param projectId Your Bluvo project identifier.
-     * @param apiKey Your Bluvo API access key.
-     * @param sandbox
-     * @param dev
-     * @param customDomain Custom domain configuration to override default api-bluvo.com
-     * @private Use the static `createClient` method or the global `createClient` function instead.
-     */
-    private constructor(
-        private readonly orgId: string,
-        private readonly projectId: string,
-        private readonly apiKey: string,
-        private readonly sandbox: boolean = false,
-        private readonly dev: boolean = false,
-        customDomain?: string | "api-bluvo.com" | { api: string; ws: string }
-    ) {
-        // Configure WebSocket and API base URLs based on customDomain first, then environment
-        if (customDomain && typeof customDomain === 'object') {
-            // Custom domain with separate API and WebSocket URLs
-            this.apiBase = `https://${customDomain.api}`;
-            this.wsBase = `wss://${customDomain.ws}`;
-        } else if (customDomain && typeof customDomain === 'string' && customDomain !== 'api-bluvo.com') {
-            // Custom domain for both API and WebSocket
-            this.apiBase = `https://${customDomain}`;
-            this.wsBase = `wss://${customDomain}`;
-        } else if (dev) {
-            this.apiBase = 'http://localhost:8787';
-            this.wsBase = 'ws://localhost:8787';
-        } else if (sandbox) {
-            this.apiBase = 'https://test.api-bluvo.com';
-            this.wsBase = 'wss://test.api-bluvo.com';
-        } else {
-            // Production default or explicit "api-bluvo.com"
-            this.apiBase = 'https://api-bluvo.com';
-            this.wsBase = 'wss://api-bluvo.com';
-        }
-    }
+	/**
+	 * Creates a new BluvoClient instance with the specified credentials.
+	 *
+	 * @param orgId Your Bluvo organization identifier.
+	 * @param projectId Your Bluvo project identifier.
+	 * @param apiKey Your Bluvo API access key.
+	 * @param sandbox
+	 * @param dev
+	 * @param customDomain Custom domain configuration to override default api-bluvo.com
+	 * @private Use the static `createClient` method or the global `createClient` function instead.
+	 */
+	private constructor(
+		private readonly orgId: string,
+		private readonly projectId: string,
+		private readonly apiKey: string,
+		private readonly sandbox: boolean = false,
+		private readonly dev: boolean = false,
+		customDomain?: string | "api-bluvo.com" | { api: string; ws: string },
+	) {
+		// Configure WebSocket and API base URLs based on customDomain first, then environment
+		if (customDomain && typeof customDomain === "object") {
+			// Custom domain with separate API and WebSocket URLs
+			this.apiBase = `https://${customDomain.api}`;
+			this.wsBase = `wss://${customDomain.ws}`;
+		} else if (
+			customDomain &&
+			typeof customDomain === "string" &&
+			customDomain !== "api-bluvo.com"
+		) {
+			// Custom domain for both API and WebSocket
+			this.apiBase = `https://${customDomain}`;
+			this.wsBase = `wss://${customDomain}`;
+		} else if (dev) {
+			this.apiBase = "http://localhost:8787";
+			this.wsBase = "ws://localhost:8787";
+		} else if (sandbox) {
+			this.apiBase = "https://test.api-bluvo.com";
+			this.wsBase = "wss://test.api-bluvo.com";
+		} else {
+			// Production default or explicit "api-bluvo.com"
+			this.apiBase = "https://api-bluvo.com";
+			this.wsBase = "wss://api-bluvo.com";
+		}
 
-    /**
-     * Creates and initializes a new BluvoClient instance with the provided credentials.
-     *
-     * This factory method is the recommended way to create BluvoClient instances when not using
-     * the global `createClient` function. It ensures proper initialization and configuration
-     * of the client with your Bluvo API credentials.
-     *
-     * @param credentials An object containing your Bluvo API credentials:
-     *   @param orgId Your unique organization identifier.
-     *   @param projectId Your specific project identifier.
-     *   @param apiKey Your secret API key for authentication.
-     *   @param sandbox Optional flag to use sandbox environment.
-     *   @param dev Optional flag to use local development environment.
-     *   @param customDomain Optional custom domain configuration.
-     *
-     * @returns A fully configured BluvoClient instance ready for use.
-     */
-    static createClient({orgId, projectId, apiKey, sandbox, dev, customDomain}: {
-        orgId: string;
-        projectId: string;
-        apiKey: string;
-        sandbox?: boolean;
-        dev?: boolean;
-        customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
-    }) {
-        return new BluvoClient(
-            orgId,
-            projectId,
-            apiKey,
-            sandbox,
-            dev,
-            customDomain
-        );
-    }
+		this.client = createClient(
+			createConfig<ClientOptions2>({
+				baseUrl: this.apiBase,
+				auth: this.apiKey,
+				headers: {
+					"x-bluvo-api-key": this.apiKey,
+					"x-bluvo-org-id": this.orgId,
+					"x-bluvo-project-id": this.projectId,
+				},
+			}),
+		);
+	}
 
-    wallet = {
+	/**
+	 * Creates and initializes a new BluvoClient instance with the provided credentials.
+	 *
+	 * This factory method is the recommended way to create BluvoClient instances when not using
+	 * the global `createClient` function. It ensures proper initialization and configuration
+	 * of the client with your Bluvo API credentials.
+	 *
+	 * @param credentials An object containing your Bluvo API credentials:
+	 *   @param orgId Your unique organization identifier.
+	 *   @param projectId Your specific project identifier.
+	 *   @param apiKey Your secret API key for authentication.
+	 *   @param sandbox Optional flag to use sandbox environment.
+	 *   @param dev Optional flag to use local development environment.
+	 *   @param customDomain Optional custom domain configuration.
+	 *
+	 * @returns A fully configured BluvoClient instance ready for use.
+	 */
+	static createClient({
+		orgId,
+		projectId,
+		apiKey,
+		sandbox,
+		dev,
+		customDomain,
+	}: {
+		orgId: string;
+		projectId: string;
+		apiKey: string;
+		sandbox?: boolean;
+		dev?: boolean;
+		customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
+	}) {
+		return new BluvoClient(
+			orgId,
+			projectId,
+			apiKey,
+			sandbox,
+			dev,
+			customDomain,
+		);
+	}
 
-        /**
-         * Retrieve comprehensive details about a connected exchange wallet, including balances, permissions, and connection status.
-         *
-         * This method provides a complete snapshot of your connected exchange wallet, giving you real-time visibility into
-         * available funds, account permissions, and the health of the API connection. The data returned is fetched directly
-         * from the exchange API at the time of the request, ensuring you always have the most up-to-date information.
-         *
-         * Use this method to verify connections, check available balances across different assets, or determine
-         * the permission scope of your connected API keys before executing transactions.
-         *
-         * @param walletId The unique identifier of the connected wallet to query. This ID was specified during the initial
-         *                 wallet connection and uniquely identifies this particular exchange integration within your project.
-         *
-         * @returns A promise resolving to a detailed wallet information object containing:
-         *          - Connection status and health
-         *          - Exchange identifier and account details
-         *          - Available balances for all assets
-         *          - API key permissions and restrictions
-         *          - Last synchronization timestamp
-         *
-         * @example
-         * // Get details about a connected Binance wallet
-         * const walletDetails = await client.wallet.get('primary-trading-account');
-         * console.log(`Connection status: ${walletDetails.status}`);
-         * console.log(`BTC Balance: ${walletDetails.balances.BTC?.available || 0}`);
-         */
+	wallet = {
+		/**
+		 * Retrieve comprehensive details about a connected exchange wallet, including balances, permissions, and connection status.
+		 *
+		 * This method provides a complete snapshot of your connected exchange wallet, giving you real-time visibility into
+		 * available funds, account permissions, and the health of the API connection. The data returned is fetched directly
+		 * from the exchange API at the time of the request, ensuring you always have the most up-to-date information.
+		 *
+		 * Use this method to verify connections, check available balances across different assets, or determine
+		 * the permission scope of your connected API keys before executing transactions.
+		 *
+		 * @param walletId The unique identifier of the connected wallet to query. This ID was specified during the initial
+		 *                 wallet connection and uniquely identifies this particular exchange integration within your project.
+		 *
+		 * @returns A promise resolving to a detailed wallet information object containing:
+		 *          - Connection status and health
+		 *          - Exchange identifier and account details
+		 *          - Available balances for all assets
+		 *          - API key permissions and restrictions
+		 *          - Last synchronization timestamp
+		 *
+		 * @example
+		 * // Get details about a connected Binance wallet
+		 * const walletDetails = await client.wallet.get('primary-trading-account');
+		 * console.log(`Connection status: ${walletDetails.status}`);
+		 * console.log(`BTC Balance: ${walletDetails.balances.BTC?.available || 0}`);
+		 */
 
-        get: (walletId: string, _options?: PromiseConfigurationOptions) => {
-            return new WalletsApi(this.configuration(walletId))
-                .walletget(_options);
-        },
+		get: async (walletId: string) => {
+			const response = await walletget({
+				headers: {
+					"x-bluvo-wallet-id": walletId,
+				},
+			});
+			const success = !!response.error;
 
-        /**
-         * Ping
-         */
-        ping: (walletId: string, _options?: PromiseConfigurationOptions) => {
-            return new WalletsApi(this.configuration(walletId))
-                .walletpingping(_options);
-        },
+			return {
+				...response,
+				success,
+			};
+		},
 
-        /**
-         * Securely disconnect and remove a previously connected exchange wallet from your Bluvo project.
-         *
-         * This method completely removes the stored API credentials and terminates the connection between your Bluvo
-         * project and the exchange account. This is useful when you need to rotate API keys, remove unused connections,
-         * or comply with user requests to delete their account information.
-         *
-         * The deletion is immediate and permanent. After deletion, any operations that were using this wallet connection
-         * will fail until a new connection is established with the `connect` method.
-         *
-         * @param walletId The unique identifier of the connected wallet to permanently delete from your project.
-         *                 This is the same ID that was used when initially connecting the wallet.
-         *
-         * @returns A promise resolving to a confirmation object indicating successful deletion with a timestamp.
-         *          All API keys and secrets associated with this connection are immediately and permanently deleted
-         *          from Bluvo's secure storage.
-         *
-         * @example
-         * // Remove a wallet connection that's no longer needed
-         * await client.wallet.delete('old-trading-account');
-         *
-         * // You can also handle the confirmation response if needed
-         * const result = await client.wallet.delete('temporary-connection');
-         * console.log(`Wallet deleted at: ${new Date(result.timestamp).toLocaleString()}`);
-         */
+		/**
+		 * Ping
+		 */
+		ping: async (walletId: string) => {
+			const response = await walletpingping({
+				headers: {
+					"x-bluvo-wallet-id": walletId,
+				},
+			});
+			const success = !!response.error;
 
-        delete: (walletId: string, _options?: PromiseConfigurationOptions) => {
-            return new WalletsApi(this.configuration(walletId))
-                .walletdelete(_options);
-        },
+			return {
+				...response,
+				success,
+			};
+		},
 
-        /**
-         * Retrieve a comprehensive, paginated list of all exchange wallets connected to your Bluvo project with powerful filtering options.
-         *
-         * This method provides a complete overview of all your integrated exchange accounts, making it easy to manage multiple
-         * connections across different exchanges or for different purposes. Results are paginated to handle large numbers of
-         * connections efficiently, with flexible page size configuration.
-         *
-         * Each wallet entry includes essential information like connection status, exchange type, and last activity timestamp,
-         * giving you a quick overview without needing to query each wallet individually. For detailed information about a specific
-         * wallet, use the `get` method with the wallet's ID.
-         *
-         * @param page Optional pagination control parameter (0-indexed). Defaults to 0 (first page).
-         *             Use this parameter in combination with the `limit` parameter to navigate through large result sets.
-         *             For example, page=1 with limit=50 will return wallets 51-100.
-         *
-         * @param limit Optional maximum number of wallet records to return per page. Defaults to 10.
-         *              Can be increased up to 1000 for retrieving larger batches in a single request.
-         *              Larger values reduce the number of API calls needed but increase response size.
-         *
-         * @param exchange Optional filter to retrieve wallets from a specific exchange only.
-         *                 Supports major exchanges including 'binance', 'coinbase', 'kraken', 'kucoin', and 'okx'.
-         *                 When omitted, wallets from all exchanges are returned.
-         *
-         * @returns A promise resolving to a paginated list response containing:
-         *          - Array of wallet objects with their connection details
-         *          - Pagination metadata (total count, current page, total pages)
-         *          - Navigation links for next/previous pages when applicable
-         *
-         * @example
-         * // List all connected wallets with default pagination (10 per page)
-         * const allWallets = await client.wallet.list();
-         *
-         * // Get the second page of results with 20 wallets per page
-         * const page2 = await client.wallet.list(1, 20);
-         *
-         * // Get only Binance wallets
-         * const binanceWallets = await client.wallet.list(0, 50, 'binance');
-         * console.log(`Found ${binanceWallets.pagination.total} Binance connections`);
-         */
+		/**
+		 * Securely disconnect and remove a previously connected exchange wallet from your Bluvo project.
+		 *
+		 * This method completely removes the stored API credentials and terminates the connection between your Bluvo
+		 * project and the exchange account. This is useful when you need to rotate API keys, remove unused connections,
+		 * or comply with user requests to delete their account information.
+		 *
+		 * The deletion is immediate and permanent. After deletion, any operations that were using this wallet connection
+		 * will fail until a new connection is established with the `connect` method.
+		 *
+		 * @param walletId The unique identifier of the connected wallet to permanently delete from your project.
+		 *                 This is the same ID that was used when initially connecting the wallet.
+		 *
+		 * @returns A promise resolving to a confirmation object indicating successful deletion with a timestamp.
+		 *          All API keys and secrets associated with this connection are immediately and permanently deleted
+		 *          from Bluvo's secure storage.
+		 *
+		 * @example
+		 * // Remove a wallet connection that's no longer needed
+		 * await client.wallet.delete('old-trading-account');
+		 *
+		 * // You can also handle the confirmation response if needed
+		 * const result = await client.wallet.delete('temporary-connection');
+		 * console.log(`Wallet deleted at: ${new Date(result.timestamp).toLocaleString()}`);
+		 */
 
-        list: (
-            page?: number,
-            limit?: number,
-            exchange?: 'binance' | 'coinbase' | 'kraken' | 'kucoin' | 'okx' | string,
-            _options?: PromiseConfigurationOptions
-        ) => {
-            return new WalletsApi(this.configuration())
-                .walletlistlistwallets(page, limit, exchange as any, undefined, undefined, undefined, undefined, undefined, undefined, _options);
-        },
+		delete: async (walletId: string) => {
+			const response = await walletdelete({
+				headers: {
+					"x-bluvo-wallet-id": walletId,
+				},
+			});
+			const success = !!response.error;
+			return {
+				...response,
+				success,
+			};
+		},
 
-        transaction: {
+		/**
+		 * Retrieve a comprehensive, paginated list of all exchange wallets connected to your Bluvo project with powerful filtering options.
+		 *
+		 * This method provides a complete overview of all your integrated exchange accounts, making it easy to manage multiple
+		 * connections across different exchanges or for different purposes. Results are paginated to handle large numbers of
+		 * connections efficiently, with flexible page size configuration.
+		 *
+		 * Each wallet entry includes essential information like connection status, exchange type, and last activity timestamp,
+		 * giving you a quick overview without needing to query each wallet individually. For detailed information about a specific
+		 * wallet, use the `get` method with the wallet's ID.
+		 *
+		 * @param page Optional pagination control parameter (0-indexed). Defaults to 0 (first page).
+		 *             Use this parameter in combination with the `limit` parameter to navigate through large result sets.
+		 *             For example, page=1 with limit=50 will return wallets 51-100.
+		 *
+		 * @param limit Optional maximum number of wallet records to return per page. Defaults to 10.
+		 *              Can be increased up to 1000 for retrieving larger batches in a single request.
+		 *              Larger values reduce the number of API calls needed but increase response size.
+		 *
+		 * @param exchange Optional filter to retrieve wallets from a specific exchange only.
+		 *                 Supports major exchanges including 'binance', 'coinbase', 'kraken', 'kucoin', and 'okx'.
+		 *                 When omitted, wallets from all exchanges are returned.
+		 *
+		 * @returns A promise resolving to a paginated list response containing:
+		 *          - Array of wallet objects with their connection details
+		 *          - Pagination metadata (total count, current page, total pages)
+		 *          - Navigation links for next/previous pages when applicable
+		 *
+		 * @example
+		 * // List all connected wallets with default pagination (10 per page)
+		 * const allWallets = await client.wallet.list();
+		 *
+		 * // Get the second page of results with 20 wallets per page
+		 * const page2 = await client.wallet.list(1, 20);
+		 *
+		 * // Get only Binance wallets
+		 * const binanceWallets = await client.wallet.list(0, 50, 'binance');
+		 * console.log(`Found ${binanceWallets.pagination.total} Binance connections`);
+		 */
 
-            /**
-             * Retrieve a comprehensive, paginated list of all transactions for a specific wallet with powerful filtering capabilities.
-             *
-             * This method provides detailed visibility into the complete transaction history of a connected exchange wallet,
-             * including deposits, withdrawals, trades, and internal transfers. The flexible filtering system allows you to precisely
-             * target specific transaction types, assets, date ranges, or statuses to streamline your analysis and reporting.
-             *
-             * Transaction data is normalized across different exchanges into a consistent format, making it easy to work with
-             * multiple exchange integrations using the same code. Each transaction includes timestamps, amounts, fees, status
-             * information, and exchange-specific details when available.
-             *
-             * @param walletId The unique identifier of the connected wallet whose transactions you want to retrieve.
-             *                 This must be a valid wallet ID that was previously connected via the `connect` method.
-             *
-             * @param page Optional pagination control parameter (0-indexed). Defaults to 0 (first page).
-             *             Use this parameter with the `limit` parameter to navigate through large transaction histories.
-             *
-             * @param limit Optional maximum number of transaction records to return per page. Defaults to a platform-specific value.
-             *              Increasing this value reduces the number of API calls needed for large datasets but increases response size.
-             *
-             * @param asset Optional filter to retrieve transactions for a specific cryptocurrency only (e.g., 'BTC', 'ETH').
-             *              When omitted, transactions for all assets are returned.
-             *
-             * @param type Optional filter for transaction type. Common values include:
-             *            - 'deposit': Funds received into the exchange account
-             *            - 'withdrawal': Funds sent out from the exchange account
-             *            - 'trade': Exchange between different cryptocurrencies
-             *            - 'transfer': Internal movement between sub-accounts or wallets
-             *            - 'fee': Exchange fees charged
-             *            - 'rebate': Fee rebates or rewards received
-             *
-             * @param since Optional filter for transactions after a specific timestamp (ISO 8601 format or UNIX timestamp).
-             *              Use this to set the starting point of your transaction history query.
-             *
-             * @param before Optional filter for transactions before a specific timestamp (ISO 8601 format or UNIX timestamp).
-             *               Use this to set the ending point of your transaction history query.
-             *
-             * @param status Optional filter for transaction status. Common values include:
-             *               - 'completed': Fully processed and confirmed transactions
-             *               - 'pending': Transactions that are still being processed
-             *               - 'failed': Transactions that encountered errors
-             *               - 'cancelled': Transactions that were cancelled
-             *
-             * @param fields Optional comma-separated list of specific fields to include in the response.
-             *               This can optimize response size when you only need specific transaction attributes.
-             *
-             * @returns A promise resolving to a paginated transaction list containing:
-             *          - Array of normalized transaction objects with detailed information
-             *          - Pagination metadata (total count, current page, total pages)
-             *          - Navigation links for next/previous pages when applicable
-             *
-             * @example
-             * // Get all BTC transactions for a wallet
-             * const btcTx = await client.wallet.transaction.list('my-exchange-wallet', 0, 100, 'BTC');
-             *
-             * // Get only completed withdrawals in a date range
-             * const withdrawals = await client.wallet.transaction.list(
-             *   'my-exchange-wallet',
-             *   0,
-             *   50,
-             *   undefined,
-             *   'withdrawal',
-             *   '2023-01-01T00:00:00Z',
-             *   '2023-12-31T23:59:59Z',
-             *   'completed'
-             * );
-             */
+		list: async (
+			page?: Required<WalletlistlistwalletsData>["query"]["page"],
+			limit?: Required<WalletlistlistwalletsData>["query"]["limit"],
+			exchange?: Required<WalletlistlistwalletsData>["query"]["exchange"],
+		) => {
+			const response = await walletlistlistwallets({
+				query: {
+					page,
+					limit,
+					exchange,
+				},
+			});
+			const success = !!response.error;
 
-            list: (
-                walletId?: string, page?: number, limit?: number, sinceDate?: string, _options?: PromiseConfigurationOptions
-            ) => {
-                return new WalletsApi(this.configuration(walletId))
-                    .wallettransactionslisttransactions(
-                        walletId, page, limit, sinceDate, _options
-                    );
-            },
-        },
+			return {
+				...response,
+				success,
+			};
+		},
 
-        withdrawals: {
+		transaction: {
+			/**
+			 * Retrieve a comprehensive, paginated list of all transactions for a specific wallet with powerful filtering capabilities.
+			 *
+			 * This method provides detailed visibility into the complete transaction history of a connected exchange wallet,
+			 * including deposits, withdrawals, trades, and internal transfers. The flexible filtering system allows you to precisely
+			 * target specific transaction types, assets, date ranges, or statuses to streamline your analysis and reporting.
+			 *
+			 * Transaction data is normalized across different exchanges into a consistent format, making it easy to work with
+			 * multiple exchange integrations using the same code. Each transaction includes timestamps, amounts, fees, status
+			 * information, and exchange-specific details when available.
+			 *
+			 * @param walletId The unique identifier of the connected wallet whose transactions you want to retrieve.
+			 *                 This must be a valid wallet ID that was previously connected via the `connect` method.
+			 *
+			 * @param page Optional pagination control parameter (0-indexed). Defaults to 0 (first page).
+			 *             Use this parameter with the `limit` parameter to navigate through large transaction histories.
+			 *
+			 * @param limit Optional maximum number of transaction records to return per page. Defaults to a platform-specific value.
+			 *              Increasing this value reduces the number of API calls needed for large datasets but increases response size.
+			 *
+			 * @param asset Optional filter to retrieve transactions for a specific cryptocurrency only (e.g., 'BTC', 'ETH').
+			 *              When omitted, transactions for all assets are returned.
+			 *
+			 * @param type Optional filter for transaction type. Common values include:
+			 *            - 'deposit': Funds received into the exchange account
+			 *            - 'withdrawal': Funds sent out from the exchange account
+			 *            - 'trade': Exchange between different cryptocurrencies
+			 *            - 'transfer': Internal movement between sub-accounts or wallets
+			 *            - 'fee': Exchange fees charged
+			 *            - 'rebate': Fee rebates or rewards received
+			 *
+			 * @param since Optional filter for transactions after a specific timestamp (ISO 8601 format or UNIX timestamp).
+			 *              Use this to set the starting point of your transaction history query.
+			 *
+			 * @param before Optional filter for transactions before a specific timestamp (ISO 8601 format or UNIX timestamp).
+			 *               Use this to set the ending point of your transaction history query.
+			 *
+			 * @param status Optional filter for transaction status. Common values include:
+			 *               - 'completed': Fully processed and confirmed transactions
+			 *               - 'pending': Transactions that are still being processed
+			 *               - 'failed': Transactions that encountered errors
+			 *               - 'cancelled': Transactions that were cancelled
+			 *
+			 * @param fields Optional comma-separated list of specific fields to include in the response.
+			 *               This can optimize response size when you only need specific transaction attributes.
+			 *
+			 * @returns A promise resolving to a paginated transaction list containing:
+			 *          - Array of normalized transaction objects with detailed information
+			 *          - Pagination metadata (total count, current page, total pages)
+			 *          - Navigation links for next/previous pages when applicable
+			 *
+			 * @example
+			 * // Get all BTC transactions for a wallet
+			 * const btcTx = await client.wallet.transaction.list('my-exchange-wallet', 0, 100, 'BTC');
+			 *
+			 * // Get only completed withdrawals in a date range
+			 * const withdrawals = await client.wallet.transaction.list(
+			 *   'my-exchange-wallet',
+			 *   0,
+			 *   50,
+			 *   undefined,
+			 *   'withdrawal',
+			 *   '2023-01-01T00:00:00Z',
+			 *   '2023-12-31T23:59:59Z',
+			 *   'completed'
+			 * );
+			 */
 
-            getWithdrawableBalance: (walletId: string) => {
-                return new WithdrawalsApi(this.configuration(walletId))
-                    .walletwithdrawbalancebalance();
-            },
+			list: async (
+				walletId?: Required<WallettransactionslisttransactionsData>["query"]["walletId"],
+				page?: Required<WallettransactionslisttransactionsData>["query"]["page"],
+				limit?: Required<WallettransactionslisttransactionsData>["query"]["limit"],
+				sinceDate?: Required<WallettransactionslisttransactionsData>["query"]["sinceDate"],
+			) => {
+				const response = await wallettransactionslisttransactions({
+					query: {
+						walletId,
+						page,
+						limit,
+						sinceDate,
+					},
+					headers: {
+						"x-bluvo-wallet-id": walletId,
+					},
+				});
+				const success = !!response.error;
 
-            // request a quotation
-            requestQuotation: (walletId: string, body: {
-                asset: string;
-                amount: string;
-                address: string;
-                tag?: string;
-                network?: string;
-                includeFee?: boolean;
-            }) => {
-                return new WithdrawalsApi(this.configuration(walletId))
-                    .walletwithdrawquotequotation({
-                        asset: body.asset,
-                        amount: body.amount,
-                        address: body.address,
-                        tag: body.tag,
-                        network: body.network,
-                        includeFee: body.includeFee ?? true,
-                    });
-            },
+				return {
+					...response,
+					success,
+				};
+			},
+		},
 
-            // give a quotation ID, execute the withdrawal
-            executeWithdrawal: (
-                walletId: string,
-                idem: string,
-                quotationId: string,
-                args?: {
-                    twofa?: string;
-                }
-            ) => {
-                return new WithdrawalsApi(this.configuration(walletId))
-                    .walletwithdrawquoteidexecutewithdraw(
-                        quotationId,
-                        {
-                            twofa: args?.twofa!,
-                        }
-                    );
-            }
-        }
+		withdrawals: {
+			getWithdrawableBalance: async (
+				walletId: string,
+				query?: WalletwithdrawbalancebalanceData["query"],
+			) => {
+				const response = await walletwithdrawbalancebalance({
+					query,
+					headers: {
+						"x-bluvo-wallet-id": walletId,
+					},
+				});
+				const success = !!response.error;
 
-    }
+				return {
+					...response,
+					success,
+				};
+			},
 
-    oauth2 = {
-        getLink : (
-            exchange: 'coinbase' | 'kraken',
-            walletId?: string,
-            idem?: string,
-            _options?: PromiseConfigurationOptions
-        ) => {
-            return new OAuth2Api(this.configuration(walletId, undefined, idem))
-                .oauth2exchangeurlgeturl(exchange, idem!, _options)
-        },
+			// request a quotation
+			requestQuotation: async (
+				walletId: string,
+				body: WalletwithdrawquotequotationData["body"],
+			) => {
+				const response = await walletwithdrawquotequotation({
+					headers: {
+						"x-bluvo-wallet-id": walletId,
+					},
+					body,
+				});
+				const success = !!response.error;
 
-        listExchanges: async (
-            status?: ListCentralizedExchangesResponseStatusEnum
-        ) => {
-            const res = await new OAuth2Api(this.configuration())
-                .oauth2exchangeslistexchanges();
-            if (res?.exchanges) {
-                if(!!status) {
-                    return res
-                        .exchanges
-                        .filter(r=>r.status === status);
-                }
-                return res
-                    .exchanges;
-            }
-            return [];
-        }
-    }
+				return {
+					...response,
+					success,
+				};
+			},
 
-    /**
-     * Creates and returns a properly configured API client configuration object.
-     *
-     * This private getter method centralizes the creation of API configuration objects,
-     * ensuring consistent authentication and request handling across all API calls made
-     * through this client. It automatically injects the organization ID and API key
-     * credentials that were provided when the client was initialized.
-     *
-     * The configuration includes:
-     * - Authentication credentials for the Bluvo API
-     * - Request middleware setup
-     * - Response handling configuration
-     * - Base URL and endpoint configuration
-     *
-     * @private
-     * @returns A fully configured API configuration object ready for use with API clients
-     */
-    private configuration(walletId?:string, ott?:string, idem?:string) {
+			// give a quotation ID, execute the withdrawal
+			executeWithdrawal: async (
+				walletId: string,
+				idem: string,
+				quotationId: string,
+				args: WalletwithdrawquoteidexecutewithdrawData["body"],
+			) => {
+				const response = await walletwithdrawquoteidexecutewithdraw({
+					path: {
+						quoteId: quotationId,
+					},
+					headers: {
+						"x-bluvo-wallet-id": walletId,
+					},
+					body: args,
+				});
+				const success = !!response.error;
 
-        let baseServer: ServerConfiguration<{}>;
+				return {
+					...response,
+					success,
+				};
+			},
+		},
+	};
 
-        // Use custom API base if provided, otherwise use environment-based defaults
-        if (this.apiBase) {
-            baseServer = new ServerConfiguration<{}>(this.apiBase, {});
-        } else {
-            const serverDev = new ServerConfiguration<{}>("http://localhost:8787", {});
-            baseServer = this.sandbox ? server2 : this.dev ? serverDev : server1;
-        }
+	oauth2 = {
+		getLink: async (
+			exchange: Oauth2ExchangeurlgeturlData["path"]["exchange"],
+			walletId: string,
+			idem: string,
+		) => {
+			const response = await oauth2Exchangeurlgeturl({
+				path: {
+					exchange,
+				},
+				headers: {
+					"x-bluvo-wallet-id": walletId,
+				},
+				query: {
+					idem,
+				},
+			});
+			const success = !!response.error;
 
-        return createConfiguration({
-            baseServer: baseServer,
+			return {
+				...response,
+				success,
+			};
+		},
 
-            authMethods: {
-                bluvoApiKey: this.apiKey,
-                bluvoOrgId: this.orgId,
-                bluvoProjectId: this.projectId,
-                bluvoWalletId: walletId,
-                bluvoOttActionId: idem,
-            }
-        });
-    }
+		listExchanges: async (
+			status?: Oauth2ExchangeslistexchangesResponses["200"]["exchanges"][number]["status"],
+		) => {
+			const response = await oauth2Exchangeslistexchanges({});
+			const exchanges =
+				response?.data?.exchanges?.filter((r) => r.status === status) || [];
+			return exchanges;
+		},
+	};
 }

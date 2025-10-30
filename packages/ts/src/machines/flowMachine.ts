@@ -1,54 +1,23 @@
 import { createMachine } from './createMachine';
-import { createWithdrawalMachine } from './withdrawalMachine';
+import type { FlowState, FlowActionType, FlowContext } from '../types/flow.types';
+import type { FlowMachineOptions, FlowMachineInstance } from './flowMachine.types';
+import { DEFAULT_MAX_RETRY_ATTEMPTS, DEFAULT_AUTO_REFRESH_QUOTATION } from './stateHelpers';
 import {
-  FlowState,
-  FlowActionType,
-  FlowContext,
-  FlowStateType
-} from '../types/flow.types';
-import {
-  WithdrawalActionType,
-  WithdrawalState
-} from '../types/withdrawal.types';
-import { Machine } from '../types/machine.types';
-
-function generate2FAMethodErrorMessage(valid2FAMethods?: string[]): string {
-  if (!valid2FAMethods || valid2FAMethods.length === 0) {
-    return 'Please make sure your Exchange account has 2FA enabled.';
-  }
-  
-  if (valid2FAMethods.length === 1) {
-    return `${valid2FAMethods[0]} is the only supported two-factor authentication method.`;
-  }
-  
-  if (valid2FAMethods.length === 2) {
-    return `${valid2FAMethods[0]} and ${valid2FAMethods[1]} are the only supported two-factor authentication methods.`;
-  }
-  
-  // For 3 or more methods: "X, Y, ..., and Z are the only supported methods"
-  const lastMethod = valid2FAMethods[valid2FAMethods.length - 1];
-  const otherMethods = valid2FAMethods.slice(0, -1).join(', ');
-  return `${otherMethods}, and ${lastMethod} are the only supported two-factor authentication methods.`;
-}
-
-interface FlowMachineOptions {
-  orgId: string;
-  projectId: string;
-  maxRetryAttempts?: number;
-  autoRefreshQuotation?: boolean;
-}
-
-interface FlowMachineInstance {
-  machine: Machine<FlowState, FlowActionType>;
-  withdrawalMachine?: Machine<WithdrawalState, WithdrawalActionType>;
-}
+  handleIdleState,
+  handleExchangeStates,
+  handleOAuthStates,
+  handleWalletStates,
+  handleQuoteStates,
+  handleWithdrawalStates,
+  handleCancelFlow
+} from './flowStateHandlers';
 
 const createInitialContext = (options: FlowMachineOptions): FlowContext => ({
   orgId: options.orgId,
   projectId: options.projectId,
   retryAttempts: 0,
-  maxRetryAttempts: options.maxRetryAttempts || 3,
-  autoRefreshQuotation: options.autoRefreshQuotation !== undefined ? options.autoRefreshQuotation : true, // Default to true
+  maxRetryAttempts: options.maxRetryAttempts || DEFAULT_MAX_RETRY_ATTEMPTS,
+  autoRefreshQuotation: options.autoRefreshQuotation !== undefined ? options.autoRefreshQuotation : DEFAULT_AUTO_REFRESH_QUOTATION,
 });
 
 const initialState = (options: FlowMachineOptions): FlowState => ({
@@ -57,491 +26,37 @@ const initialState = (options: FlowMachineOptions): FlowState => ({
   error: null
 });
 
+/**
+ * Main flow transition function
+ * Delegates to specialized handlers for each state group
+ */
 function flowTransition(
   state: FlowState,
   action: FlowActionType,
   instance: FlowMachineInstance
 ): FlowState {
-  switch (state.type) {
-    case 'idle':
-      switch (action.type) {
-        case 'LOAD_EXCHANGES':
-          return {
-            type: 'exchanges:loading',
-            context: state.context,
-            error: null
-          };
-        
-        case 'START_OAUTH':
-          return {
-            type: 'oauth:waiting',
-            context: {
-              ...state.context,
-              exchange: action.exchange,
-              walletId: action.walletId,
-              idempotencyKey: action.idem,
-              topicName: action.idem
-            },
-            error: null
-          };
-      }
-      break;
+  // Handle CANCEL_FLOW from any state first (highest priority)
+  const cancelResult = handleCancelFlow(state, action, instance);
+  if (cancelResult) return cancelResult;
 
-    case 'exchanges:loading':
-      switch (action.type) {
-        case 'EXCHANGES_LOADED':
-          return {
-            type: 'exchanges:ready',
-            context: {
-              ...state.context,
-              exchanges: action.exchanges
-            },
-            error: null
-          };
-        
-        case 'EXCHANGES_FAILED':
-          return {
-            type: 'exchanges:error',
-            context: state.context,
-            error: action.error
-          };
-      }
-      break;
+  // Try each handler in order - they return null if not applicable
+  const handlers = [
+    () => handleIdleState(state, action),
+    () => handleExchangeStates(state, action),
+    () => handleOAuthStates(state, action),
+    () => handleWalletStates(state, action),
+    () => handleQuoteStates(state, action, instance),
+    () => handleWithdrawalStates(state, action, instance)
+  ];
 
-    case 'exchanges:ready':
-      if (action.type === 'START_OAUTH') {
-        return {
-          type: 'oauth:waiting',
-          context: {
-            ...state.context,
-            exchange: action.exchange,
-            walletId: action.walletId,
-            idempotencyKey: action.idem,
-            topicName: action.idem
-          },
-          error: null
-        };
-      }
-      break;
-
-    case 'oauth:waiting':
-      if (action.type === 'OAUTH_WINDOW_OPENED') {
-        return {
-          type: 'oauth:processing',
-          context: state.context,
-          error: null
-        };
-      }
-      break;
-
-    case 'oauth:processing':
-      switch (action.type) {
-        case 'OAUTH_COMPLETED':
-          return {
-            type: 'oauth:completed',
-            context: {
-              ...state.context,
-              walletId: action.walletId
-            },
-            error: null
-          };
-        
-        case 'OAUTH_FAILED':
-          return {
-            type: 'oauth:error',
-            context: state.context,
-            error: action.error
-          };
-        
-        case 'OAUTH_WINDOW_CLOSED_BY_USER':
-          return {
-            type: 'oauth:window_closed_by_user',
-            context: state.context,
-            error: action.error
-          };
-      }
-      break;
-
-    case 'oauth:completed':
-      if (action.type === 'LOAD_WALLET') {
-        return {
-          type: 'wallet:loading',
-          context: state.context,
-          error: null
-        };
-      }
-      break;
-
-    case 'wallet:loading':
-      switch (action.type) {
-        case 'WALLET_LOADED':
-          return {
-            type: 'wallet:ready',
-            context: {
-              ...state.context,
-              walletBalances: action.balances
-            },
-            error: null
-          };
-        
-        case 'WALLET_FAILED':
-          return {
-            type: 'wallet:error',
-            context: state.context,
-            error: action.error
-          };
-      }
-      break;
-
-    case 'wallet:ready':
-      if (action.type === 'REQUEST_QUOTE') {
-        return {
-          type: 'quote:requesting',
-          context: {
-            ...state.context,
-            lastQuoteRequest: {
-              asset: action.asset,
-              amount: action.amount,
-              destinationAddress: action.destinationAddress,
-              network: action.network
-            }
-          },
-          error: null
-        };
-      }
-      break;
-
-    case 'quote:requesting':
-      switch (action.type) {
-        case 'QUOTE_RECEIVED':
-          if (action.quote) {
-            console.log('[State Machine] quote:requesting received QUOTE_RECEIVED with ID:', action.quote.id,
-              'ExpiresAt:', new Date(action.quote.expiresAt).toLocaleTimeString());
-          }
-          return {
-            type: 'quote:ready',
-            context: {
-              ...state.context,
-              quote: action.quote
-            },
-            error: null
-          };
-        
-        case 'QUOTE_FAILED':
-          return {
-            type: 'quote:error',
-            context: state.context,
-            error: action.error
-          };
-      }
-      break;
-
-    case 'quote:ready':
-      switch (action.type) {
-        case 'REQUEST_QUOTE':
-          // Allow refreshing quote while in quote:ready state (for auto-refresh)
-          console.log('[State Machine] quote:ready received REQUEST_QUOTE, transitioning to quote:requesting');
-          return {
-            type: 'quote:requesting',
-            context: {
-              ...state.context,
-              quote: undefined,  // Clear old quote before requesting new one
-              lastQuoteRequest: {
-                asset: action.asset,
-                amount: action.amount,
-                destinationAddress: action.destinationAddress,
-                network: action.network
-              }
-            },
-            error: null
-          };
-
-        case 'QUOTE_EXPIRED':
-          return {
-            type: 'quote:expired',
-            context: state.context,
-            error: new Error('Quote has expired')
-          };
-
-        case 'START_WITHDRAWAL':
-          if (!instance.withdrawalMachine) {
-            instance.withdrawalMachine = createWithdrawalMachine({
-              quoteId: action.quoteId,
-              walletId: state.context.walletId!,
-              maxRetries: state.context.maxRetryAttempts
-            });
-          }
-          
-          instance.withdrawalMachine.send({
-            type: 'EXECUTE',
-            quoteId: action.quoteId,
-            walletId: state.context.walletId!
-          });
-
-          return {
-            type: 'withdraw:processing',
-            context: state.context,
-            error: null
-          };
-      }
-      break;
-
-    case 'quote:expired':
-      if (action.type === 'REQUEST_QUOTE') {
-        return {
-          type: 'quote:requesting',
-          context: {
-            ...state.context,
-            quote: undefined  // Clear expired quote to ensure fresh quote is requested
-          },
-          error: null
-        };
-      }
-      break;
-
-    case 'withdraw:processing':
-    case 'withdraw:error2FA':
-    case 'withdraw:errorSMS':
-    case 'withdraw:errorKYC':
-    case 'withdraw:errorBalance':
-    case 'withdraw:retrying':
-      // Handle withdrawal state transitions based on nested machine state
-      if (instance.withdrawalMachine) {
-        const withdrawalState = instance.withdrawalMachine.getState();
-        
-        switch (withdrawalState.type) {
-          case 'waitingFor2FA':
-            if (state.type !== 'withdraw:error2FA') {
-              return {
-                type: 'withdraw:error2FA',
-                context: state.context,
-                error: null
-              };
-            }
-            break;
-          
-          case 'waitingForSMS':
-            if (state.type !== 'withdraw:errorSMS') {
-              return {
-                type: 'withdraw:errorSMS',
-                context: state.context,
-                error: null
-              };
-            }
-            break;
-          
-          case 'waitingForKYC':
-            if (state.type !== 'withdraw:errorKYC') {
-              return {
-                type: 'withdraw:errorKYC',
-                context: state.context,
-                error: null
-              };
-            }
-            break;
-          
-          case 'completed':
-            if (action.type === 'WITHDRAWAL_COMPLETED') {
-              return {
-                type: 'withdraw:completed',
-                context: {
-                  ...state.context,
-                  withdrawal: {
-                    id: withdrawalState.context.idempotencyKey,
-                    status: 'completed',
-                    transactionId: action.transactionId
-                  }
-                },
-                error: null
-              };
-            }
-            break;
-          
-          case 'blocked':
-            if (action.type === 'WITHDRAWAL_BLOCKED') {
-              return {
-                type: 'withdraw:blocked',
-                context: state.context,
-                error: new Error(action.reason)
-              };
-            }
-            break;
-          
-          case 'failed':
-            // Automatically transition to fatal state when withdrawal machine fails
-            return {
-              type: 'withdraw:fatal',
-              context: state.context,
-              error: withdrawalState.error || new Error('Withdrawal failed')
-            };
-          
-          case 'retrying':
-            if (state.type !== 'withdraw:retrying') {
-              return {
-                type: 'withdraw:retrying',
-                context: {
-                  ...state.context,
-                  retryAttempts: state.context.retryAttempts + 1
-                },
-                error: null
-              };
-            }
-            break;
-        }
-      }
-
-      // Handle direct withdrawal actions
-      switch (action.type) {
-        case 'SUBMIT_2FA':
-          if (instance.withdrawalMachine && state.type === 'withdraw:error2FA') {
-            instance.withdrawalMachine.send({
-              type: 'SUBMIT_2FA',
-              code: action.code
-            });
-            return {
-              type: 'withdraw:processing',
-              context: {
-                ...state.context,
-                invalid2FAAttempts: 0 // Reset invalid attempts when submitting new 2FA
-              },
-              error: null
-            };
-          }
-          break;
-        
-        case 'SUBMIT_SMS':
-          if (instance.withdrawalMachine && state.type === 'withdraw:errorSMS') {
-            instance.withdrawalMachine.send({
-              type: 'SUBMIT_SMS',
-              code: action.code
-            });
-            return {
-              type: 'withdraw:processing',
-              context: state.context,
-              error: null
-            };
-          }
-          break;
-        
-        case 'RETRY_WITHDRAWAL':
-          if (instance.withdrawalMachine && state.type === 'withdraw:retrying') {
-            instance.withdrawalMachine.send({ type: 'RETRY' });
-            return {
-              type: 'withdraw:processing',
-              context: state.context,
-              error: null
-            };
-          }
-          break;
-        
-        case 'WITHDRAWAL_2FA_INVALID':
-          return {
-            type: 'withdraw:error2FA',
-            context: {
-              ...state.context,
-              invalid2FAAttempts: (state.context.invalid2FAAttempts || 0) + 1
-            },
-            error: new Error('Invalid 2FA code')
-          };
-        
-        case 'WITHDRAWAL_INSUFFICIENT_BALANCE':
-          return {
-            type: 'withdraw:errorBalance',
-            context: state.context,
-            error: new Error('Insufficient balance')
-          };
-        
-        case 'WITHDRAWAL_REQUIRES_2FA':
-          if (instance.withdrawalMachine) {
-            instance.withdrawalMachine.send({ type: 'REQUIRES_2FA' });
-            // Check the withdrawal machine state immediately after sending the action
-            const withdrawalState = instance.withdrawalMachine.getState();
-            if (withdrawalState.type === 'waitingFor2FA') {
-              return {
-                type: 'withdraw:error2FA',
-                context: state.context,
-                error: null
-              };
-            }
-          }
-          break;
-        
-        case 'WITHDRAWAL_REQUIRES_SMS':
-          if (instance.withdrawalMachine) {
-            instance.withdrawalMachine.send({ type: 'REQUIRES_SMS' });
-            // Check the withdrawal machine state immediately after sending the action
-            const withdrawalState = instance.withdrawalMachine.getState();
-            if (withdrawalState.type === 'waitingForSMS') {
-              return {
-                type: 'withdraw:errorSMS',
-                context: state.context,
-                error: null
-              };
-            }
-          }
-          break;
-        
-        case 'WITHDRAWAL_REQUIRES_KYC':
-          if (instance.withdrawalMachine) {
-            instance.withdrawalMachine.send({ type: 'REQUIRES_KYC' });
-            // Check the withdrawal machine state immediately after sending the action
-            const withdrawalState = instance.withdrawalMachine.getState();
-            if (withdrawalState.type === 'waitingForKYC') {
-              return {
-                type: 'withdraw:errorKYC',
-                context: state.context,
-                error: null
-              };
-            }
-          }
-          break;
-        
-        case 'WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED':
-          const valid2FAMethods = action.result?.valid2FAMethods;
-          const errorMessage = generate2FAMethodErrorMessage(valid2FAMethods);
-          return {
-            type: 'withdraw:fatal',
-            context: {
-              ...state.context,
-              errorDetails: {
-                valid2FAMethods
-              }
-            },
-            error: new Error(errorMessage)
-          };
-        
-        case 'WITHDRAWAL_SUCCESS':
-          if (instance.withdrawalMachine) {
-            instance.withdrawalMachine.send({
-              type: 'SUCCESS',
-              transactionId: action.transactionId
-            });
-          }
-          break;
-        
-        case 'WITHDRAWAL_FATAL':
-          return {
-            type: 'withdraw:fatal',
-            context: state.context,
-            error: action.error
-          };
-      }
-      break;
-  }
-
-  // Handle CANCEL_FLOW from any state
-  if (action.type === 'CANCEL_FLOW') {
-    if (instance.withdrawalMachine) {
-      instance.withdrawalMachine.dispose();
-      instance.withdrawalMachine = undefined;
+  for (const handler of handlers) {
+    const result = handler();
+    if (result !== null) {
+      return result;
     }
-    return {
-      type: 'flow:cancelled',
-      context: state.context,
-      error: null
-    };
   }
 
+  // No handler matched - return current state unchanged
   return state;
 }
 

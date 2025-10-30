@@ -21,6 +21,8 @@ import {
 } from "../WorkflowTypes";
 import { createFlowMachine } from "./flowMachine";
 import { transformBalances } from "../utils/balanceTransform";
+import { WithdrawalErrorHandler } from "./withdrawalErrorHandler";
+import { extractErrorMessage, toErrorInstance } from "../utils/errorUtils";
 
 export interface BluvoFlowClientOptions {
 	orgId: string;
@@ -806,45 +808,8 @@ export class BluvoFlowClient {
 		);
 
 		if (!success) {
-
 			console.error("executeWithdrawal error", error);
-
-		// Extract error code from the error object
-		const errorCode = extractErrorCode(error);
-
-			switch (errorCode) {
-				case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP:
-				case WITHDRAWAL_EXECUTION_ERROR_TYPES.TWO_FACTOR_REQUIRED: // Legacy compatibility
-					this.flowMachine.send({ type: "WITHDRAWAL_REQUIRES_2FA" });
-					break;
-				case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS:
-				case WITHDRAWAL_EXECUTION_ERROR_TYPES.SMS_CODE_REQUIRED: // Legacy compatibility
-					this.flowMachine.send({ type: "WITHDRAWAL_REQUIRES_SMS" });
-					break;
-				case ERROR_CODES.WITHDRAWAL_KYC_REQUIRED:
-				case WITHDRAWAL_EXECUTION_ERROR_TYPES.KYC_REQUIRED: // Legacy compatibility
-					this.flowMachine.send({ type: "WITHDRAWAL_REQUIRES_KYC" });
-					break;
-				case ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE:
-				case WITHDRAWAL_EXECUTION_ERROR_TYPES.INSUFFICIENT_BALANCE: // Legacy compatibility
-					this.flowMachine.send({ type: "WITHDRAWAL_INSUFFICIENT_BALANCE" });
-					break;
-				case ERROR_CODES.QUOTE_EXPIRED:
-				case WITHDRAWAL_EXECUTION_ERROR_TYPES.RESOURCE_EXHAUSTED: // Legacy compatibility
-					this.flowMachine.send({ type: "QUOTE_EXPIRED" });
-					break;
-				case ERROR_CODES.WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED:
-					this.flowMachine.send({
-						type: "WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED",
-						result: extractErrorResult(error) as { valid2FAMethods?: string[] } | undefined,
-					});
-					break;
-				default:
-					this.flowMachine.send({
-						type: "WITHDRAWAL_FATAL",
-                        error: error instanceof Error ? error : new Error((error as any)?.error || (error as any)?.message || "Failed to execute withdrawal"),
-					});
-			}
+			this.handleWithdrawalError(error);
 			return;
 		}
 
@@ -877,8 +842,7 @@ export class BluvoFlowClient {
 
 
 			if (!success) {
-				// Handle errors same as in executeWithdrawal
-				this.handleWithdrawalError(error)
+				this.handleWithdrawalError(error);
 				return;
 			}
 
@@ -936,42 +900,8 @@ export class BluvoFlowClient {
 	}
 
 	private handleWithdrawalError(error: BluvoError) {
-		// Extract error code from the error object
-		const errorCode = extractErrorCode(error);
-
-		switch (errorCode) {
-			case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP:
-			case WITHDRAWAL_EXECUTION_ERROR_TYPES.TWO_FACTOR_REQUIRED: // Legacy compatibility
-				this.flowMachine?.send({ type: "WITHDRAWAL_REQUIRES_2FA" });
-				break;
-			case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS:
-			case WITHDRAWAL_EXECUTION_ERROR_TYPES.SMS_CODE_REQUIRED: // Legacy compatibility
-				this.flowMachine?.send({ type: "WITHDRAWAL_REQUIRES_SMS" });
-				break;
-			case ERROR_CODES.WITHDRAWAL_KYC_REQUIRED:
-			case WITHDRAWAL_EXECUTION_ERROR_TYPES.KYC_REQUIRED: // Legacy compatibility
-				this.flowMachine?.send({ type: "WITHDRAWAL_REQUIRES_KYC" });
-				break;
-			case ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE:
-			case WITHDRAWAL_EXECUTION_ERROR_TYPES.INSUFFICIENT_BALANCE: // Legacy compatibility
-				this.flowMachine?.send({ type: "WITHDRAWAL_INSUFFICIENT_BALANCE" });
-				break;
-			case ERROR_CODES.QUOTE_EXPIRED:
-			case WITHDRAWAL_EXECUTION_ERROR_TYPES.RESOURCE_EXHAUSTED: // Legacy compatibility
-				this.flowMachine?.send({ type: "QUOTE_EXPIRED" });
-				break;
-			case ERROR_CODES.WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED:
-				this.flowMachine?.send({
-					type: "WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED",
-					result: extractErrorResult(error) as { valid2FAMethods?: string[] } | undefined,
-				});
-				break;
-			default:
-				this.flowMachine?.send({
-					type: "WITHDRAWAL_FATAL",
-					error: error instanceof Error ? error : new Error((error as any)?.error || (error as any)?.message || "Failed to execute withdrawal"),
-                });
-		}
+		// Use centralized error handler
+		WithdrawalErrorHandler.handleWithdrawalError(error, this.flowMachine);
 	}
 
 	getState() {

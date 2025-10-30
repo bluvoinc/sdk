@@ -1,25 +1,24 @@
-import { BluvoWebClient } from './src/BluvoWebClient';
-import { BluvoClient } from './src/BluvoClient';
+import { BluvoClient } from "./src/BluvoClient";
+import { BluvoWebClient } from "./src/BluvoWebClient";
 
-export { BluvoWebClient } from './src/BluvoWebClient';
-export { BluvoClient } from './src/BluvoClient';
-export { WebSocketClient } from './src/WebSocketClient';
-export type { Subscription, TopicInfo } from './src/WebSocketClient';
-
+export * from "./generated";
+export { BluvoClient } from "./src/BluvoClient";
+export { BluvoWebClient } from "./src/BluvoWebClient";
 // State Machine exports
-export * from './src/machines';
-export * from './src/types/machine.types';
-export * from './src/types/flow.types';
-export * from './src/types/withdrawal.types';
-
+export * from "./src/machines";
+export type { SilentResumeWithdrawalFlowOptions } from "./src/machines/BluvoFlowClient";
+export type { BluvoPreviewManagerOptions } from "./src/machines/BluvoPreviewManager";
+export { BluvoPreviewManager } from "./src/machines/BluvoPreviewManager";
+export * from "./src/types/flow.types";
+export * from "./src/types/machine.types";
 // Preview functionality (NEW - backwards compatible addition)
-export * from './src/types/preview.types';
-export { BluvoPreviewManager } from './src/machines/BluvoPreviewManager';
-export type { BluvoPreviewManagerOptions } from './src/machines/BluvoPreviewManager';
-export type { SilentResumeWithdrawalFlowOptions } from './src/machines/BluvoFlowClient';
+export * from "./src/types/preview.types";
+export * from "./src/types/withdrawal.types";
+export type { Subscription, TopicInfo } from "./src/WebSocketClient";
+export { WebSocketClient } from "./src/WebSocketClient";
 
 // API Types - Clean, self-explanatory type exports
-export * from './src/types/api.types';
+// export * from './src/types/api.types';
 
 /**
  * Create a fully configured Bluvo SDK client instance with a single function call.
@@ -54,47 +53,63 @@ export * from './src/types/api.types';
  * // The client is ready to use
  * const btcPrice = await bluvo.prices.candlesticks('BTC', 'USDT');
  */
-export function createClient(
-    {orgId, projectId, apiKey, customDomain}: {
-        orgId: string;
-        projectId: string;
-        apiKey: string;
-        customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
-    }
-) {
-    return BluvoClient.createClient({
-        orgId, projectId, apiKey, customDomain
-    });
+export function createClient({
+	orgId,
+	projectId,
+	apiKey,
+	customDomain,
+}: {
+	orgId: string;
+	projectId: string;
+	apiKey: string;
+	customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
+}) {
+	return BluvoClient.createClient({
+		orgId,
+		projectId,
+		apiKey,
+		customDomain,
+	});
 }
 
-export function createSandboxClient(
-    {orgId, projectId, apiKey, customDomain}: {
-        orgId: string;
-        projectId: string;
-        apiKey: string;
-        customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
-    }
-) {
-    return BluvoClient.createClient({
-        orgId, projectId, apiKey,
-        sandbox: true,
-        customDomain
-    });
+export function createSandboxClient({
+	orgId,
+	projectId,
+	apiKey,
+	customDomain,
+}: {
+	orgId: string;
+	projectId: string;
+	apiKey: string;
+	customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
+}) {
+	return BluvoClient.createClient({
+		orgId,
+		projectId,
+		apiKey,
+		sandbox: true,
+		customDomain,
+	});
 }
 
-export function createDevClient(
-    {orgId, projectId, apiKey, customDomain}: {
-        orgId: string;
-        projectId: string;
-        apiKey: string;
-        customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
-    }
-) {
-    return BluvoClient.createClient({
-        orgId, projectId, apiKey,
-        dev: true,
-        customDomain
-    });
+export function createDevClient({
+	orgId,
+	projectId,
+	apiKey,
+	customDomain,
+}: {
+	orgId: string;
+	projectId: string;
+	apiKey: string;
+	customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
+}) {
+	return BluvoClient.createClient({
+		orgId,
+		projectId,
+		apiKey,
+		dev: true,
+		customDomain,
+	});
 }
 
 // createWebClient
@@ -111,14 +126,16 @@ export function createDevClient(
  *
  * @returns A new BluvoWebClient instance configured for your organization and project.
  */
-export function createWebClient(
-    {orgId, projectId, customDomain}: {
-        orgId: string;
-        projectId: string;
-        customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
-    }
-): BluvoWebClient {
-    return BluvoWebClient.createClient({orgId, projectId, customDomain});
+export function createWebClient({
+	orgId,
+	projectId,
+	customDomain,
+}: {
+	orgId: string;
+	projectId: string;
+	customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
+}): BluvoWebClient {
+	return BluvoWebClient.createClient({ orgId, projectId, customDomain });
 }
 
 /**
@@ -133,19 +150,21 @@ export function createWebClient(
  *
  * @returns A new BluvoWebClient instance configured for the sandbox environment.
  */
-export function createSandboxWebClient(
-    {orgId, projectId, customDomain}: {
-        orgId: string;
-        projectId: string;
-        customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
-    }
-): BluvoWebClient {
-    return BluvoWebClient.createClient({
-        orgId,
-        projectId,
-        sandbox: true,
-        customDomain
-    });
+export function createSandboxWebClient({
+	orgId,
+	projectId,
+	customDomain,
+}: {
+	orgId: string;
+	projectId: string;
+	customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
+}): BluvoWebClient {
+	return BluvoWebClient.createClient({
+		orgId,
+		projectId,
+		sandbox: true,
+		customDomain,
+	});
 }
 
 /**
@@ -160,17 +179,19 @@ export function createSandboxWebClient(
  *
  * @returns A new BluvoWebClient instance configured for local development.
  */
-export function createDevWebClient(
-    {orgId, projectId, customDomain}: {
-        orgId: string;
-        projectId: string;
-        customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
-    }
-): BluvoWebClient {
-    return BluvoWebClient.createClient({
-        orgId,
-        projectId,
-        dev: true,
-        customDomain
-    });
+export function createDevWebClient({
+	orgId,
+	projectId,
+	customDomain,
+}: {
+	orgId: string;
+	projectId: string;
+	customDomain?: string | "api-bluvo.com" | { api: string; ws: string };
+}): BluvoWebClient {
+	return BluvoWebClient.createClient({
+		orgId,
+		projectId,
+		dev: true,
+		customDomain,
+	});
 }

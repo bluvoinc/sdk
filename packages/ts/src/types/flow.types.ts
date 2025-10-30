@@ -16,6 +16,7 @@ export type FlowStateType =
 	| "oauth:processing"
 	| "oauth:completed"
 	| "oauth:error"
+	| "oauth:fatal"
 	| "oauth:window_closed_by_user"
 	| "wallet:loading"
 	| "wallet:ready"
@@ -102,6 +103,7 @@ export interface FlowContext {
 	idempotencyKey?: string;
 	topicName?: string;
 	invalid2FAAttempts?: number;
+	oauthErrorType?: 'recoverable' | 'fatal';
 	errorDetails?: {
 		valid2FAMethods?: string[];
 	};
@@ -127,6 +129,7 @@ export type FlowActionType =
 	| { type: "OAUTH_WINDOW_OPENED" }
 	| { type: "OAUTH_COMPLETED"; walletId: string; exchange: string }
 	| { type: "OAUTH_FAILED"; error: Error }
+	| { type: "OAUTH_FATAL"; error: Error }
 	| { type: "OAUTH_WINDOW_CLOSED_BY_USER"; error: Error }
 	| { type: "LOAD_WALLET" }
 	| {

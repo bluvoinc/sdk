@@ -94,7 +94,14 @@ export function handleOAuthStates(
           });
 
         case 'OAUTH_FAILED':
-          return createErrorTransition('oauth:error', state.context, action.error);
+          return createErrorTransition('oauth:error', state.context, action.error, {
+            oauthErrorType: 'recoverable'
+          });
+
+        case 'OAUTH_FATAL':
+          return createErrorTransition('oauth:fatal', state.context, action.error, {
+            oauthErrorType: 'fatal'
+          });
 
         case 'OAUTH_WINDOW_CLOSED_BY_USER':
           return createErrorTransition(

@@ -22,16 +22,17 @@ export function createTransition<T extends FlowState['type']>(
 }
 
 /**
- * Create an error transition
+ * Create an error transition with optional context updates
  */
 export function createErrorTransition(
   type: FlowState['type'],
   context: FlowContext,
-  error: Error
+  error: Error,
+  contextUpdates?: Partial<FlowContext>
 ): FlowState {
   return {
     type,
-    context,
+    context: contextUpdates ? { ...context, ...contextUpdates } : context,
     error
   };
 }

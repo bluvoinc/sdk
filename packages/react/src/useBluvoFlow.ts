@@ -176,7 +176,11 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 			flow.state?.type === "oauth:processing",
 		isOAuthWaiting: flow.state?.type === "oauth:waiting",
 		isOAuthProcessing: flow.state?.type === "oauth:processing",
-		isOAuthError: flow.state?.type === "oauth:error",
+		isOAuthError:
+			flow.state?.type === "oauth:error" ||
+			flow.state?.type === "oauth:fatal",
+		isOAuthFatal: flow.state?.type === "oauth:fatal",
+		isWalletConnectionInvalid: flow.state?.type === "oauth:fatal",
 		isOAuthComplete: flow.state?.type === "oauth:completed",
 		isOAuthWindowBeenClosedByTheUser:
 			flow.state?.type === "oauth:window_closed_by_user",

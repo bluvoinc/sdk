@@ -246,9 +246,16 @@ export class BluvoFlowClient {
 					errorInstance = new Error(errorMessage);
 				}
 
-				// Handle OAuth-specific errors
-				if (
-					errorCode === ERROR_CODES.OAUTH_TOKEN_EXCHANGE_FAILED ||
+				// OAUTH_TOKEN_EXCHANGE_FAILED is a FATAL error - wallet connection is permanently broken
+				// This means the OAuth tokens are invalid/revoked/expired and the wallet needs to be reconnected
+				if (errorCode === ERROR_CODES.OAUTH_TOKEN_EXCHANGE_FAILED) {
+					this.flowMachine?.send({
+						type: "OAUTH_FATAL",
+						error: errorInstance,
+					});
+				}
+				// Other OAuth errors are recoverable (user can retry)
+				else if (
 					errorCode === ERROR_CODES.OAUTH_AUTHORIZATION_FAILED ||
 					errorCode === ERROR_CODES.OAUTH_INVALID_STATE
 				) {
@@ -257,7 +264,7 @@ export class BluvoFlowClient {
 						error: errorInstance,
 					});
 				} else {
-					// For any other error during OAuth, also send OAUTH_FAILED
+					// For any other error during OAuth, treat as recoverable
 					this.flowMachine?.send({
 						type: "OAUTH_FAILED",
 						error: errorInstance,

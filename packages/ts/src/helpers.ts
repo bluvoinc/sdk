@@ -5,6 +5,5 @@ export const transformResponse = <T extends Awaited<RequestResult<unknown, unkno
         data: response.data as T["data"],
         error: response.error as T["error"],
         success: !response.error,
-        rawResponse: response.response as T["response"],
     }
 };

@@ -121,7 +121,7 @@ export interface QuoteRequestOptions {
 export class BluvoFlowClient {
 	private webClient: BluvoWebClient;
 	private flowMachine?: Machine<FlowState, FlowActionType>;
-	private subscription?: Subscription;
+	private subscription?: Subscription | null;
 	private generateId: () => string;
 	private quoteRefreshTimer?: ReturnType<typeof setTimeout>;
 

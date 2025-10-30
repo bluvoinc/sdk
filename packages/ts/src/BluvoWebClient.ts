@@ -332,7 +332,7 @@ export class BluvoWebClient {
 	 * @param topicName The name of the topic to subscribe to
 	 * @param topicToken
 	 * @param options Subscription options including callbacks
-	 * @returns A subscription object that can be used to unsubscribe
+	 * @returns A subscription object that can be used to unsubscribe, or null if subscription fails
 	 *
 	 * @example
 	 * // Listen to a custom topic
@@ -355,7 +355,7 @@ export class BluvoWebClient {
 	async listen(
 		topicName: string,
 		options: OAuth2Options | WithdrawOptions,
-	): Promise<Subscription> {
+	): Promise<Subscription | null> {
 		const onMessage = (rawData: any) => {
 			// Extract the body if the message has a wrapper structure
 			// WebSocket messages come in format: { messageId, idem, timestamp, body }

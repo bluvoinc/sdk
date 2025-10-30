@@ -30,14 +30,14 @@ export class WebSocketClient {
      * @param orgId The organization ID
      * @param wsBase The WebSocket base URL
      * @param options Subscription options including callbacks
-     * @returns A subscription object that can be used to unsubscribe
+     * @returns A subscription object that can be used to unsubscribe, or null if subscription fails
      */
     async subscribe(
         topicName: string,
         orgId: string,
         wsBase: string,
         options: SubscriptionOptions
-    ): Promise<Subscription> {
+    ): Promise<Subscription | null> {
         // Check if already subscribed to this topic
         if (this.activeSubscriptions.has(topicName)) {
             console.warn(`Already subscribed to topic: ${topicName}. Closing existing subscription.`);
@@ -46,15 +46,24 @@ export class WebSocketClient {
 
         // Validate inputs
         if (!topicName || topicName.trim().length === 0) {
-            throw new Error(`Topic name cannot be empty`);
+            const error = new Error(`Topic name cannot be empty`);
+            console.error(error.message);
+            options.onError?.(error);
+            return null;
         }
 
         if (!orgId || orgId.trim().length === 0) {
-            throw new Error(`Organization ID cannot be empty`);
+            const error = new Error(`Organization ID cannot be empty`);
+            console.error(error.message);
+            options.onError?.(error);
+            return null;
         }
 
         if (!wsBase || wsBase.trim().length === 0) {
-            throw new Error(`WebSocket base URL cannot be empty`);
+            const error = new Error(`WebSocket base URL cannot be empty`);
+            console.error(error.message);
+            options.onError?.(error);
+            return null;
         }
 
         try {
@@ -99,7 +108,8 @@ export class WebSocketClient {
             return subscription;
         } catch (error) {
             console.error(`Error subscribing to topic ${topicName}:`, error);
-            throw error;
+            options.onError?.(error instanceof Error ? error : new Error(String(error)));
+            return null;
         }
     }
     

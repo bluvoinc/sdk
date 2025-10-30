@@ -1,9 +1,25 @@
-import {
-	type Walletwithdrawbalancebalance200Response,
-	Walletwithdrawbalancebalance200ResponseBalancesInner,
-	type Walletwithdrawquoteidexecutewithdraw200Response,
-	type Walletwithdrawquotequotation200Response,
+// import {
+// 	type Walletwithdrawbalancebalance200Response,
+// 	Walletwithdrawbalancebalance200ResponseBalancesInner,
+// 	type Walletwithdrawquoteidexecutewithdraw200Response,
+// 	type Walletwithdrawquotequotation200Response,
+// } from "../../generated";
+
+// import type {
+// 	ListCentralizedExchangesResponse,
+// 	ListCentralizedExchangesResponseStatusEnum,
+// 	Wallet,
+// 	WithdrawableBalance,
+// 	WithdrawableBalanceNetwork,
+// } from "../types/api.types";
+import type {
+	Oauth2ExchangeslistexchangesResponses,
+	WalletgetResponse as Wallet,
+	WalletwithdrawbalancebalanceResponse,
+	WalletwithdrawquoteidexecutewithdrawResponses,
+	WalletwithdrawquotequotationResponses,
 } from "../../generated";
+import type { BluvoClient } from "../BluvoClient";
 import { BluvoWebClient } from "../BluvoWebClient";
 import {
 	ERROR_CODES,
@@ -12,13 +28,6 @@ import {
 	WITHDRAWAL_EXECUTION_ERROR_TYPES,
 	WITHDRAWAL_QUOTATION_ERROR_TYPES,
 } from "../error-codes";
-import type {
-	ListCentralizedExchangesResponse,
-	ListCentralizedExchangesResponseStatusEnum,
-	Wallet,
-	WithdrawableBalance,
-	WithdrawableBalanceNetwork,
-} from "../types/api.types";
 import type { FlowActionType, FlowState } from "../types/flow.types";
 import type { Machine } from "../types/machine.types";
 import type { Subscription } from "../WebSocketClient";
@@ -32,36 +41,12 @@ import { createFlowMachine } from "./flowMachine";
 export interface BluvoFlowClientOptions {
 	orgId: string;
 	projectId: string;
-	listExchangesFn: (
-		status?: ListCentralizedExchangesResponseStatusEnum,
-	) => Promise<ListCentralizedExchangesResponse["exchanges"]>;
-	fetchWithdrawableBalanceFn: (
-		walletId: string,
-	) => Promise<Walletwithdrawbalancebalance200Response>;
-	requestQuotationFn: (
-		walletId: string,
-		params: {
-			asset: string;
-			amount: string;
-			address: string;
-			network?: string;
-			tag?: string;
-			includeFee?: boolean;
-		},
-	) => Promise<Walletwithdrawquotequotation200Response>;
-	executeWithdrawalFn: (
-		walletId: string,
-		idem: string,
-		quoteId: string,
-		params?: {
-			twofa?: string;
-			smsCode?: string;
-		},
-	) => Promise<Walletwithdrawquoteidexecutewithdraw200Response>;
-	getWalletByIdFn: (
-		walletId: string,
-	) => Promise<Pick<Wallet, "id" | "exchange"> | null>;
-	pingWalletByIdFn: (walletId: string) => Promise<any>;
+	listExchangesFn: BluvoClient["oauth2"]["listExchanges"];
+	fetchWithdrawableBalanceFn: BluvoClient["wallet"]["withdrawals"]["getWithdrawableBalance"];
+	requestQuotationFn: BluvoClient["wallet"]["withdrawals"]["requestQuotation"];
+	executeWithdrawalFn: BluvoClient["wallet"]["withdrawals"]["executeWithdrawal"];
+	getWalletByIdFn: BluvoClient["wallet"]["get"];
+	pingWalletByIdFn: BluvoClient["wallet"]["ping"];
 	mkUUIDFn?: () => string;
 	onWalletConnectedFn?: (walletId: string, exchange: string) => any;
 
@@ -169,7 +154,9 @@ export class BluvoFlowClient {
 		this.generateId = options.mkUUIDFn || (() => crypto.randomUUID());
 	}
 
-	async loadExchanges(status?: ListCentralizedExchangesResponseStatusEnum) {
+	async loadExchanges(
+		status?: Oauth2ExchangeslistexchangesResponses["200"]["exchanges"][number]["status"],
+	) {
 		if (!this.flowMachine) {
 			// Create flow machine if it doesn't exist
 			this.flowMachine = createFlowMachine({
@@ -204,13 +191,13 @@ export class BluvoFlowClient {
 	async startWithdrawalFlow(flowOptions: WithdrawalFlowOptions) {
 		// Check if wallet already exists
 		try {
-			const existingWallet = await this.options.getWalletByIdFn(
-				flowOptions.walletId,
-			);
+			const existingWallet = await this.options
+				.getWalletByIdFn(flowOptions.walletId)
+				.then((response) => response.data?.exchange);
 			if (existingWallet) {
 				// Wallet exists, redirect to resumeWithdrawalFlow
 				return this.resumeWithdrawalFlow({
-					exchange: existingWallet.exchange,
+					exchange: existingWallet,
 					walletId: flowOptions.walletId,
 				});
 			}
@@ -417,13 +404,13 @@ export class BluvoFlowClient {
 				// Step 2: Fetch withdrawable balance
 				const balanceResponse = await this.options.fetchWithdrawableBalanceFn(
 					options.walletId,
-				);
+				).then(response => response.data);
 
 				// Transform to expected format
-				balances = balanceResponse.balances.map((b: WithdrawableBalance) => ({
+				balances = balanceResponse?.balances.map((b) => ({
 					asset: b.asset,
 					balance: String(b.amount),
-					networks: b.networks.map((n: WithdrawableBalanceNetwork) => ({
+					networks: b.networks.map((n) => ({
 						id: n.id,
 						name: n.name,
 						displayName: n.displayName,

@@ -8,6 +8,11 @@ export default defineConfig({
     lint: 'eslint',
     path: './packages/ts/generated',
   },
+  parser: {
+    transforms: {
+      enums: "root"
+    }
+  },
   plugins: [
     '@hey-api/schemas',
     {

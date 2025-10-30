@@ -3,10 +3,6 @@
 
 import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
 import {BluvoFlowClient} from '../../src/machines';
-import type {
-    Walletwithdrawbalancebalance200Response,
-    Walletwithdrawquotequotation200Response
-} from '../../generated';
 
 /**
  * Cross-Browser Compatibility Tests
@@ -25,7 +21,7 @@ describe('Cross-Browser Compatibility', () => {
     let mockWindowOpen: ReturnType<typeof vi.fn>;
     let mockWindow: Window | null;
 
-    const mockBalanceResponse: Walletwithdrawbalancebalance200Response = {
+    const mockBalanceResponse: any = {
         lastSyncAt: new Date().toISOString(),
         balances: [{
             asset: 'BTC',
@@ -42,7 +38,7 @@ describe('Cross-Browser Compatibility', () => {
         }]
     };
 
-    const mockQuoteResponse: Walletwithdrawquotequotation200Response = {
+    const mockQuoteResponse: any = {
         id: 'quote-123',
         asset: 'BTC',
         amountNoFee: 1.0,
@@ -170,6 +166,9 @@ describe('Cross-Browser Compatibility', () => {
         ('Chrome/Chromium-specific behavior', () => {
             it('should handle OAuth flow in Chromium', async () => {
                 const client = new BluvoFlowClient({
+                    pingWalletByIdFn(walletId: string): Promise<any> {
+                        return Promise.resolve(undefined);
+                    },
                     orgId: 'test-org',
                     projectId: 'test-project',
                     listExchangesFn: vi.fn().mockResolvedValue([]),
@@ -177,7 +176,7 @@ describe('Cross-Browser Compatibility', () => {
                     fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
                     requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
                     executeWithdrawalFn: vi.fn().mockResolvedValue({id: 'withdrawal-123'}),
-                    mkUUIDFn: () => 'chrome-test-uuid',
+                    mkUUIDFn: () => 'chrome-test-uuid'
                 });
 
                 const {machine} = await client.startWithdrawalFlow({
@@ -197,6 +196,9 @@ describe('Cross-Browser Compatibility', () => {
         ('Firefox-specific behavior', () => {
             it('should handle OAuth flow in Firefox', async () => {
                 const client = new BluvoFlowClient({
+                    pingWalletByIdFn(walletId: string): Promise<any> {
+                        return Promise.resolve(undefined);
+                    },
                     orgId: 'test-org',
                     projectId: 'test-project',
                     listExchangesFn: vi.fn().mockResolvedValue([]),
@@ -204,7 +206,7 @@ describe('Cross-Browser Compatibility', () => {
                     fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
                     requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
                     executeWithdrawalFn: vi.fn().mockResolvedValue({id: 'withdrawal-123'}),
-                    mkUUIDFn: () => 'firefox-test-uuid',
+                    mkUUIDFn: () => 'firefox-test-uuid'
                 });
 
                 const {machine} = await client.startWithdrawalFlow({
@@ -230,6 +232,9 @@ describe('Cross-Browser Compatibility', () => {
             it('should handle OAuth flow in Safari', async () => {
 
                 const client = new BluvoFlowClient({
+                    pingWalletByIdFn(walletId: string): Promise<any> {
+                        return Promise.resolve(undefined);
+                    },
                     orgId: 'test-org',
                     projectId: 'test-project',
                     listExchangesFn: vi.fn().mockResolvedValue([]),
@@ -237,7 +242,7 @@ describe('Cross-Browser Compatibility', () => {
                     fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
                     requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
                     executeWithdrawalFn: vi.fn().mockResolvedValue({id: 'withdrawal-123'}),
-                    mkUUIDFn: () => 'safari-test-uuid',
+                    mkUUIDFn: () => 'safari-test-uuid'
                 });
 
                 const {machine} = await client.startWithdrawalFlow({
@@ -254,6 +259,9 @@ describe('Cross-Browser Compatibility', () => {
         it('should produce identical state machine behavior in all browsers', async () => {
             // This test runs in ALL configured browsers
             const client = new BluvoFlowClient({
+                pingWalletByIdFn(walletId: string): Promise<any> {
+                    return Promise.resolve(undefined);
+                },
                 orgId: 'cross-browser-org',
                 projectId: 'cross-browser-project',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
@@ -261,7 +269,7 @@ describe('Cross-Browser Compatibility', () => {
                 fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
                 requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
                 executeWithdrawalFn: vi.fn().mockResolvedValue({id: 'withdrawal-123'}),
-                mkUUIDFn: () => 'universal-uuid',
+                mkUUIDFn: () => 'universal-uuid'
             });
 
             const {machine} = await client.startWithdrawalFlow({
@@ -305,6 +313,9 @@ describe('Cross-Browser Compatibility', () => {
             vi.stubGlobal('open', vi.fn(() => null));
 
             const client = new BluvoFlowClient({
+                pingWalletByIdFn(walletId: string): Promise<any> {
+                    return Promise.resolve(undefined);
+                },
                 orgId: 'test-org',
                 projectId: 'test-project',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
@@ -312,7 +323,7 @@ describe('Cross-Browser Compatibility', () => {
                 fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
                 requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
                 executeWithdrawalFn: vi.fn().mockResolvedValue({id: 'withdrawal-123'}),
-                mkUUIDFn: () => 'blocked-uuid',
+                mkUUIDFn: () => 'blocked-uuid'
             });
 
             // Should throw an error when popup is blocked
@@ -324,6 +335,9 @@ describe('Cross-Browser Compatibility', () => {
 
         it('should handle window close events consistently', async () => {
             const client = new BluvoFlowClient({
+                pingWalletByIdFn(walletId: string): Promise<any> {
+                    return Promise.resolve(undefined);
+                },
                 orgId: 'test-org',
                 projectId: 'test-project',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
@@ -331,7 +345,7 @@ describe('Cross-Browser Compatibility', () => {
                 fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
                 requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
                 executeWithdrawalFn: vi.fn().mockResolvedValue({id: 'withdrawal-123'}),
-                mkUUIDFn: () => 'close-test-uuid',
+                mkUUIDFn: () => 'close-test-uuid'
             });
 
             const {machine} = await client.startWithdrawalFlow({

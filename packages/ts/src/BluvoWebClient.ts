@@ -1,4 +1,3 @@
-import {createConfiguration, OAuth2Api, server1, server2, ServerConfiguration} from "../generated";
 import {WebSocketClient, Subscription} from "./WebSocketClient";
 import {
     OAuth2WorkflowMessageBody,
@@ -6,6 +5,7 @@ import {
     WorkflowMessageBody,
     WorkflowTypes
 } from "./WorkflowTypes";
+import {oauth2Exchangeurlgeturl} from "../generated";
 
 export type BaseOptions = {
     onStep?: (message: WorkflowMessageBody) => void;
@@ -151,7 +151,7 @@ export class BluvoWebClient {
             }
 
             const {
-                url,
+                data,
                 success
             } = await this
                 .getURL(
@@ -191,7 +191,7 @@ export class BluvoWebClient {
             }
 
             const newWindow = windowRef.open(
-                url,
+                data?.url,
                 windowTitle,
                 `width=${windowWidth},height=${windowHeight},left=${left},top=${top},status=yes,scrollbars=yes,resizable=yes`
             );
@@ -282,7 +282,7 @@ export class BluvoWebClient {
          *
          * @returns A URL string that can be used to initiate the OAuth2 flow.
          */
-        getURL : (
+        getURL: async (
             exchange: 'coinbase' | 'kraken',
             {
                 walletId,
@@ -292,8 +292,23 @@ export class BluvoWebClient {
                 idem: string;
             }
         ) => {
-            return new OAuth2Api(this.configuration(walletId, undefined, idem))
-                .oauth2exchangeurlgeturl(exchange, idem!)
+            const response = await oauth2Exchangeurlgeturl({
+                path: {
+                    exchange,
+                },
+                headers: {
+                    "x-bluvo-wallet-id": walletId,
+                },
+                query: {
+                    idem,
+                },
+            });
+            const success = !!response.error;
+
+            return {
+                ...response,
+                success,
+            };
         },
     }
 
@@ -442,45 +457,5 @@ export class BluvoWebClient {
      */
     getActiveSubscriptionCount(): number {
         return this.wsClient.getActiveSubscriptionCount();
-    }
-
-    /**
-     * Creates and returns a properly configured API client configuration object.
-     *
-     * This private getter method centralizes the creation of API configuration objects,
-     * ensuring consistent authentication and request handling across all API calls made
-     * through this client. It automatically injects the organization ID and project ID
-     * credentials that were provided when the client was initialized.
-     *
-     * The configuration includes:
-     * - Authentication credentials for the Bluvo API
-     * - Request middleware setup
-     * - Response handling configuration
-     * - Base URL and endpoint configuration
-     *
-     * @private
-     * @returns A fully configured API configuration object ready for use with API clients
-     */
-    private configuration(walletId?:string, ott?:string, idem?:string) {
-        let baseServer: ServerConfiguration<{}>;
-
-        // Use custom API base if provided, otherwise use environment-based defaults
-        if (this.apiBase) {
-            baseServer = new ServerConfiguration<{}>(this.apiBase, {});
-        } else {
-            const serverDev = new ServerConfiguration<{}>("http://localhost:8787", {});
-            baseServer = this.sandbox ? server2 : this.dev ? serverDev : server1;
-        }
-
-        return createConfiguration({
-            baseServer: baseServer,
-            authMethods: {
-                bluvoOtt: ott,
-                bluvoOrgId: this.orgId,
-                bluvoProjectId: this.projectId,
-                bluvoWalletId: walletId,
-                bluvoOttActionId: idem,
-            },
-        });
     }
 }

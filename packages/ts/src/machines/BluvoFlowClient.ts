@@ -19,6 +19,7 @@ import {
 	WorkflowTypes,
 } from "../WorkflowTypes";
 import { createFlowMachine } from "./flowMachine";
+import { transformBalances } from "../utils/balanceTransform";
 
 export interface BluvoFlowClientOptions {
 	orgId: string;
@@ -411,25 +412,7 @@ export class BluvoFlowClient {
 			}
 
 			// Transform to expected format
-			balances = balanceResponse?.balances.map((b) => ({
-				asset: b.asset,
-				balance: String(b.amount),
-				networks: b.networks.map((n) => ({
-					id: n.id,
-					name: n.name,
-					displayName: n.displayName,
-					minWithdrawal: n.minWithdrawal,
-					maxWithdrawal: n.maxWithdrawal,
-					assetName: n.assetName,
-					...(n.addressRegex !== null && n.addressRegex !== undefined
-						? { addressRegex: n.addressRegex }
-						: {}),
-				})),
-				...(b.amountInFiat !== undefined
-					? { balanceInFiat: String(b.amountInFiat) }
-					: {}),
-				...(b.extra !== undefined ? { extra: b.extra } : {}),
-			})) ?? [];
+			balances = balanceResponse?.balances ? transformBalances(balanceResponse.balances) : [];
 
 			// Call success callback
 			options.onWalletBalance?.(options.walletId, balances);
@@ -502,49 +485,7 @@ export class BluvoFlowClient {
 
 		this.flowMachine.send({
 			type: "WALLET_LOADED",
-			balances: withdrawableBalanceInfo.balances.map(
-				(b: any) => ({
-					asset: b.asset,
-					balance: String(b.amount),
-					networks: b.networks.map((n: any) => ({
-						id: n.id,
-						name: n.name,
-						displayName: n.displayName,
-						minWithdrawal: n.minWithdrawal,
-						maxWithdrawal: n.maxWithdrawal,
-						assetName: n.assetName,
-						// Only include optional fields if they have meaningful values (not null or undefined)
-						...(n.addressRegex !== null && n.addressRegex !== undefined
-							? { addressRegex: n.addressRegex }
-							: {}),
-						...(n.chainId !== null && n.chainId !== undefined
-							? { chainId: n.chainId }
-							: {}),
-						...(n.tokenAddress !== null && n.tokenAddress !== undefined
-							? { tokenAddress: n.tokenAddress }
-							: {}),
-						...(n.contractAddress !== null && n.contractAddress !== undefined
-							? { contractAddress: n.contractAddress }
-							: {}),
-						// contractAddressVerified defaults to true if null or undefined
-						contractAddressVerified: n.contractAddressVerified ?? true,
-					})),
-
-					// if amountInFiat is present (including 0), include balanceInFiat
-					...(b.amountInFiat !== undefined
-						? {
-								balanceInFiat: String(b.amountInFiat),
-							}
-						: {}),
-
-					// if extra is present, include it as is
-					...(b.extra !== undefined
-						? {
-								extra: b.extra,
-							}
-						: {}),
-				}),
-			),
+			balances: transformBalances(withdrawableBalanceInfo.balances),
 		});
 	}
 

@@ -5,9 +5,9 @@ import type {
 	PreviewWalletInput,
 	WalletPreviewState,
 } from "../types/preview.types";
-import type {BluvoClient} from "../BluvoClient";
 import {BluvoFlowClientOptions} from "./BluvoFlowClient";
 import { ERROR_CODES, extractErrorCode } from "../error-codes";
+import { transformBalancesForPreview } from "../utils/balanceTransform";
 
 /**
  * Options for creating a BluvoPreviewManager
@@ -177,15 +177,7 @@ export class BluvoPreviewManager {
 		}
 
 		// Transform balance data to preview format
-		const balances: Array<PreviewWalletBalance> =
-			balanceResponse.balances.map((b) => ({
-				asset: b.asset,
-				balance: String(b.amount),
-				...(b.amountInFiat !== undefined
-					? { balanceInFiat: String(b.amountInFiat) }
-					: {}),
-				...(b.extra !== undefined ? { extra: b.extra } : {}),
-			}));
+		const balances: Array<PreviewWalletBalance> = transformBalancesForPreview(balanceResponse.balances);
 
 		// Update state to ready
 		this.updateState(walletId, {

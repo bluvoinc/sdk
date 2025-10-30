@@ -2,11 +2,7 @@
 /// <reference types="@vitest/browser/providers/playwright" />
 
 import {describe, it, expect, vi, beforeEach, afterEach} from 'vitest';
-import {BluvoFlowClient} from '../../src/machines/BluvoFlowClient';
-import type {
-    Walletwithdrawbalancebalance200Response,
-    Walletwithdrawquotequotation200Response
-} from '../../generated';
+import {BluvoFlowClient} from '../../src/machines';
 
 /**
  * Browser-specific tests for startWithdrawalFlow
@@ -27,7 +23,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
     let currentExchange: string = 'coinbase';
 
     // Mock API responses
-    const mockBalanceResponse: Walletwithdrawbalancebalance200Response = {
+    const mockBalanceResponse: any = {
         lastSyncAt: new Date().toISOString(),
         balances: [{
             asset: 'BTC',
@@ -44,7 +40,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
         }]
     };
 
-    const mockQuoteResponse: Walletwithdrawquotequotation200Response = {
+    const mockQuoteResponse: any = {
         id: 'quote-123',
         asset: 'BTC',
         amountNoFee: 1.0,
@@ -135,6 +131,9 @@ describe('startWithdrawalFlow - Browser Tests', () => {
     describe('OAuth Window Opening', () => {
         it('should open OAuth window with correct URL and parameters', async () => {
             const client = new BluvoFlowClient({
+                pingWalletByIdFn(walletId: string): Promise<any> {
+                    return Promise.resolve(undefined);
+                },
                 orgId: 'test-org',
                 projectId: 'test-project',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
@@ -142,7 +141,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
                 fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
                 requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
                 executeWithdrawalFn: vi.fn().mockResolvedValue({id: 'withdrawal-123'}),
-                mkUUIDFn: () => 'test-uuid-123',
+                mkUUIDFn: () => 'test-uuid-123'
             });
 
             // Start withdrawal flow
@@ -173,6 +172,9 @@ describe('startWithdrawalFlow - Browser Tests', () => {
 
         it('should transition to oauth:waiting state when window opens', async () => {
             const client = new BluvoFlowClient({
+                pingWalletByIdFn(walletId: string): Promise<any> {
+                    return Promise.resolve(undefined);
+                },
                 orgId: 'test-org',
                 projectId: 'test-project',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
@@ -180,7 +182,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
                 fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
                 requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
                 executeWithdrawalFn: vi.fn().mockResolvedValue({id: 'withdrawal-123'}),
-                mkUUIDFn: () => 'test-uuid-123',
+                mkUUIDFn: () => 'test-uuid-123'
             });
 
             const {machine} = await client.startWithdrawalFlow({

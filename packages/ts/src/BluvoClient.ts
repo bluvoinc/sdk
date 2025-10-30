@@ -172,7 +172,7 @@ export class BluvoClient {
 					"x-bluvo-wallet-id": walletId,
 				},
 			});
-			const success = !!response.error;
+			const success = !response.error;
 
 			return {
 				...response,
@@ -190,7 +190,7 @@ export class BluvoClient {
 					"x-bluvo-wallet-id": walletId,
 				},
 			});
-			const success = !!response.error;
+			const success = !response.error;
 
 			return {
 				...response,
@@ -231,7 +231,7 @@ export class BluvoClient {
 					"x-bluvo-wallet-id": walletId,
 				},
 			});
-			const success = !!response.error;
+			const success = !response.error;
 			return {
 				...response,
 				success,
@@ -291,7 +291,7 @@ export class BluvoClient {
 					exchange,
 				},
 			});
-			const success = !!response.error;
+			const success = !response.error;
 
 			return {
 				...response,
@@ -386,7 +386,7 @@ export class BluvoClient {
 						"x-bluvo-wallet-id": walletId,
 					},
 				});
-				const success = !!response.error;
+				const success = !response.error;
 
 				return {
 					...response,
@@ -407,7 +407,7 @@ export class BluvoClient {
 						"x-bluvo-wallet-id": walletId,
 					},
 				});
-				const success = !!response.error;
+				const success = !response.error;
 
 				return {
 					...response,
@@ -427,7 +427,7 @@ export class BluvoClient {
 					},
 					body,
 				});
-				const success = !!response.error;
+				const success = !response.error;
 
 				return {
 					...response,
@@ -452,7 +452,7 @@ export class BluvoClient {
 					},
 					body: args,
 				});
-				const success = !!response.error;
+				const success = !response.error;
 
 				return {
 					...response,
@@ -480,7 +480,7 @@ export class BluvoClient {
 					idem,
 				},
 			});
-			const success = !!response.error;
+			const success = !response.error;
 
 			return {
 				...response,

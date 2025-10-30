@@ -151,8 +151,9 @@ export class BluvoWebClient {
             }
 
             const {
-                data,
-                success
+                url,
+                success,
+                error
             } = await this
                 .getURL(
                     exchange,
@@ -162,7 +163,7 @@ export class BluvoWebClient {
                     }
                 );
 
-            if (!success) {
+            if (!success || !url) {
                 throw new Error('Failed to generate OAuth2 URL');
             }
 
@@ -191,7 +192,7 @@ export class BluvoWebClient {
             }
 
             const newWindow = windowRef.open(
-                data?.url,
+                url,
                 windowTitle,
                 `width=${windowWidth},height=${windowHeight},left=${left},top=${top},status=yes,scrollbars=yes,resizable=yes`
             );
@@ -283,31 +284,31 @@ export class BluvoWebClient {
          * @returns A URL string that can be used to initiate the OAuth2 flow.
          */
         getURL: async (
-            exchange: 'coinbase' | 'kraken',
-            {
-                walletId,
-                idem
+            exchange: 'coinbase' | 'kraken', {
+                walletId, idem
             }: {
                 walletId: string;
                 idem: string;
-            }
-        ) => {
+            }        ) => {
             const response = await oauth2Exchangeurlgeturl({
                 path: {
                     exchange,
                 },
                 headers: {
                     "x-bluvo-wallet-id": walletId,
+                    "x-bluvo-org-id": this.orgId,
+                    "x-bluvo-project-id": this.projectId,
                 },
                 query: {
                     idem,
                 },
             });
-            const success = !!response.error;
+            const success = !response.error;
 
             return {
                 ...response,
                 success,
+                url: response?.data?.url,
             };
         },
     }

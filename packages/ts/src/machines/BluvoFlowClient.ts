@@ -11,14 +11,7 @@ import {
     extractErrorCode,
     extractErrorResult
 } from '../error-codes';
-import {
-    Walletwithdrawbalancebalance200ResponseBalancesInner,
-    Walletwithdrawquotequotation200Response
-} from "../../generated";
-import {
-    Walletwithdrawquoteidexecutewithdraw200Response
-} from "../../generated";
-import {Walletwithdrawbalancebalance200Response} from "../../generated";
+
 import {
     type ListCentralizedExchangesResponse,
     ListCentralizedExchangesResponseStatusEnum,
@@ -29,7 +22,7 @@ export interface BluvoFlowClientOptions {
     orgId: string;
     projectId: string;
     listExchangesFn: (status?: ListCentralizedExchangesResponseStatusEnum) => Promise<ListCentralizedExchangesResponse['exchanges']>;
-    fetchWithdrawableBalanceFn: (walletId: string) => Promise<Walletwithdrawbalancebalance200Response>;
+    fetchWithdrawableBalanceFn: (walletId: string) => Promise<any>;
     requestQuotationFn: (walletId: string, params: {
         asset: string;
         amount: string;

@@ -2,15 +2,6 @@
 
 import type { Client, Options as Options2, TDataShape } from "./client";
 import { client } from "./client.gen";
-import {
-  oauth2ExchangeslistexchangesResponseTransformer,
-  walletgetResponseTransformer,
-  walletlistlistwalletsResponseTransformer,
-  walletpingpingResponseTransformer,
-  wallettransactionslisttransactionsResponseTransformer,
-  walletwithdrawquoteidexecutewithdrawResponseTransformer,
-  walletwithdrawquotequotationResponseTransformer,
-} from "./transformers.gen";
 import type {
   Oauth2ExchangeslistexchangesData,
   Oauth2ExchangeslistexchangesResponses,
@@ -113,7 +104,6 @@ export const oauth2Exchangeslistexchanges = <
     unknown,
     ThrowOnError
   >({
-    responseTransformer: oauth2ExchangeslistexchangesResponseTransformer,
     url: "/v0/oauth2/exchanges",
     ...options,
   });
@@ -172,7 +162,6 @@ export const walletget = <ThrowOnError extends boolean = false>(
     WalletgetErrors,
     ThrowOnError
   >({
-    responseTransformer: walletgetResponseTransformer,
     security: [
       {
         name: "x-bluvo-api-key",
@@ -211,7 +200,6 @@ export const walletpingping = <ThrowOnError extends boolean = false>(
     WalletpingpingErrors,
     ThrowOnError
   >({
-    responseTransformer: walletpingpingResponseTransformer,
     security: [
       {
         name: "x-bluvo-api-key",
@@ -250,7 +238,6 @@ export const walletlistlistwallets = <ThrowOnError extends boolean = false>(
     WalletlistlistwalletsErrors,
     ThrowOnError
   >({
-    responseTransformer: walletlistlistwalletsResponseTransformer,
     security: [
       {
         name: "x-bluvo-api-key",
@@ -287,7 +274,6 @@ export const wallettransactionslisttransactions = <
     WallettransactionslisttransactionsErrors,
     ThrowOnError
   >({
-    responseTransformer: wallettransactionslisttransactionsResponseTransformer,
     security: [
       {
         name: "x-bluvo-api-key",
@@ -364,7 +350,6 @@ export const walletwithdrawquotequotation = <
     WalletwithdrawquotequotationErrors,
     ThrowOnError
   >({
-    responseTransformer: walletwithdrawquotequotationResponseTransformer,
     security: [
       {
         name: "x-bluvo-api-key",
@@ -409,8 +394,6 @@ export const walletwithdrawquoteidexecutewithdraw = <
     WalletwithdrawquoteidexecutewithdrawErrors,
     ThrowOnError
   >({
-    responseTransformer:
-      walletwithdrawquoteidexecutewithdrawResponseTransformer,
     security: [
       {
         name: "x-bluvo-api-key",

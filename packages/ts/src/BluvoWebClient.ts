@@ -1,4 +1,5 @@
 import { oauth2Exchangeurlgeturl } from "../generated";
+import { transformResponse } from "./helpers";
 import { type Subscription, WebSocketClient } from "./WebSocketClient";
 import {
 	type OAuth2WorkflowMessageBody,
@@ -312,14 +313,12 @@ export class BluvoWebClient {
 				query: {
 					idem,
 				},
-			});
-			const success = !response.error;
-
-			return {
-				...response,
-				success,
-				url: response?.data?.url,
-			};
+			}).then(transformResponse);
+            
+            return {
+                ...response,
+                url: response.data?.url,
+            }
 		},
 	};
 

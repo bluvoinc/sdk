@@ -22,7 +22,7 @@ import type {
 	Client,
 	ClientOptions as ClientOptions2,
 } from "../generated/client/types.gen";
-
+import { transformResponse } from "./helpers";
 /**
  * The core client class for interacting with Bluvo's cryptocurrency exchange integration platform.
  *
@@ -172,11 +172,7 @@ export class BluvoClient {
 					"x-bluvo-wallet-id": walletId,
 				},
 			});
-			const success = !response.error;
-			return {
-				...response,
-				success,
-			};
+			return transformResponse(response);
 		},
 
 		/**
@@ -189,12 +185,7 @@ export class BluvoClient {
 					"x-bluvo-wallet-id": walletId,
 				},
 			});
-			const success = !response.error;
-
-			return {
-				...response,
-				success,
-			};
+			return transformResponse(response);
 		},
 
 		/**
@@ -230,11 +221,7 @@ export class BluvoClient {
 					"x-bluvo-wallet-id": walletId,
 				},
 			});
-			const success = !response.error;
-			return {
-				...response,
-				success,
-			};
+			return transformResponse(response);
 		},
 
 		/**
@@ -290,12 +277,7 @@ export class BluvoClient {
 					exchange,
 				},
 			});
-			const success = !response.error;
-
-			return {
-				...response,
-				success,
-			};
+			return transformResponse(response);
 		},
 
 		transaction: {
@@ -385,12 +367,7 @@ export class BluvoClient {
 						"x-bluvo-wallet-id": walletId,
 					},
 				});
-				const success = !response.error;
-
-				return {
-					...response,
-					success,
-				};
+				return transformResponse(response);
 			},
 		},
 
@@ -406,12 +383,7 @@ export class BluvoClient {
 						"x-bluvo-wallet-id": walletId,
 					},
 				});
-				const success = !response.error;
-
-				return {
-					...response,
-					success,
-				};
+				return transformResponse(response);
 			},
 
 			// request a quotation
@@ -426,12 +398,7 @@ export class BluvoClient {
 					},
 					body,
 				});
-				const success = !response.error;
-
-				return {
-					...response,
-					success,
-				};
+				return transformResponse(response);
 			},
 
 			// give a quotation ID, execute the withdrawal
@@ -451,12 +418,7 @@ export class BluvoClient {
 					},
 					body: args,
 				});
-				const success = !response.error;
-
-				return {
-					...response,
-					success,
-				};
+				return transformResponse(response);
 			},
 		},
 	};
@@ -479,12 +441,7 @@ export class BluvoClient {
 					idem,
 				},
 			});
-			const success = !response.error;
-
-			return {
-				...response,
-				success,
-			};
+			return transformResponse(response);
 		},
 
 		listExchanges: async (

@@ -152,6 +152,7 @@ export class BluvoWebClient {
 
             const {
                 url,
+                data,
                 success,
                 error
             } = await this

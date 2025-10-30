@@ -78,31 +78,51 @@ describe('startWithdrawalFlow - Browser Tests', () => {
             forEach: (callback: (value: string, key: string) => void) => {
                 callback('application/json', 'content-type');
             },
-            get: (key: string) => key === 'content-type' ? 'application/json' : null,
-            has: (key: string) => key === 'content-type',
+            get: (key: string) => {
+                const lowerKey = key.toLowerCase();
+                return lowerKey === 'content-type' ? 'application/json' : null;
+            },
+            has: (key: string) => key.toLowerCase() === 'content-type',
             entries: () => [['content-type', 'application/json']].entries(),
             keys: () => ['content-type'].values(),
             values: () => ['application/json'].values()
         };
 
-        vi.stubGlobal('fetch', vi.fn((url: string, options?: any) => {
+        vi.stubGlobal('fetch', vi.fn((input: Request | string, init?: RequestInit) => {
+            // Handle Request object (OpenAPI client passes Request object, not just URL)
+            let url: string;
+            let headers: Headers | Record<string, string> | undefined;
+
+            if (input instanceof Request) {
+                url = input.url;
+                headers = input.headers;
+            } else {
+                url = input;
+                headers = init?.headers as Headers | Record<string, string> | undefined;
+            }
+
             // Extract exchange from URL path
             const urlObj = new URL(url, 'https://api.example.com');
             const pathParts = urlObj.pathname.split('/').filter(p => p);
 
             let exchange = currentExchange;
             if (pathParts.includes('coinbase')) exchange = 'coinbase';
-            else if (pathParts.includes('binance')) exchange = 'binbase';
+            else if (pathParts.includes('binance')) exchange = 'binance';
             else if (pathParts.includes('kraken')) exchange = 'kraken';
 
-            // Get wallet ID from auth headers or use current
+            // Get wallet ID from headers
             let walletId = currentWalletId;
-            if (options?.headers) {
-                const walletIdHeader = Object.keys(options.headers).find(k =>
-                    k.toLowerCase().includes('wallet')
-                );
-                if (walletIdHeader && options.headers[walletIdHeader]) {
-                    walletId = options.headers[walletIdHeader];
+            if (headers) {
+                // Handle both Headers object and plain object
+                if (headers instanceof Headers || ('get' in headers && typeof headers.get === 'function')) {
+                    walletId = (headers as Headers).get('x-bluvo-wallet-id') || currentWalletId;
+                } else {
+                    const walletIdHeader = Object.keys(headers).find(k =>
+                        k.toLowerCase().includes('wallet')
+                    );
+                    if (walletIdHeader && (headers as Record<string, string>)[walletIdHeader]) {
+                        walletId = (headers as Record<string, string>)[walletIdHeader];
+                    }
                 }
             }
 
@@ -131,9 +151,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
     describe('OAuth Window Opening', () => {
         it('should open OAuth window with correct URL and parameters', async () => {
             const client = new BluvoFlowClient({
-                pingWalletByIdFn(walletId: string): Promise<any> {
-                    return Promise.resolve(undefined);
-                },
+                pingWalletByIdFn: vi.fn(),
                 orgId: 'test-org',
                 projectId: 'test-project',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
@@ -202,6 +220,9 @@ describe('startWithdrawalFlow - Browser Tests', () => {
             vi.stubGlobal('open', vi.fn(() => null));
 
             const client = new BluvoFlowClient({
+                pingWalletByIdFn(walletId: string): Promise<any> {
+                    return Promise.resolve(undefined);
+                },
                 orgId: 'test-org',
                 projectId: 'test-project',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
@@ -209,7 +230,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
                 fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
                 requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
                 executeWithdrawalFn: vi.fn().mockResolvedValue({id: 'withdrawal-123'}),
-                mkUUIDFn: () => 'test-uuid-123',
+                mkUUIDFn: () => 'test-uuid-123'
             });
 
             // Should throw an error when popup is blocked
@@ -223,6 +244,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
     describe('Momento Cache Message Simulation', () => {
         it('should transition to oauth:completed when receiving OAuth success message', async () => {
             const client = new BluvoFlowClient({
+                pingWalletByIdFn: vi.fn(),
                 orgId: 'test-org',
                 projectId: 'test-project',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
@@ -230,7 +252,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
                 fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
                 requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
                 executeWithdrawalFn: vi.fn().mockResolvedValue({id: 'withdrawal-123'}),
-                mkUUIDFn: () => 'test-uuid-123',
+                mkUUIDFn: () => 'test-uuid-123'
             });
 
             const {machine} = await client.startWithdrawalFlow({
@@ -253,6 +275,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
         it('should close OAuth window after receiving completion message', async () => {
             const client = new BluvoFlowClient({
                 orgId: 'test-org',
+                pingWalletByIdFn: vi.fn(),
                 projectId: 'test-project',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
                 getWalletByIdFn: vi.fn().mockResolvedValue(null),
@@ -294,6 +317,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
                 getWalletByIdFn: vi.fn().mockResolvedValue(null),
                 listExchangesFn: vi.fn().mockResolvedValue([]),
                 orgId: 'test-org',
+                pingWalletByIdFn: vi.fn(),
                 projectId: 'test-project',
                 fetchWithdrawableBalanceFn: fetchBalanceFn,
                 requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
@@ -338,6 +362,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
         it('should handle OAuth window closed by user', async () => {
             const client = new BluvoFlowClient({
                 orgId: 'test-org',
+                pingWalletByIdFn: vi.fn(),
                 projectId: 'test-project',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
                 getWalletByIdFn: vi.fn().mockResolvedValue(null),
@@ -368,6 +393,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
         it('should handle OAuth failure', async () => {
             const client = new BluvoFlowClient({
                 orgId: 'test-org',
+                pingWalletByIdFn: vi.fn(),
                 projectId: 'test-project',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
                 getWalletByIdFn: vi.fn().mockResolvedValue(null),
@@ -403,6 +429,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
 
             const client = new BluvoFlowClient({
                 orgId: 'test-org',
+                pingWalletByIdFn: vi.fn(),
                 projectId: 'test-project',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
                 getWalletByIdFn: vi.fn().mockResolvedValue(null),
@@ -447,6 +474,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
         it('should open popup with appropriate dimensions', async () => {
             const client = new BluvoFlowClient({
                 orgId: 'test-org',
+                pingWalletByIdFn: vi.fn(),
                 projectId: 'test-project',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
                 getWalletByIdFn: vi.fn().mockResolvedValue(null),
@@ -485,6 +513,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
 
                 const client = new BluvoFlowClient({
                     orgId: 'test-org',
+                    pingWalletByIdFn: vi.fn(),
                     projectId: 'test-project',
                     listExchangesFn: vi.fn().mockResolvedValue([]),
                     getWalletByIdFn: vi.fn().mockResolvedValue(null),
@@ -513,6 +542,7 @@ describe('startWithdrawalFlow - Browser Tests', () => {
         it('should preserve context through OAuth flow', async () => {
             const client = new BluvoFlowClient({
                 orgId: 'test-org-123',
+                pingWalletByIdFn: vi.fn(),
                 projectId: 'test-project-456',
                 listExchangesFn: vi.fn().mockResolvedValue([]),
                 getWalletByIdFn: vi.fn().mockResolvedValue(null),

@@ -75,14 +75,29 @@ describe('Cross-Browser Compatibility', () => {
             forEach: (callback: (value: string, key: string) => void) => {
                 callback('application/json', 'content-type');
             },
-            get: (key: string) => key === 'content-type' ? 'application/json' : null,
-            has: (key: string) => key === 'content-type',
+            get: (key: string) => {
+                const lowerKey = key.toLowerCase();
+                return lowerKey === 'content-type' ? 'application/json' : null;
+            },
+            has: (key: string) => key.toLowerCase() === 'content-type',
             entries: () => [['content-type', 'application/json']].entries(),
             keys: () => ['content-type'].values(),
             values: () => ['application/json'].values()
         };
 
-        vi.stubGlobal('fetch', vi.fn((url: string) => {
+        vi.stubGlobal('fetch', vi.fn((input: Request | string, init?: RequestInit) => {
+            // Handle Request object (OpenAPI client passes Request object, not just URL)
+            let url: string;
+            let headers: Headers | Record<string, string> | undefined;
+
+            if (input instanceof Request) {
+                url = input.url;
+                headers = input.headers;
+            } else {
+                url = input;
+                headers = init?.headers as Headers | Record<string, string> | undefined;
+            }
+
             // Extract parameters from URL to make response dynamic
             const urlObj = new URL(url, 'https://api.example.com');
             const pathParts = urlObj.pathname.split('/');
@@ -90,7 +105,21 @@ describe('Cross-Browser Compatibility', () => {
                 pathParts.includes('binance') ? 'binance' :
                     pathParts.includes('kraken') ? 'kraken' : 'exchange';
 
-            const walletId = pathParts[pathParts.length - 1] || 'wallet-abc';
+            // Get wallet ID from headers
+            let walletId = 'wallet-abc';
+            if (headers) {
+                // Handle both Headers object and plain object
+                if (headers instanceof Headers || ('get' in headers && typeof headers.get === 'function')) {
+                    walletId = (headers as Headers).get('x-bluvo-wallet-id') || 'wallet-abc';
+                } else {
+                    const walletIdHeader = Object.keys(headers).find(k =>
+                        k.toLowerCase().includes('wallet')
+                    );
+                    if (walletIdHeader && (headers as Record<string, string>)[walletIdHeader]) {
+                        walletId = (headers as Record<string, string>)[walletIdHeader];
+                    }
+                }
+            }
 
             return Promise.resolve({
                 ok: true,

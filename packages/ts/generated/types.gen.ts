@@ -7,13 +7,330 @@ export type ClientOptions = {
     | (string & {});
 };
 
+export const SchemaEnum = {
+  COINBASE: "coinbase",
+  KRAKEN: "kraken",
+  GEMINI: "gemini",
+  LOCAL_CEX: "local-cex",
+} as const;
+
+export type SchemaEnum = (typeof SchemaEnum)[keyof typeof SchemaEnum];
+
+export const StatusEnum = {
+  LIVE: "live",
+  OFFLINE: "offline",
+  MAINTENANCE: "maintenance",
+  COMING_SOON: "coming_soon",
+} as const;
+
+export type StatusEnum = (typeof StatusEnum)[keyof typeof StatusEnum];
+
+export const ExchangeEnum = {
+  ACE: "ace",
+  ASCENDEX: "ascendex",
+  BEQUANT: "bequant",
+  BIGONE: "bigone",
+  BINANCE: "binance",
+  COINBASE: "coinbase",
+  BINANCEUS: "binanceus",
+  BINGX: "bingx",
+  BIT2C: "bit2c",
+  BITBANK: "bitbank",
+  BITBNS: "bitbns",
+  BITCOINCOM: "bitcoincom",
+  BITFINEX: "bitfinex",
+  BITFLYER: "bitflyer",
+  BITGET: "bitget",
+  BITHUMB: "bithumb",
+  BITMART: "bitmart",
+  BITMEX: "bitmex",
+  BITOPRO: "bitopro",
+  BITPANDA: "bitpanda",
+  BITRUE: "bitrue",
+  BITSO: "bitso",
+  BITSTAMP: "bitstamp",
+  BITTEAM: "bitteam",
+  BITVAVO: "bitvavo",
+  BYBIT: "bybit",
+  BL3P: "bl3p",
+  BLOCKCHAINCOM: "blockchaincom",
+  BLOFIN: "blofin",
+  BTCALPHA: "btcalpha",
+  BTCBOX: "btcbox",
+  BTCMARKETS: "btcmarkets",
+  BTCTURK: "btcturk",
+  CEX: "cex",
+  COINCHECK: "coincheck",
+  COINEX: "coinex",
+  COINLIST: "coinlist",
+  COINMATE: "coinmate",
+  COINMETRO: "coinmetro",
+  COINONE: "coinone",
+  COINSPH: "coinsph",
+  COINSPOT: "coinspot",
+  CRYPTOCOM: "cryptocom",
+  DELTA: "delta",
+  DERIBIT: "deribit",
+  DIGIFINEX: "digifinex",
+  EXMO: "exmo",
+  FMFWIO: "fmfwio",
+  GATE: "gate",
+  GATEIO: "gateio",
+  GEMINI: "gemini",
+  HASHKEY: "hashkey",
+  HITBTC: "hitbtc",
+  HOLLAEX: "hollaex",
+  HTX: "htx",
+  HUOBI: "huobi",
+  HUOBIJP: "huobijp",
+  HYPERLIQUID: "hyperliquid",
+  INDEPENDENTRESERVE: "independentreserve",
+  INDODAX: "indodax",
+  KRAKEN: "kraken",
+  KRAKENFUTURES: "krakenfutures",
+  KUCOIN: "kucoin",
+  KUCOINFUTURES: "kucoinfutures",
+  LATOKEN: "latoken",
+  LBANK: "lbank",
+  LUNO: "luno",
+  MERCADO: "mercado",
+  MEXC: "mexc",
+  NDAX: "ndax",
+  NOVADAX: "novadax",
+  OCEANEX: "oceanex",
+  OKCOIN: "okcoin",
+  OKX: "okx",
+  ONETRADING: "onetrading",
+  OXFUN: "oxfun",
+  P2B: "p2b",
+  PARADEX: "paradex",
+  PAYMIUM: "paymium",
+  PHEMEX: "phemex",
+  POLONIEX: "poloniex",
+  POLONIEXFUTURES: "poloniexfutures",
+  PROBIT: "probit",
+  TIMEX: "timex",
+  TRADEOGRE: "tradeogre",
+  UPBIT: "upbit",
+  VERTEX: "vertex",
+  WAVESEXCHANGE: "wavesexchange",
+  WHITEBIT: "whitebit",
+  WOO: "woo",
+  WOOFIPRO: "woofipro",
+  XT: "xt",
+  YOBIT: "yobit",
+  ZAIF: "zaif",
+  ZONDA: "zonda",
+  LOCAL_CEX: "local-cex",
+} as const;
+
+export type ExchangeEnum = (typeof ExchangeEnum)[keyof typeof ExchangeEnum];
+
+export const StatusEnum2 = {
+  SUCCESS: "SUCCESS",
+  INVALID_API_CREDENTIALS: "INVALID_API_CREDENTIALS",
+} as const;
+
+export type StatusEnum2 = (typeof StatusEnum2)[keyof typeof StatusEnum2];
+
+export const SchemaEnum2 = {
+  ACE: "ace",
+  ASCENDEX: "ascendex",
+  BEQUANT: "bequant",
+  BIGONE: "bigone",
+  BINANCE: "binance",
+  COINBASE: "coinbase",
+  BINANCEUS: "binanceus",
+  BINGX: "bingx",
+  BIT2C: "bit2c",
+  BITBANK: "bitbank",
+  BITBNS: "bitbns",
+  BITCOINCOM: "bitcoincom",
+  BITFINEX: "bitfinex",
+  BITFLYER: "bitflyer",
+  BITGET: "bitget",
+  BITHUMB: "bithumb",
+  BITMART: "bitmart",
+  BITMEX: "bitmex",
+  BITOPRO: "bitopro",
+  BITPANDA: "bitpanda",
+  BITRUE: "bitrue",
+  BITSO: "bitso",
+  BITSTAMP: "bitstamp",
+  BITTEAM: "bitteam",
+  BITVAVO: "bitvavo",
+  BYBIT: "bybit",
+  BL3P: "bl3p",
+  BLOCKCHAINCOM: "blockchaincom",
+  BLOFIN: "blofin",
+  BTCALPHA: "btcalpha",
+  BTCBOX: "btcbox",
+  BTCMARKETS: "btcmarkets",
+  BTCTURK: "btcturk",
+  CEX: "cex",
+  COINCHECK: "coincheck",
+  COINEX: "coinex",
+  COINLIST: "coinlist",
+  COINMATE: "coinmate",
+  COINMETRO: "coinmetro",
+  COINONE: "coinone",
+  COINSPH: "coinsph",
+  COINSPOT: "coinspot",
+  CRYPTOCOM: "cryptocom",
+  DELTA: "delta",
+  DERIBIT: "deribit",
+  DIGIFINEX: "digifinex",
+  EXMO: "exmo",
+  FMFWIO: "fmfwio",
+  GATE: "gate",
+  GATEIO: "gateio",
+  GEMINI: "gemini",
+  HASHKEY: "hashkey",
+  HITBTC: "hitbtc",
+  HOLLAEX: "hollaex",
+  HTX: "htx",
+  HUOBI: "huobi",
+  HUOBIJP: "huobijp",
+  HYPERLIQUID: "hyperliquid",
+  INDEPENDENTRESERVE: "independentreserve",
+  INDODAX: "indodax",
+  KRAKEN: "kraken",
+  KRAKENFUTURES: "krakenfutures",
+  KUCOIN: "kucoin",
+  KUCOINFUTURES: "kucoinfutures",
+  LATOKEN: "latoken",
+  LBANK: "lbank",
+  LUNO: "luno",
+  MERCADO: "mercado",
+  MEXC: "mexc",
+  NDAX: "ndax",
+  NOVADAX: "novadax",
+  OCEANEX: "oceanex",
+  OKCOIN: "okcoin",
+  OKX: "okx",
+  ONETRADING: "onetrading",
+  OXFUN: "oxfun",
+  P2B: "p2b",
+  PARADEX: "paradex",
+  PAYMIUM: "paymium",
+  PHEMEX: "phemex",
+  POLONIEX: "poloniex",
+  POLONIEXFUTURES: "poloniexfutures",
+  PROBIT: "probit",
+  TIMEX: "timex",
+  TRADEOGRE: "tradeogre",
+  UPBIT: "upbit",
+  VERTEX: "vertex",
+  WAVESEXCHANGE: "wavesexchange",
+  WHITEBIT: "whitebit",
+  WOO: "woo",
+  WOOFIPRO: "woofipro",
+  XT: "xt",
+  YOBIT: "yobit",
+  ZAIF: "zaif",
+  ZONDA: "zonda",
+  LOCAL_CEX: "local-cex",
+  NULL: null,
+} as const;
+
+export type SchemaEnum2 = (typeof SchemaEnum2)[keyof typeof SchemaEnum2];
+
+export const SchemaEnum3 = {
+  TRUE: "true",
+  FALSE: "false",
+  NULL: null,
+} as const;
+
+export type SchemaEnum3 = (typeof SchemaEnum3)[keyof typeof SchemaEnum3];
+
+export const TypeEnum = {
+  DEPOSIT: "deposit",
+  WITHDRAWAL: "withdrawal",
+  TRANSACTION: "transaction",
+} as const;
+
+export type TypeEnum = (typeof TypeEnum)[keyof typeof TypeEnum];
+
+export const DirectionEnum = {
+  IN: "in",
+  OUT: "out",
+  NULL: null,
+} as const;
+
+export type DirectionEnum = (typeof DirectionEnum)[keyof typeof DirectionEnum];
+
+export const FiatCurrencyEnum = {
+  USD: "USD",
+  EUR: "EUR",
+  NULL: null,
+} as const;
+
+export type FiatCurrencyEnum =
+  (typeof FiatCurrencyEnum)[keyof typeof FiatCurrencyEnum];
+
+export const StatusEnum3 = {
+  PENDING: "pending",
+  OK: "ok",
+  FAILED: "failed",
+  CANCELED: "canceled",
+} as const;
+
+export type StatusEnum3 = (typeof StatusEnum3)[keyof typeof StatusEnum3];
+
+export const CategoryEnum = {
+  EXCHANGE_WITHDRAWAL_FEE: "exchange_withdrawal_fee",
+  NETWORK_FEE: "network_fee",
+  PROVIDER_FEE: "provider_fee",
+  OTHER: "other",
+} as const;
+
+export type CategoryEnum = (typeof CategoryEnum)[keyof typeof CategoryEnum];
+
+export const TypeEnum2 = {
+  GENERIC_NOT_FOUND: "GENERIC_NOT_FOUND",
+  GENERIC_UNAUTHORIZED: "GENERIC_UNAUTHORIZED",
+  GENERIC_INTERNAL_SERVER_ERROR: "GENERIC_INTERNAL_SERVER_ERROR",
+  GENERIC_VALIDATION_ERROR: "GENERIC_VALIDATION_ERROR",
+  GENERIC_INVALID_REQUEST: "GENERIC_INVALID_REQUEST",
+  APIKEY_INSUFFICIENT_PERMISSIONS: "APIKEY_INSUFFICIENT_PERMISSIONS",
+  WALLET_NOT_FOUND: "WALLET_NOT_FOUND",
+  WALLET_INVALID_CREDENTIALS: "WALLET_INVALID_CREDENTIALS",
+  QUOTE_NOT_FOUND: "QUOTE_NOT_FOUND",
+  QUOTE_EXPIRED: "QUOTE_EXPIRED",
+  WITHDRAWAL_INSUFFICIENT_BALANCE: "WITHDRAWAL_INSUFFICIENT_BALANCE",
+  WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE:
+    "WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE",
+  WITHDRAWAL_INVALID_ADDRESS: "WITHDRAWAL_INVALID_ADDRESS",
+  WITHDRAWAL_NETWORK_NOT_SUPPORTED: "WITHDRAWAL_NETWORK_NOT_SUPPORTED",
+  WITHDRAWAL_TOO_MANY_ADDRESSES: "WITHDRAWAL_TOO_MANY_ADDRESSES",
+  WITHDRAWAL_AMOUNT_BELOW_MINIMUM: "WITHDRAWAL_AMOUNT_BELOW_MINIMUM",
+  WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM: "WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM",
+  WITHDRAWAL_ASSET_NOT_SUPPORTED: "WITHDRAWAL_ASSET_NOT_SUPPORTED",
+  WITHDRAWAL_PROVIDER_ERROR: "WITHDRAWAL_PROVIDER_ERROR",
+  WITHDRAWAL_2FA_REQUIRED_TOTP: "WITHDRAWAL_2FA_REQUIRED_TOTP",
+  WITHDRAWAL_2FA_REQUIRED_SMS: "WITHDRAWAL_2FA_REQUIRED_SMS",
+  WITHDRAWAL_2FA_REQUIRED_YUBIKEY: "WITHDRAWAL_2FA_REQUIRED_YUBIKEY",
+  WITHDRAWAL_2FA_REQUIRED_PASSPHRASE: "WITHDRAWAL_2FA_REQUIRED_PASSPHRASE",
+  WITHDRAWAL_2FA_INVALID: "WITHDRAWAL_2FA_INVALID",
+  WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED: "WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED",
+  WITHDRAWAL_KYC_REQUIRED: "WITHDRAWAL_KYC_REQUIRED",
+  WITHDRAWAL_EMAIL_UNVERIFIED: "WITHDRAWAL_EMAIL_UNVERIFIED",
+  WITHDRAWAL_RATE_LIMIT_EXCEEDED: "WITHDRAWAL_RATE_LIMIT_EXCEEDED",
+  OAUTH_AUTHORIZATION_FAILED: "OAUTH_AUTHORIZATION_FAILED",
+  OAUTH_TOKEN_EXCHANGE_FAILED: "OAUTH_TOKEN_EXCHANGE_FAILED",
+  OAUTH_INVALID_STATE: "OAUTH_INVALID_STATE",
+  OAUTH_INSUFFICIENT_SCOPE: "OAUTH_INSUFFICIENT_SCOPE",
+} as const;
+
+export type TypeEnum2 = (typeof TypeEnum2)[keyof typeof TypeEnum2];
+
 export type Oauth2ExchangeurlgeturlData = {
   body?: never;
   path: {
     /**
      * Exchange identifier.
      */
-    exchange: "coinbase" | "kraken" | "gemini" | "local-cex";
+    exchange: SchemaEnum;
   };
   query: {
     /**
@@ -54,7 +371,7 @@ export type Oauth2ExchangeslistexchangesResponses = {
       id: string;
       name: string;
       logoUrl: string;
-      status: "live" | "offline" | "maintenance" | "coming_soon";
+      status: StatusEnum;
     }>;
   };
 };
@@ -137,103 +454,7 @@ export type WalletgetResponses = {
    */
   200: {
     id: string;
-    exchange:
-      | "ace"
-      | "ascendex"
-      | "bequant"
-      | "bigone"
-      | "binance"
-      | "coinbase"
-      | "binanceus"
-      | "bingx"
-      | "bit2c"
-      | "bitbank"
-      | "bitbns"
-      | "bitcoincom"
-      | "bitfinex"
-      | "bitflyer"
-      | "bitget"
-      | "bithumb"
-      | "bitmart"
-      | "bitmex"
-      | "bitopro"
-      | "bitpanda"
-      | "bitrue"
-      | "bitso"
-      | "bitstamp"
-      | "bitteam"
-      | "bitvavo"
-      | "bybit"
-      | "bl3p"
-      | "blockchaincom"
-      | "blofin"
-      | "btcalpha"
-      | "btcbox"
-      | "btcmarkets"
-      | "btcturk"
-      | "cex"
-      | "coincheck"
-      | "coinex"
-      | "coinlist"
-      | "coinmate"
-      | "coinmetro"
-      | "coinone"
-      | "coinsph"
-      | "coinspot"
-      | "cryptocom"
-      | "delta"
-      | "deribit"
-      | "digifinex"
-      | "exmo"
-      | "fmfwio"
-      | "gate"
-      | "gateio"
-      | "gemini"
-      | "hashkey"
-      | "hitbtc"
-      | "hollaex"
-      | "htx"
-      | "huobi"
-      | "huobijp"
-      | "hyperliquid"
-      | "independentreserve"
-      | "indodax"
-      | "kraken"
-      | "krakenfutures"
-      | "kucoin"
-      | "kucoinfutures"
-      | "latoken"
-      | "lbank"
-      | "luno"
-      | "mercado"
-      | "mexc"
-      | "ndax"
-      | "novadax"
-      | "oceanex"
-      | "okcoin"
-      | "okx"
-      | "onetrading"
-      | "oxfun"
-      | "p2b"
-      | "paradex"
-      | "paymium"
-      | "phemex"
-      | "poloniex"
-      | "poloniexfutures"
-      | "probit"
-      | "timex"
-      | "tradeogre"
-      | "upbit"
-      | "vertex"
-      | "wavesexchange"
-      | "whitebit"
-      | "woo"
-      | "woofipro"
-      | "xt"
-      | "yobit"
-      | "zaif"
-      | "zonda"
-      | "local-cex";
+    exchange: ExchangeEnum;
     balances: {
       [key: string]: {
         free?: number | null;
@@ -289,104 +510,8 @@ export type WalletpingpingResponses = {
    */
   200: {
     id: string;
-    exchange:
-      | "ace"
-      | "ascendex"
-      | "bequant"
-      | "bigone"
-      | "binance"
-      | "coinbase"
-      | "binanceus"
-      | "bingx"
-      | "bit2c"
-      | "bitbank"
-      | "bitbns"
-      | "bitcoincom"
-      | "bitfinex"
-      | "bitflyer"
-      | "bitget"
-      | "bithumb"
-      | "bitmart"
-      | "bitmex"
-      | "bitopro"
-      | "bitpanda"
-      | "bitrue"
-      | "bitso"
-      | "bitstamp"
-      | "bitteam"
-      | "bitvavo"
-      | "bybit"
-      | "bl3p"
-      | "blockchaincom"
-      | "blofin"
-      | "btcalpha"
-      | "btcbox"
-      | "btcmarkets"
-      | "btcturk"
-      | "cex"
-      | "coincheck"
-      | "coinex"
-      | "coinlist"
-      | "coinmate"
-      | "coinmetro"
-      | "coinone"
-      | "coinsph"
-      | "coinspot"
-      | "cryptocom"
-      | "delta"
-      | "deribit"
-      | "digifinex"
-      | "exmo"
-      | "fmfwio"
-      | "gate"
-      | "gateio"
-      | "gemini"
-      | "hashkey"
-      | "hitbtc"
-      | "hollaex"
-      | "htx"
-      | "huobi"
-      | "huobijp"
-      | "hyperliquid"
-      | "independentreserve"
-      | "indodax"
-      | "kraken"
-      | "krakenfutures"
-      | "kucoin"
-      | "kucoinfutures"
-      | "latoken"
-      | "lbank"
-      | "luno"
-      | "mercado"
-      | "mexc"
-      | "ndax"
-      | "novadax"
-      | "oceanex"
-      | "okcoin"
-      | "okx"
-      | "onetrading"
-      | "oxfun"
-      | "p2b"
-      | "paradex"
-      | "paymium"
-      | "phemex"
-      | "poloniex"
-      | "poloniexfutures"
-      | "probit"
-      | "timex"
-      | "tradeogre"
-      | "upbit"
-      | "vertex"
-      | "wavesexchange"
-      | "whitebit"
-      | "woo"
-      | "woofipro"
-      | "xt"
-      | "yobit"
-      | "zaif"
-      | "zonda"
-      | "local-cex";
-    status: "SUCCESS" | "INVALID_API_CREDENTIALS";
+    exchange: ExchangeEnum;
+    status: StatusEnum2;
     success: boolean;
   };
 };
@@ -409,104 +534,7 @@ export type WalletlistlistwalletsData = {
     /**
      * Filter by exchange.
      */
-    exchange?:
-      | "ace"
-      | "ascendex"
-      | "bequant"
-      | "bigone"
-      | "binance"
-      | "coinbase"
-      | "binanceus"
-      | "bingx"
-      | "bit2c"
-      | "bitbank"
-      | "bitbns"
-      | "bitcoincom"
-      | "bitfinex"
-      | "bitflyer"
-      | "bitget"
-      | "bithumb"
-      | "bitmart"
-      | "bitmex"
-      | "bitopro"
-      | "bitpanda"
-      | "bitrue"
-      | "bitso"
-      | "bitstamp"
-      | "bitteam"
-      | "bitvavo"
-      | "bybit"
-      | "bl3p"
-      | "blockchaincom"
-      | "blofin"
-      | "btcalpha"
-      | "btcbox"
-      | "btcmarkets"
-      | "btcturk"
-      | "cex"
-      | "coincheck"
-      | "coinex"
-      | "coinlist"
-      | "coinmate"
-      | "coinmetro"
-      | "coinone"
-      | "coinsph"
-      | "coinspot"
-      | "cryptocom"
-      | "delta"
-      | "deribit"
-      | "digifinex"
-      | "exmo"
-      | "fmfwio"
-      | "gate"
-      | "gateio"
-      | "gemini"
-      | "hashkey"
-      | "hitbtc"
-      | "hollaex"
-      | "htx"
-      | "huobi"
-      | "huobijp"
-      | "hyperliquid"
-      | "independentreserve"
-      | "indodax"
-      | "kraken"
-      | "krakenfutures"
-      | "kucoin"
-      | "kucoinfutures"
-      | "latoken"
-      | "lbank"
-      | "luno"
-      | "mercado"
-      | "mexc"
-      | "ndax"
-      | "novadax"
-      | "oceanex"
-      | "okcoin"
-      | "okx"
-      | "onetrading"
-      | "oxfun"
-      | "p2b"
-      | "paradex"
-      | "paymium"
-      | "phemex"
-      | "poloniex"
-      | "poloniexfutures"
-      | "probit"
-      | "timex"
-      | "tradeogre"
-      | "upbit"
-      | "vertex"
-      | "wavesexchange"
-      | "whitebit"
-      | "woo"
-      | "woofipro"
-      | "xt"
-      | "yobit"
-      | "zaif"
-      | "zonda"
-      | "local-cex"
-      | null;
+    exchange?: SchemaEnum2;
     /**
      * Filter by creation date (from, ISO format).
      */
@@ -526,7 +554,7 @@ export type WalletlistlistwalletsData = {
     /**
      * Filter by API validity status.
      */
-    invalidApi?: "true" | "false" | null;
+    invalidApi?: SchemaEnum3;
     /**
      * Comma-separated list of fields to include.
      */
@@ -561,103 +589,7 @@ export type WalletlistlistwalletsResponses = {
       updatedAt?: string | number | null;
       lastSyncAt?: string | number | null;
       expiresAt?: string | number | null;
-      exchange:
-        | "ace"
-        | "ascendex"
-        | "bequant"
-        | "bigone"
-        | "binance"
-        | "coinbase"
-        | "binanceus"
-        | "bingx"
-        | "bit2c"
-        | "bitbank"
-        | "bitbns"
-        | "bitcoincom"
-        | "bitfinex"
-        | "bitflyer"
-        | "bitget"
-        | "bithumb"
-        | "bitmart"
-        | "bitmex"
-        | "bitopro"
-        | "bitpanda"
-        | "bitrue"
-        | "bitso"
-        | "bitstamp"
-        | "bitteam"
-        | "bitvavo"
-        | "bybit"
-        | "bl3p"
-        | "blockchaincom"
-        | "blofin"
-        | "btcalpha"
-        | "btcbox"
-        | "btcmarkets"
-        | "btcturk"
-        | "cex"
-        | "coincheck"
-        | "coinex"
-        | "coinlist"
-        | "coinmate"
-        | "coinmetro"
-        | "coinone"
-        | "coinsph"
-        | "coinspot"
-        | "cryptocom"
-        | "delta"
-        | "deribit"
-        | "digifinex"
-        | "exmo"
-        | "fmfwio"
-        | "gate"
-        | "gateio"
-        | "gemini"
-        | "hashkey"
-        | "hitbtc"
-        | "hollaex"
-        | "htx"
-        | "huobi"
-        | "huobijp"
-        | "hyperliquid"
-        | "independentreserve"
-        | "indodax"
-        | "kraken"
-        | "krakenfutures"
-        | "kucoin"
-        | "kucoinfutures"
-        | "latoken"
-        | "lbank"
-        | "luno"
-        | "mercado"
-        | "mexc"
-        | "ndax"
-        | "novadax"
-        | "oceanex"
-        | "okcoin"
-        | "okx"
-        | "onetrading"
-        | "oxfun"
-        | "p2b"
-        | "paradex"
-        | "paymium"
-        | "phemex"
-        | "poloniex"
-        | "poloniexfutures"
-        | "probit"
-        | "timex"
-        | "tradeogre"
-        | "upbit"
-        | "vertex"
-        | "wavesexchange"
-        | "whitebit"
-        | "woo"
-        | "woofipro"
-        | "xt"
-        | "yobit"
-        | "zaif"
-        | "zonda"
-        | "local-cex";
+      exchange: ExchangeEnum;
       balances: {
         [key: string]: {
           free?: number | null;
@@ -731,16 +663,16 @@ export type WallettransactionslisttransactionsResponses = {
       createdAt?: string | number | null;
       updatedAt?: string | number | null;
       timestamp?: string | number | null;
-      type: "deposit" | "withdrawal" | "transaction";
+      type: TypeEnum;
       amount: number;
       currency: string;
-      direction?: "in" | "out" | null;
+      direction?: DirectionEnum;
       feeCost?: number | null;
       feeCurrency?: string | null;
       amountInFiat?: number | null;
       feeInFiat?: number | null;
-      fiatCurrency?: "USD" | "EUR" | null;
-      status: "pending" | "ok" | "failed" | "canceled";
+      fiatCurrency?: FiatCurrencyEnum;
+      status: StatusEnum3;
       addressTo?: string | null;
       network?: string | null;
       addressFrom?: string | null;
@@ -1099,39 +1031,7 @@ export type WalletwithdrawquotequotationErrors = {
    */
   400: {
     error: string;
-    type:
-      | "GENERIC_NOT_FOUND"
-      | "GENERIC_UNAUTHORIZED"
-      | "GENERIC_INTERNAL_SERVER_ERROR"
-      | "GENERIC_VALIDATION_ERROR"
-      | "GENERIC_INVALID_REQUEST"
-      | "APIKEY_INSUFFICIENT_PERMISSIONS"
-      | "WALLET_NOT_FOUND"
-      | "WALLET_INVALID_CREDENTIALS"
-      | "QUOTE_NOT_FOUND"
-      | "QUOTE_EXPIRED"
-      | "WITHDRAWAL_INSUFFICIENT_BALANCE"
-      | "WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE"
-      | "WITHDRAWAL_INVALID_ADDRESS"
-      | "WITHDRAWAL_NETWORK_NOT_SUPPORTED"
-      | "WITHDRAWAL_TOO_MANY_ADDRESSES"
-      | "WITHDRAWAL_AMOUNT_BELOW_MINIMUM"
-      | "WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM"
-      | "WITHDRAWAL_ASSET_NOT_SUPPORTED"
-      | "WITHDRAWAL_PROVIDER_ERROR"
-      | "WITHDRAWAL_2FA_REQUIRED_TOTP"
-      | "WITHDRAWAL_2FA_REQUIRED_SMS"
-      | "WITHDRAWAL_2FA_REQUIRED_YUBIKEY"
-      | "WITHDRAWAL_2FA_REQUIRED_PASSPHRASE"
-      | "WITHDRAWAL_2FA_INVALID"
-      | "WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED"
-      | "WITHDRAWAL_KYC_REQUIRED"
-      | "WITHDRAWAL_EMAIL_UNVERIFIED"
-      | "WITHDRAWAL_RATE_LIMIT_EXCEEDED"
-      | "OAUTH_AUTHORIZATION_FAILED"
-      | "OAUTH_TOKEN_EXCHANGE_FAILED"
-      | "OAUTH_INVALID_STATE"
-      | "OAUTH_INSUFFICIENT_SCOPE";
+    type: TypeEnum2;
     result?: unknown;
   };
   /**
@@ -1173,11 +1073,7 @@ export type WalletwithdrawquotequotationResponses = {
     tag?: string | null;
     estimatedTotal?: number;
     feeDetails?: Array<{
-      category:
-        | "exchange_withdrawal_fee"
-        | "network_fee"
-        | "provider_fee"
-        | "other";
+      category: CategoryEnum;
       currency: string;
       amount: number;
       amountInFiat: number;
@@ -1212,39 +1108,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
    */
   400: {
     error: string;
-    type:
-      | "GENERIC_NOT_FOUND"
-      | "GENERIC_UNAUTHORIZED"
-      | "GENERIC_INTERNAL_SERVER_ERROR"
-      | "GENERIC_VALIDATION_ERROR"
-      | "GENERIC_INVALID_REQUEST"
-      | "APIKEY_INSUFFICIENT_PERMISSIONS"
-      | "WALLET_NOT_FOUND"
-      | "WALLET_INVALID_CREDENTIALS"
-      | "QUOTE_NOT_FOUND"
-      | "QUOTE_EXPIRED"
-      | "WITHDRAWAL_INSUFFICIENT_BALANCE"
-      | "WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE"
-      | "WITHDRAWAL_INVALID_ADDRESS"
-      | "WITHDRAWAL_NETWORK_NOT_SUPPORTED"
-      | "WITHDRAWAL_TOO_MANY_ADDRESSES"
-      | "WITHDRAWAL_AMOUNT_BELOW_MINIMUM"
-      | "WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM"
-      | "WITHDRAWAL_ASSET_NOT_SUPPORTED"
-      | "WITHDRAWAL_PROVIDER_ERROR"
-      | "WITHDRAWAL_2FA_REQUIRED_TOTP"
-      | "WITHDRAWAL_2FA_REQUIRED_SMS"
-      | "WITHDRAWAL_2FA_REQUIRED_YUBIKEY"
-      | "WITHDRAWAL_2FA_REQUIRED_PASSPHRASE"
-      | "WITHDRAWAL_2FA_INVALID"
-      | "WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED"
-      | "WITHDRAWAL_KYC_REQUIRED"
-      | "WITHDRAWAL_EMAIL_UNVERIFIED"
-      | "WITHDRAWAL_RATE_LIMIT_EXCEEDED"
-      | "OAUTH_AUTHORIZATION_FAILED"
-      | "OAUTH_TOKEN_EXCHANGE_FAILED"
-      | "OAUTH_INVALID_STATE"
-      | "OAUTH_INSUFFICIENT_SCOPE";
+    type: TypeEnum2;
     result?: unknown;
   };
   /**
@@ -1260,39 +1124,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
    */
   404: {
     error: string;
-    type:
-      | "GENERIC_NOT_FOUND"
-      | "GENERIC_UNAUTHORIZED"
-      | "GENERIC_INTERNAL_SERVER_ERROR"
-      | "GENERIC_VALIDATION_ERROR"
-      | "GENERIC_INVALID_REQUEST"
-      | "APIKEY_INSUFFICIENT_PERMISSIONS"
-      | "WALLET_NOT_FOUND"
-      | "WALLET_INVALID_CREDENTIALS"
-      | "QUOTE_NOT_FOUND"
-      | "QUOTE_EXPIRED"
-      | "WITHDRAWAL_INSUFFICIENT_BALANCE"
-      | "WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE"
-      | "WITHDRAWAL_INVALID_ADDRESS"
-      | "WITHDRAWAL_NETWORK_NOT_SUPPORTED"
-      | "WITHDRAWAL_TOO_MANY_ADDRESSES"
-      | "WITHDRAWAL_AMOUNT_BELOW_MINIMUM"
-      | "WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM"
-      | "WITHDRAWAL_ASSET_NOT_SUPPORTED"
-      | "WITHDRAWAL_PROVIDER_ERROR"
-      | "WITHDRAWAL_2FA_REQUIRED_TOTP"
-      | "WITHDRAWAL_2FA_REQUIRED_SMS"
-      | "WITHDRAWAL_2FA_REQUIRED_YUBIKEY"
-      | "WITHDRAWAL_2FA_REQUIRED_PASSPHRASE"
-      | "WITHDRAWAL_2FA_INVALID"
-      | "WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED"
-      | "WITHDRAWAL_KYC_REQUIRED"
-      | "WITHDRAWAL_EMAIL_UNVERIFIED"
-      | "WITHDRAWAL_RATE_LIMIT_EXCEEDED"
-      | "OAUTH_AUTHORIZATION_FAILED"
-      | "OAUTH_TOKEN_EXCHANGE_FAILED"
-      | "OAUTH_INVALID_STATE"
-      | "OAUTH_INSUFFICIENT_SCOPE";
+    type: TypeEnum2;
     result?: unknown;
   };
 };
@@ -1307,39 +1139,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
   200: {
     success: boolean;
     error?: string;
-    type?:
-      | "GENERIC_NOT_FOUND"
-      | "GENERIC_UNAUTHORIZED"
-      | "GENERIC_INTERNAL_SERVER_ERROR"
-      | "GENERIC_VALIDATION_ERROR"
-      | "GENERIC_INVALID_REQUEST"
-      | "APIKEY_INSUFFICIENT_PERMISSIONS"
-      | "WALLET_NOT_FOUND"
-      | "WALLET_INVALID_CREDENTIALS"
-      | "QUOTE_NOT_FOUND"
-      | "QUOTE_EXPIRED"
-      | "WITHDRAWAL_INSUFFICIENT_BALANCE"
-      | "WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE"
-      | "WITHDRAWAL_INVALID_ADDRESS"
-      | "WITHDRAWAL_NETWORK_NOT_SUPPORTED"
-      | "WITHDRAWAL_TOO_MANY_ADDRESSES"
-      | "WITHDRAWAL_AMOUNT_BELOW_MINIMUM"
-      | "WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM"
-      | "WITHDRAWAL_ASSET_NOT_SUPPORTED"
-      | "WITHDRAWAL_PROVIDER_ERROR"
-      | "WITHDRAWAL_2FA_REQUIRED_TOTP"
-      | "WITHDRAWAL_2FA_REQUIRED_SMS"
-      | "WITHDRAWAL_2FA_REQUIRED_YUBIKEY"
-      | "WITHDRAWAL_2FA_REQUIRED_PASSPHRASE"
-      | "WITHDRAWAL_2FA_INVALID"
-      | "WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED"
-      | "WITHDRAWAL_KYC_REQUIRED"
-      | "WITHDRAWAL_EMAIL_UNVERIFIED"
-      | "WITHDRAWAL_RATE_LIMIT_EXCEEDED"
-      | "OAUTH_AUTHORIZATION_FAILED"
-      | "OAUTH_TOKEN_EXCHANGE_FAILED"
-      | "OAUTH_INVALID_STATE"
-      | "OAUTH_INSUFFICIENT_SCOPE";
+    type?: TypeEnum2;
     result?: unknown;
   };
 };

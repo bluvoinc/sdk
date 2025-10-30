@@ -1,10 +1,8 @@
 import {
-	type Oauth2ExchangeslistexchangesData,
 	type Oauth2ExchangeslistexchangesResponses,
 	type Oauth2ExchangeurlgeturlData,
 	oauth2Exchangeslistexchanges,
 	oauth2Exchangeurlgeturl,
-	WalletgetErrors,
 	type WalletlistlistwalletsData,
 	type WallettransactionslisttransactionsData,
 	type WalletwithdrawbalancebalanceData,
@@ -23,7 +21,6 @@ import { createClient, createConfig } from "../generated/client";
 import type {
 	Client,
 	ClientOptions as ClientOptions2,
-	RequestResult,
 } from "../generated/client/types.gen";
 
 /**
@@ -56,9 +53,9 @@ export class BluvoClient {
 		private readonly orgId: string,
 		private readonly projectId: string,
 		private readonly apiKey: string,
-		private readonly sandbox: boolean = false,
-		private readonly dev: boolean = false,
-		customDomain?: string | "api-bluvo.com" | { api: string; ws: string },
+		readonly sandbox: boolean = false,
+		readonly dev: boolean = false,
+		readonly customDomain?: string | "api-bluvo.com" | { api: string; ws: string },
 	) {
 		// Configure WebSocket and API base URLs based on customDomain first, then environment
 		if (customDomain && typeof customDomain === "object") {
@@ -170,6 +167,7 @@ export class BluvoClient {
 
 		get: async (walletId: string) => {
 			const response = await walletget({
+                client: this.client,
 				headers: {
 					"x-bluvo-wallet-id": walletId,
 				},
@@ -187,6 +185,7 @@ export class BluvoClient {
 		 */
 		ping: async (walletId: string) => {
 			const response = await walletpingping({
+                client: this.client,
 				headers: {
 					"x-bluvo-wallet-id": walletId,
 				},
@@ -227,6 +226,7 @@ export class BluvoClient {
 
 		delete: async (walletId: string) => {
 			const response = await walletdelete({
+                client: this.client,
 				headers: {
 					"x-bluvo-wallet-id": walletId,
 				},
@@ -284,6 +284,7 @@ export class BluvoClient {
 			exchange?: Required<WalletlistlistwalletsData>["query"]["exchange"],
 		) => {
 			const response = await walletlistlistwallets({
+                client: this.client,
 				query: {
 					page,
 					limit,
@@ -374,6 +375,7 @@ export class BluvoClient {
 				sinceDate?: Required<WallettransactionslisttransactionsData>["query"]["sinceDate"],
 			) => {
 				const response = await wallettransactionslisttransactions({
+                    client: this.client,
 					query: {
 						walletId,
 						page,
@@ -399,6 +401,7 @@ export class BluvoClient {
 				query?: WalletwithdrawbalancebalanceData["query"],
 			) => {
 				const response = await walletwithdrawbalancebalance({
+                    client: this.client,
 					query,
 					headers: {
 						"x-bluvo-wallet-id": walletId,
@@ -418,6 +421,7 @@ export class BluvoClient {
 				body: WalletwithdrawquotequotationData["body"],
 			) => {
 				const response = await walletwithdrawquotequotation({
+                    client: this.client,
 					headers: {
 						"x-bluvo-wallet-id": walletId,
 					},
@@ -439,6 +443,7 @@ export class BluvoClient {
 				args: WalletwithdrawquoteidexecutewithdrawData["body"],
 			) => {
 				const response = await walletwithdrawquoteidexecutewithdraw({
+                    client: this.client,
 					path: {
 						quoteId: quotationId,
 					},
@@ -464,6 +469,7 @@ export class BluvoClient {
 			idem: string,
 		) => {
 			const response = await oauth2Exchangeurlgeturl({
+                client: this.client,
 				path: {
 					exchange,
 				},

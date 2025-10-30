@@ -7,6 +7,7 @@ import {
 	type WallettransactionslisttransactionsData,
 	type WalletwithdrawbalancebalanceData,
 	type WalletwithdrawquoteidexecutewithdrawData,
+	type WalletwithdrawquoteidexecutewithdrawResponse,
 	type WalletwithdrawquotequotationData,
 	walletdelete,
 	walletget,
@@ -55,7 +56,10 @@ export class BluvoClient {
 		private readonly apiKey: string,
 		readonly sandbox: boolean = false,
 		readonly dev: boolean = false,
-		readonly customDomain?: string | "api-bluvo.com" | { api: string; ws: string },
+		readonly customDomain?:
+			| string
+			| "api-bluvo.com"
+			| { api: string; ws: string },
 	) {
 		// Configure WebSocket and API base URLs based on customDomain first, then environment
 		if (customDomain && typeof customDomain === "object") {
@@ -167,7 +171,7 @@ export class BluvoClient {
 
 		get: async (walletId: string) => {
 			const response = await walletget({
-                client: this.client,
+				client: this.client,
 				headers: {
 					"x-bluvo-wallet-id": walletId,
 				},
@@ -180,7 +184,7 @@ export class BluvoClient {
 		 */
 		ping: async (walletId: string) => {
 			const response = await walletpingping({
-                client: this.client,
+				client: this.client,
 				headers: {
 					"x-bluvo-wallet-id": walletId,
 				},
@@ -216,7 +220,7 @@ export class BluvoClient {
 
 		delete: async (walletId: string) => {
 			const response = await walletdelete({
-                client: this.client,
+				client: this.client,
 				headers: {
 					"x-bluvo-wallet-id": walletId,
 				},
@@ -270,7 +274,7 @@ export class BluvoClient {
 			exchange?: Required<WalletlistlistwalletsData>["query"]["exchange"],
 		) => {
 			const response = await walletlistlistwallets({
-                client: this.client,
+				client: this.client,
 				query: {
 					page,
 					limit,
@@ -356,7 +360,7 @@ export class BluvoClient {
 				sinceDate?: Required<WallettransactionslisttransactionsData>["query"]["sinceDate"],
 			) => {
 				const response = await wallettransactionslisttransactions({
-                    client: this.client,
+					client: this.client,
 					query: {
 						walletId,
 						page,
@@ -377,7 +381,7 @@ export class BluvoClient {
 				query?: WalletwithdrawbalancebalanceData["query"],
 			) => {
 				const response = await walletwithdrawbalancebalance({
-                    client: this.client,
+					client: this.client,
 					query,
 					headers: {
 						"x-bluvo-wallet-id": walletId,
@@ -392,7 +396,7 @@ export class BluvoClient {
 				body: WalletwithdrawquotequotationData["body"],
 			) => {
 				const response = await walletwithdrawquotequotation({
-                    client: this.client,
+					client: this.client,
 					headers: {
 						"x-bluvo-wallet-id": walletId,
 					},
@@ -407,9 +411,10 @@ export class BluvoClient {
 				idem: string,
 				quotationId: string,
 				args: WalletwithdrawquoteidexecutewithdrawData["body"],
-			) => {
+				// enforce legacy type for backwards compatibility
+			): Promise<WalletwithdrawquoteidexecutewithdrawResponse> => {
 				const response = await walletwithdrawquoteidexecutewithdraw({
-                    client: this.client,
+					client: this.client,
 					path: {
 						quoteId: quotationId,
 					},
@@ -417,8 +422,27 @@ export class BluvoClient {
 						"x-bluvo-wallet-id": walletId,
 					},
 					body: args,
-				});
-				return transformResponse(response);
+				}).then(transformResponse);
+
+				const data = response.data;
+				// we need to reconsile data object that has shape like this:
+				// {
+				//     success: boolean;
+				//     error?: string;
+				//     type?: TypeEnum2;
+				//     result?: unknown;
+				// }
+				const success = data?.success ?? response.success ?? false;
+				const error = data?.error ?? response.error?.error;
+				const type = data?.type ?? response.error?.type;
+				const result = data?.result;
+
+				return {
+					success,
+					error,
+					type,
+					result,
+				};
 			},
 		},
 	};
@@ -430,7 +454,7 @@ export class BluvoClient {
 			idem: string,
 		) => {
 			const response = await oauth2Exchangeurlgeturl({
-                client: this.client,
+				client: this.client,
 				path: {
 					exchange,
 				},

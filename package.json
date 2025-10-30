@@ -2,13 +2,12 @@
   "name": "@bluvo/sdk",
   "private": true,
   "scripts": {
-    "complete-sync": "pnpm --filter @bluvo/sdk-ts build && pnpm --filter @bluvo/react build",
+    "complete-sync": "pnpm generate-sdk && pnpm --filter @bluvo/sdk-ts build && pnpm --filter @bluvo/react build",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "openapi-ts": "openapi-ts",
-    "generate-sdk": "npx @hey-api/openapi-ts -i https://api-bluvo.com/api/v0/openapi -o packages/ts/generated",
+    "generate-sdk": "openapi-ts",
     "sync-sdk-from-openapi-inc-version": "jq '.version |= (split(\".\")|map(tonumber)|.[2] |= .+1|map(tostring)|join(\".\"))' packages/ts/package.json > packages/ts/package.json.tmp && mv packages/ts/package.json.tmp packages/ts/package.json"
   },
   "devDependencies": {

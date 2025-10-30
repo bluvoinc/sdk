@@ -7,9 +7,9 @@ import type {
   Oauth2ExchangeslistexchangesResponses,
   Oauth2ExchangeurlgeturlData,
   Oauth2ExchangeurlgeturlResponses,
-  OrganizationapikeygetapikeyinfoData,
-  OrganizationapikeygetapikeyinfoErrors,
-  OrganizationapikeygetapikeyinfoResponses,
+  OrganizationapikeyapikeyinfoData,
+  OrganizationapikeyapikeyinfoErrors,
+  OrganizationapikeyapikeyinfoResponses,
   WalletdeleteData,
   WalletdeleteErrors,
   WalletdeleteResponses,
@@ -422,20 +422,20 @@ export const walletwithdrawquoteidexecutewithdraw = <
 };
 
 /**
- * Get API Key Info
+ * API key info
  *
  * Get information about the current API key, including its permissions and rate limit configuration.
  *
  * **🔒 Authentication:** This endpoint requires a valid API key.
  */
-export const organizationapikeygetapikeyinfo = <
+export const organizationapikeyapikeyinfo = <
   ThrowOnError extends boolean = false,
 >(
-  options?: Options<OrganizationapikeygetapikeyinfoData, ThrowOnError>,
+  options?: Options<OrganizationapikeyapikeyinfoData, ThrowOnError>,
 ) => {
   return (options?.client ?? client).get<
-    OrganizationapikeygetapikeyinfoResponses,
-    OrganizationapikeygetapikeyinfoErrors,
+    OrganizationapikeyapikeyinfoResponses,
+    OrganizationapikeyapikeyinfoErrors,
     ThrowOnError
   >({
     security: [

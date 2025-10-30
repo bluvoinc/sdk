@@ -1,5 +1,5 @@
 import type {
-	Oauth2ExchangeslistexchangesResponses,
+    Oauth2ExchangeslistexchangesResponses, TypeEnum2,
 } from "../../generated";
 import type { BluvoClient } from "../BluvoClient";
 import { BluvoWebClient } from "../BluvoWebClient";
@@ -735,9 +735,7 @@ export class BluvoFlowClient {
 					});
 				}
 			},
-			// on error should check if the error is recoverable (i.e. requires 2FA, SMS, KYC, etc)
 			onError: (error) => {
-				// Extract error code from new format or legacy format
 				const errorCode = extractErrorCode(error);
 
 				// Handle new error codes
@@ -799,19 +797,21 @@ export class BluvoFlowClient {
 		});
 
 		// Execute withdrawal
-		const { data: res, error, success } = await this.options.executeWithdrawalFn(
+		const data = await this.options.executeWithdrawalFn(
 			state.context.walletId,
 			quoteId,
 			quoteId,
 			{},
 		);
+        const {
+            error,
+            success,
+            type:errorCode
+        } = data;
 
-		if (!success) {
-			// IMMEDIATE ERROR HANDLING (i.e. wrong schema type, network error, etc)
+		if (!success && errorCode) {
+
 			console.error("executeWithdrawal error", error);
-
-			// Extract error code from the error object
-			const errorCode = extractErrorCode(error);
 
 			switch (errorCode) {
 				case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP:
@@ -843,17 +843,14 @@ export class BluvoFlowClient {
 				default:
 					this.flowMachine.send({
 						type: "WITHDRAWAL_FATAL",
-						error:
-							error instanceof Error
-								? error
-								: new Error((error as any)?.error || (error as any)?.message || "Failed to execute withdrawal"),
+                        error: new Error("Unhandled withdrawal error"),
 					});
 			}
 			return;
 		}
 
 		// Withdrawal is in progress, will be handled by WebSocket callbacks
-		return res;
+		return data;
 	}
 
 	async submit2FA(code: string) {
@@ -872,21 +869,28 @@ export class BluvoFlowClient {
 		if (quote && state.context.walletId) {
 			const idem = this.generateId();
 
-			const { data: res, error, success } = await this.options.executeWithdrawalFn(
+			const data = await this.options.executeWithdrawalFn(
 				state.context.walletId,
 				idem,
 				quote.id,
 				{ twofa: code },
 			);
 
+            const {
+                error,
+                success,
+                result,
+                type
+            } = data;
+
 			if (!success) {
 				// Handle errors same as in executeWithdrawal
-				this.handleWithdrawalError(error);
+				this.handleWithdrawalError(type, error, result)
 				return;
 			}
 
 			// Withdrawal is in progress, will be handled by WebSocket callbacks
-			return res;
+			return data;
 		}
 	}
 
@@ -906,20 +910,27 @@ export class BluvoFlowClient {
 		if (quote && state.context.walletId) {
 			const idem = this.generateId();
 
-			const { data: res, error, success } = await this.options.executeWithdrawalFn(
+			const data = await this.options.executeWithdrawalFn(
 				state.context.walletId,
 				idem,
 				quote.id,
 				{},
 			);
 
+            const {
+                error,
+                success,
+                type,
+                result,
+            } = data;
+
 			if (!success) {
-				this.handleWithdrawalError(error);
+				this.handleWithdrawalError(type, error, result);
 				return;
 			}
 
 			// Withdrawal is in progress, will be handled by WebSocket callbacks
-			return res;
+			return data;
 		}
 	}
 
@@ -938,10 +949,11 @@ export class BluvoFlowClient {
 		}
 	}
 
-	private handleWithdrawalError(error: any) {
-		// Extract error code from the error object
-		const errorCode = extractErrorCode(error);
-
+	private handleWithdrawalError(
+        errorCode: TypeEnum2 | undefined,
+        errorMsg?: string,
+        result?: any
+    ) {
 		switch (errorCode) {
 			case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP:
 			case WITHDRAWAL_EXECUTION_ERROR_TYPES.TWO_FACTOR_REQUIRED: // Legacy compatibility
@@ -966,17 +978,14 @@ export class BluvoFlowClient {
 			case ERROR_CODES.WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED:
 				this.flowMachine?.send({
 					type: "WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED",
-					result: extractErrorResult(error),
+					result: result,
 				});
 				break;
 			default:
 				this.flowMachine?.send({
 					type: "WITHDRAWAL_FATAL",
-					error:
-						error instanceof Error
-							? error
-							: new Error((error as any)?.error || (error as any)?.message || "Failed to execute withdrawal"),
-				});
+					error: new Error(errorMsg),
+                });
 		}
 	}
 

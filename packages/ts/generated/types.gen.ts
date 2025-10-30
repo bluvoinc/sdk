@@ -619,10 +619,6 @@ export type WallettransactionslisttransactionsData = {
   path?: never;
   query?: {
     /**
-     * The wallet ID to list transactions for. If not provided, returns transactions for all wallets.
-     */
-    walletId?: string;
-    /**
      * Page number (0-indexed).
      */
     page?: number | null;
@@ -1147,14 +1143,14 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
 export type WalletwithdrawquoteidexecutewithdrawResponse =
   WalletwithdrawquoteidexecutewithdrawResponses[keyof WalletwithdrawquoteidexecutewithdrawResponses];
 
-export type OrganizationapikeygetapikeyinfoData = {
+export type OrganizationapikeyapikeyinfoData = {
   body?: never;
   path?: never;
   query?: never;
   url: "/v0/organization/api-key";
 };
 
-export type OrganizationapikeygetapikeyinfoErrors = {
+export type OrganizationapikeyapikeyinfoErrors = {
   /**
    * Forbidden - Insufficient API key permissions
    */
@@ -1165,10 +1161,10 @@ export type OrganizationapikeygetapikeyinfoErrors = {
   };
 };
 
-export type OrganizationapikeygetapikeyinfoError =
-  OrganizationapikeygetapikeyinfoErrors[keyof OrganizationapikeygetapikeyinfoErrors];
+export type OrganizationapikeyapikeyinfoError =
+  OrganizationapikeyapikeyinfoErrors[keyof OrganizationapikeyapikeyinfoErrors];
 
-export type OrganizationapikeygetapikeyinfoResponses = {
+export type OrganizationapikeyapikeyinfoResponses = {
   /**
    * Successful response
    */
@@ -1192,5 +1188,5 @@ export type OrganizationapikeygetapikeyinfoResponses = {
   };
 };
 
-export type OrganizationapikeygetapikeyinfoResponse =
-  OrganizationapikeygetapikeyinfoResponses[keyof OrganizationapikeygetapikeyinfoResponses];
+export type OrganizationapikeyapikeyinfoResponse =
+  OrganizationapikeyapikeyinfoResponses[keyof OrganizationapikeyapikeyinfoResponses];

@@ -355,11 +355,16 @@ describe('Cross-Browser Compatibility', () => {
                 mkUUIDFn: () => 'blocked-uuid'
             });
 
-            // Should throw an error when popup is blocked
-            await expect(client.startWithdrawalFlow({
+            // Should gracefully handle popup blocker (no longer throws)
+            const result = await client.startWithdrawalFlow({
                 exchange: 'coinbase',
                 walletId: 'blocked-wallet'
-            })).rejects.toThrow('Failed to open OAuth2 window');
+            });
+
+            // Should return an object with machine and cleanup function
+            expect(result).toBeDefined();
+            expect(result.machine).toBeDefined();
+            expect(result.closeOAuthWindow).toBeTypeOf('function');
         });
 
         it('should handle window close events consistently', async () => {

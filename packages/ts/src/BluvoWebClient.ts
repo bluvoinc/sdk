@@ -154,9 +154,8 @@ export class BluvoWebClient {
 		) {
 			if (typeof windowRef === "undefined") {
 				if (typeof window === "undefined") {
-					throw new Error(
-						"This method can only be called in a browser environment",
-					);
+					console.error("This method can only be called in a browser environment");
+					return () => {}; // Return empty cleanup function
 				}
 				windowRef = window;
 			}
@@ -167,7 +166,8 @@ export class BluvoWebClient {
 			});
 
 			if (!success || !url) {
-				throw new Error("Failed to generate OAuth2 URL");
+				console.error("Failed to generate OAuth2 URL:", error);
+				return () => {}; // Return empty cleanup function
 			}
 
 			// Set default window options
@@ -201,9 +201,8 @@ export class BluvoWebClient {
 			);
 
 			if (!newWindow) {
-				throw new Error(
-					"Failed to open OAuth2 window. Please allow pop-ups for this site.",
-				);
+				console.error("Failed to open OAuth2 window. Please allow pop-ups for this site.");
+				return () => {}; // Return empty cleanup function
 			}
 
 			newWindow.focus();
@@ -380,18 +379,16 @@ export class BluvoWebClient {
 			}
 
 			if (data.type === WorkflowTypes.OAuth2Flow && !options.onOAuth2Complete) {
-				throw new Error(
-					"received OAuth2 message but no onOAuth2Complete handler is defined",
-				);
+				console.error("received OAuth2 message but no onOAuth2Complete handler is defined");
+				return;
 			}
 
 			if (
 				data.type === WorkflowTypes.WithdrawFunds &&
 				!options.onWithdrawComplete
 			) {
-				throw new Error(
-					"received Withdraw message but no onWithdrawComplete handler is defined",
-				);
+				console.error("received Withdraw message but no onWithdrawComplete handler is defined");
+				return;
 			}
 
 			if (data.type === WorkflowTypes.OAuth2Flow) {

@@ -1,23 +1,5 @@
-// import {
-// 	type Walletwithdrawbalancebalance200Response,
-// 	Walletwithdrawbalancebalance200ResponseBalancesInner,
-// 	type Walletwithdrawquoteidexecutewithdraw200Response,
-// 	type Walletwithdrawquotequotation200Response,
-// } from "../../generated";
-
-// import type {
-// 	ListCentralizedExchangesResponse,
-// 	ListCentralizedExchangesResponseStatusEnum,
-// 	Wallet,
-// 	WithdrawableBalance,
-// 	WithdrawableBalanceNetwork,
-// } from "../types/api.types";
 import type {
 	Oauth2ExchangeslistexchangesResponses,
-	WalletgetResponse as Wallet,
-	WalletwithdrawbalancebalanceResponse,
-	WalletwithdrawquoteidexecutewithdrawResponses,
-	WalletwithdrawquotequotationResponses,
 } from "../../generated";
 import type { BluvoClient } from "../BluvoClient";
 import { BluvoWebClient } from "../BluvoWebClient";

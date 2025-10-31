@@ -30,6 +30,9 @@ importers:
       '@bluvo/sdk-ts':
         specifier: workspace:*
         version: link:../ts
+      '@types/node':
+        specifier: ^20
+        version: 20.19.19
       '@types/react':
         specifier: ^18.0.0
         version: 18.3.24

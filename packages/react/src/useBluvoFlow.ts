@@ -42,7 +42,9 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		async (flowOptions: WithdrawalFlowOptions) => {
 			const result = await flowClient.startWithdrawalFlow(flowOptions);
 			setFlowMachine(result.machine);
-			closeOAuthWindowRef.current = result.closeOAuthWindow;
+            if(result.closeOAuthWindow) {
+                closeOAuthWindowRef.current = result.closeOAuthWindow;
+            }
 			return result;
 		},
 		[flowClient],
@@ -60,6 +62,10 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 	const silentResumeWithdrawalFlow = useCallback(
 		async (flowOptions: SilentResumeWithdrawalFlowOptions) => {
 			const result = await flowClient.silentResumeWithdrawalFlow(flowOptions);
+            if(!result) {
+                console.error("Error resuming withdrawal flow silently");
+                return null;
+            }
 			setFlowMachine(result.machine);
 			return result;
 		},
@@ -98,6 +104,10 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 
 			try {
 				const result = await flowClient.loadExchanges(status);
+                if(!result) {
+                    console.error("Error loading exchanges");
+                    return null;
+                }
 				setExchanges(result);
 				return result;
 			} catch (error) {

@@ -348,6 +348,7 @@ export class BluvoFlowClient {
 
 		return {
 			machine: this.flowMachine,
+            closeOAuthWindow: null
 		};
 	}
 

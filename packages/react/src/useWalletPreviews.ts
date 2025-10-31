@@ -1,5 +1,7 @@
+"use client";
+
 import { useState, useEffect, useCallback, useRef } from 'react';
-import type {
+import {
     BluvoPreviewManager,
     BluvoPreviewManagerOptions,
     PreviewWalletInput,
@@ -51,7 +53,6 @@ export interface UseWalletPreviewsOptions extends BluvoPreviewManagerOptions {
 export function useWalletPreviews(options: UseWalletPreviewsOptions) {
     const [previewManager] = useState(() => {
         // Lazy import to avoid SSR issues
-        const { BluvoPreviewManager } = require('@bluvo/sdk-ts');
         return new BluvoPreviewManager({
             pingWalletByIdFn: options.pingWalletByIdFn,
             fetchWithdrawableBalanceFn: options.fetchWithdrawableBalanceFn

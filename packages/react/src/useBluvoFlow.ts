@@ -1,3 +1,5 @@
+"use client";
+
 import type {
 	BluvoFlowClientOptions,
 	FlowActionType,
@@ -8,6 +10,7 @@ import type {
 	SilentResumeWithdrawalFlowOptions,
 	WithdrawalFlowOptions,
 } from "@bluvo/sdk-ts";
+import { BluvoFlowClient } from "@bluvo/sdk-ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFlowMachine } from "./useFlowMachine";
 
@@ -15,8 +18,6 @@ export interface UseBluvoFlowOptions extends BluvoFlowClientOptions {}
 
 export function useBluvoFlow(options: UseBluvoFlowOptions) {
 	const [flowClient] = useState(() => {
-		// Lazy import to avoid SSR issues
-		const { BluvoFlowClient } = require("@bluvo/sdk-ts");
 		return new BluvoFlowClient(options);
 	});
 	const [flowMachine, setFlowMachine] = useState<Machine<
@@ -177,8 +178,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		isOAuthWaiting: flow.state?.type === "oauth:waiting",
 		isOAuthProcessing: flow.state?.type === "oauth:processing",
 		isOAuthError:
-			flow.state?.type === "oauth:error" ||
-			flow.state?.type === "oauth:fatal",
+			flow.state?.type === "oauth:error" || flow.state?.type === "oauth:fatal",
 		isOAuthFatal: flow.state?.type === "oauth:fatal",
 		isWalletConnectionInvalid: flow.state?.type === "oauth:fatal",
 		isOAuthComplete: flow.state?.type === "oauth:completed",

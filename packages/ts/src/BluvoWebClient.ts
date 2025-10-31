@@ -1,4 +1,5 @@
-import { oauth2Exchangeurlgeturl } from "../generated";
+import { type ClientOptions, oauth2Exchangeurlgeturl } from "../generated";
+import { type Client, createClient, createConfig } from "../generated/client";
 import { transformResponse } from "./helpers";
 import { type Subscription, WebSocketClient } from "./WebSocketClient";
 import {
@@ -39,6 +40,7 @@ export class BluvoWebClient {
 	private wsClient: WebSocketClient;
 	private readonly wsBase: string;
 	private readonly apiBase?: string;
+	private readonly client: Client;
 
 	/**
 	 * Creates a new BluvoWebClient instance for browser environments.
@@ -85,6 +87,15 @@ export class BluvoWebClient {
 			this.apiBase = "https://api-bluvo.com";
 			this.wsBase = "wss://api-bluvo.com";
 		}
+		this.client = createClient(
+			createConfig<ClientOptions>({
+				baseUrl: this.apiBase,
+				headers: {
+					"x-bluvo-org-id": this.orgId,
+					"x-bluvo-project-id": this.projectId,
+				},
+			}),
+		);
 	}
 
 	static createClient({
@@ -155,7 +166,9 @@ export class BluvoWebClient {
 		) {
 			if (typeof windowRef === "undefined") {
 				if (typeof window === "undefined") {
-					console.error("This method can only be called in a browser environment");
+					console.error(
+						"This method can only be called in a browser environment",
+					);
 					return () => {}; // Return empty cleanup function
 				}
 				windowRef = window;
@@ -202,7 +215,9 @@ export class BluvoWebClient {
 			);
 
 			if (!newWindow) {
-				console.error("Failed to open OAuth2 window. Please allow pop-ups for this site.");
+				console.error(
+					"Failed to open OAuth2 window. Please allow pop-ups for this site.",
+				);
 				return () => {}; // Return empty cleanup function
 			}
 
@@ -307,18 +322,17 @@ export class BluvoWebClient {
 				},
 				headers: {
 					"x-bluvo-wallet-id": walletId,
-					"x-bluvo-org-id": this.orgId,
-					"x-bluvo-project-id": this.projectId,
 				},
+				client: this.client,
 				query: {
 					idem,
 				},
 			}).then(transformResponse);
-            
-            return {
-                ...response,
-                url: response.data?.url,
-            }
+
+			return {
+				...response,
+				url: response.data?.url,
+			};
 		},
 	};
 
@@ -378,7 +392,9 @@ export class BluvoWebClient {
 			}
 
 			if (data.type === WorkflowTypes.OAuth2Flow && !options.onOAuth2Complete) {
-				console.error("received OAuth2 message but no onOAuth2Complete handler is defined");
+				console.error(
+					"received OAuth2 message but no onOAuth2Complete handler is defined",
+				);
 				return;
 			}
 
@@ -386,7 +402,9 @@ export class BluvoWebClient {
 				data.type === WorkflowTypes.WithdrawFunds &&
 				!options.onWithdrawComplete
 			) {
-				console.error("received Withdraw message but no onWithdrawComplete handler is defined");
+				console.error(
+					"received Withdraw message but no onWithdrawComplete handler is defined",
+				);
 				return;
 			}
 

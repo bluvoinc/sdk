@@ -326,6 +326,7 @@ export class BluvoWebClient {
 				client: this.client,
 				query: {
 					idem,
+                    // ignore customDomain for now
 				},
 			}).then(transformResponse);
 

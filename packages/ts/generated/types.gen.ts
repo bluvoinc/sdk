@@ -337,6 +337,10 @@ export type Oauth2ExchangeurlgeturlData = {
      * Idempotency key.
      */
     idem: string;
+    /**
+     * Custom base domain for redirect URI i.e. 'example.com'.
+     */
+    customDomain?: string | null;
   };
   url: "/v0/oauth2/{exchange}/url";
 };

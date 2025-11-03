@@ -3,11 +3,15 @@
   "private": true,
   "scripts": {
     "complete-sync": "pnpm generate-sdk && pnpm --filter @bluvo/sdk-ts build && pnpm --filter @bluvo/react build",
+    "generate-sdk": "openapi-ts",
+
+    "complete-sync-test": "pnpm generate-sdk-test && pnpm --filter @bluvo/sdk-ts build && pnpm --filter @bluvo/react build",
+    "generate-sdk-test": "openapi-ts --file openapi-ts.test.config.ts",
+
     "build": "turbo run build",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "generate-sdk": "openapi-ts",
     "sync-sdk-from-openapi-inc-version": "jq '.version |= (split(\".\")|map(tonumber)|.[2] |= .+1|map(tostring)|join(\".\"))' packages/ts/package.json > packages/ts/package.json.tmp && mv packages/ts/package.json.tmp packages/ts/package.json"
   },
   "devDependencies": {

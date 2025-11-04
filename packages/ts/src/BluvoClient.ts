@@ -1,29 +1,26 @@
 import {
-	type Oauth2ExchangeslistexchangesResponses,
-	type Oauth2ExchangeurlgeturlData,
-	oauth2Exchangeslistexchanges,
-	oauth2Exchangeurlgeturl,
-	type WalletlistlistwalletsData,
-	type WallettransactionslisttransactionsData,
-	type WalletwithdrawbalancebalanceData,
-	type WalletwithdrawquoteidexecutewithdrawData,
-	type WalletwithdrawquoteidexecutewithdrawResponse,
-	type WalletwithdrawquotequotationData,
-	walletdelete,
-	walletget,
-	walletlistlistwallets,
-	walletpingping,
-	wallettransactionslisttransactions,
-	walletwithdrawbalancebalance,
-	walletwithdrawquoteidexecutewithdraw,
-	walletwithdrawquotequotation,
+    oauth2Exchangeslistexchanges,
+    type Oauth2ExchangeslistexchangesResponses,
+    oauth2Exchangeurlgeturl,
+    type Oauth2ExchangeurlgeturlData,
+    walletdelete,
+    walletget,
+    walletlistlistwallets,
+    type WalletlistlistwalletsData,
+    walletpingping,
+    wallettransactionslisttransactions,
+    type WallettransactionslisttransactionsData,
+    walletwithdrawbalancebalance,
+    type WalletwithdrawbalancebalanceData,
+    walletwithdrawquoteidexecutewithdraw,
+    type WalletwithdrawquoteidexecutewithdrawData,
+    walletwithdrawquotequotation,
+    type WalletwithdrawquotequotationData,
 } from "../generated";
-import { createClient, createConfig } from "../generated/client";
-import type {
-	Client,
-	ClientOptions as ClientOptions2,
-} from "../generated/client/types.gen";
-import { transformResponse } from "./helpers";
+import {createClient, createConfig} from "../generated/client";
+import type {Client, ClientOptions as ClientOptions2,} from "../generated/client/types.gen";
+import {transformResponse} from "./helpers";
+
 /**
  * The core client class for interacting with Bluvo's cryptocurrency exchange integration platform.
  *
@@ -75,6 +72,7 @@ export class BluvoClient {
 			this.apiBase = `https://${customDomain}`;
 			this.wsBase = `wss://${customDomain}`;
 		} else if (dev) {
+            console.log("Using Bluvo Development environment");
 			this.apiBase = "http://localhost:8787";
 			this.wsBase = "ws://localhost:8787";
 		} else if (sandbox) {
@@ -465,10 +463,13 @@ export class BluvoClient {
 		listExchanges: async (
 			status?: Oauth2ExchangeslistexchangesResponses["200"]["exchanges"][number]["status"],
 		) => {
-			const response = await oauth2Exchangeslistexchanges({});
-			const exchanges =
-				response?.data?.exchanges?.filter((r) => r.status === status) || [];
-			return exchanges;
+			const response = await oauth2Exchangeslistexchanges({
+                client: this.client,
+            });
+            return response
+                ?.data
+                ?.exchanges
+                ?.filter((r) => r.status === status) || [];
 		},
 	};
 }

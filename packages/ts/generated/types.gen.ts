@@ -698,6 +698,10 @@ export type WalletwithdrawbalancebalanceData = {
      * Override balance refresh threshold in minutes. Set to 0 to always refresh balances from the exchange. Defaults to 0.
      */
     refreshThresholdMinutes?: number;
+    /**
+     * Automatically delete the wallet if API credentials are found to be invalid during balance fetch. Defaults to true.
+     */
+    autoDeleteIfInvalid?: boolean;
   };
   url: "/v0/wallet/withdraw/balance";
 };
@@ -1098,7 +1102,12 @@ export type WalletwithdrawquoteidexecutewithdrawData = {
   path: {
     quoteId: string;
   };
-  query?: never;
+  query?: {
+    /**
+     * Automatically delete the wallet if API credentials are found to be invalid during balance fetch. Defaults to true.
+     */
+    autoDeleteIfInvalid?: boolean;
+  };
   url: "/v0/wallet/withdraw/{quoteId}/execute";
 };
 

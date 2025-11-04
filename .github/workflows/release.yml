@@ -43,6 +43,9 @@ jobs:
       - name: Run tests for @bluvo/react
         run: pnpm -F @bluvo/react test
 
+      - name: Sync SDK from OpenAPI
+        run: pnpm complete-sync
+
       - name: Build packages
         run: |
           pnpm -F @bluvo/sdk-ts build

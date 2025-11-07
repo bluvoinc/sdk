@@ -120,6 +120,18 @@ export interface QuoteRequestOptions {
 	includeFee?: boolean;
 }
 
+export interface LoadExchangesResult {
+	success: boolean;
+	error?: string;
+	type?: TypeEnum2;
+	result?: Array<{
+		id: string;
+		name: string;
+		logoUrl: string;
+		status: string;
+	}>;
+}
+
 export class BluvoFlowClient {
 	private webClient: BluvoWebClient;
 	private flowMachine?: Machine<FlowState, FlowActionType>;
@@ -154,23 +166,58 @@ export class BluvoFlowClient {
 
 		this.flowMachine.send({ type: "LOAD_EXCHANGES" });
 
-		// Note: listExchangesFn returns the exchanges array directly, not {data, error, success}
-		const exchanges = await this.options.listExchangesFn(status);
+		// Wrap in try-catch since listExchangesFn returns directly (not {data, error, success})
+		let exchanges: any;
+		try {
+			exchanges = await this.options.listExchangesFn(status);
+		} catch (err) {
+			// Handle thrown exceptions
+			const errorInfo = extractErrorTypeInfo(err);
+			const errorMessage = err instanceof Error ? err.message : "Failed to load exchanges";
+			const error = new Error(errorMessage);
 
-		if (!exchanges || !Array.isArray(exchanges)) {
-			const error = new Error("Failed to load exchanges");
 			this.flowMachine.send({
 				type: "EXCHANGES_FAILED",
 				error,
 			});
-			return;
+
+			return {
+				success: false,
+				error: errorMessage,
+				type: (errorInfo.rawType as TypeEnum2) || undefined,
+			};
 		}
 
+		// Validate response structure
+		if (!exchanges || !Array.isArray(exchanges)) {
+			const errorMsg = "Failed to load exchanges: Invalid response";
+			const error = new Error(errorMsg);
+
+			this.flowMachine.send({
+				type: "EXCHANGES_FAILED",
+				error,
+			});
+
+			return {
+				success: false,
+				error: errorMsg,
+			};
+		}
+
+		// Success: send to state machine and return standardized response
 		this.flowMachine.send({
 			type: "EXCHANGES_LOADED",
 			exchanges,
 		});
-		return exchanges;
+
+		return {
+			// Legacy compatibility - flat array access
+			exchanges,
+
+			// New standardized structure
+			success: true,
+			result: exchanges,
+		};
 	}
 
 	async startWithdrawalFlow(flowOptions: WithdrawalFlowOptions) {

@@ -108,8 +108,18 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
                     console.error("Error loading exchanges");
                     return null;
                 }
-				setExchanges(result);
-				return result;
+
+				// Handle standardized error/success response
+				if (!result.success) {
+					const errorObj = new Error(result.error || "Failed to load exchanges");
+					setExchangesError(errorObj);
+					throw errorObj;
+				}
+
+				// Use legacy flat field for backwards compatibility
+				const exchangesData = result.exchanges || result.result || [];
+				setExchanges(exchangesData);
+				return exchangesData;
 			} catch (error) {
 				const errorObj =
 					error instanceof Error

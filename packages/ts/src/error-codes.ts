@@ -170,6 +170,76 @@ export function extractErrorCode(error: BluvoError): ErrorCode | null {
 }
 
 /**
+ * Comprehensive error type information
+ * Includes both validated error codes and raw type strings
+ */
+export interface ErrorTypeInfo {
+  /** Known error code from ERROR_CODES, null if not recognized */
+  knownCode: ErrorCode | null;
+  /** Raw type string from error object (even if unknown), null if not found */
+  rawType: string | null;
+}
+
+/**
+ * Extract comprehensive error type information from an error object
+ *
+ * This function provides maximum flexibility by returning both:
+ * - `knownCode`: Only set if the error code is in ERROR_CODES (validated)
+ * - `rawType`: Any type/errorCode/code string found, even if unknown
+ *
+ * This allows callers to handle known errors specifically while still
+ * preserving unknown error codes for logging/debugging.
+ *
+ * @param error The error object to extract type information from
+ * @returns Object with knownCode and rawType properties
+ *
+ * @example
+ * const info = extractErrorTypeInfo(error);
+ * if (info.knownCode === ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE) {
+ *   // Handle known error
+ * } else if (info.rawType) {
+ *   // Log unknown error code
+ *   console.log('Unknown error:', info.rawType);
+ * }
+ */
+export function extractErrorTypeInfo(error: BluvoError): ErrorTypeInfo {
+  // First, try to get a known/validated error code
+  const knownCode = extractErrorCode(error);
+
+  // If we have a known code, use it as rawType too
+  if (knownCode) {
+    return { knownCode, rawType: knownCode };
+  }
+
+  // No known code found, but try to extract ANY type string
+  // This handles unknown/future error codes gracefully
+  if (error == null || typeof error !== 'object') {
+    return { knownCode: null, rawType: null };
+  }
+
+  const err = error as Record<string, unknown>;
+
+  // Check direct fields in priority order: type, errorCode, code
+  const rawType = err.type || err.errorCode || err.code;
+
+  if (rawType && typeof rawType === 'string' && rawType.length > 0) {
+    return { knownCode: null, rawType };
+  }
+
+  // Check legacy axios format: response.data.type
+  const legacyError = err as LegacyAxiosError;
+  if (legacyError.response?.data?.type) {
+    const legacyType = legacyError.response.data.type;
+    if (typeof legacyType === 'string' && legacyType.length > 0) {
+      return { knownCode: null, rawType: legacyType };
+    }
+  }
+
+  // No type information found at all
+  return { knownCode: null, rawType: null };
+}
+
+/**
  * Extract error result from various error formats
  */
 export function extractErrorResult(error: BluvoError): unknown {

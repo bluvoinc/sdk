@@ -16,6 +16,16 @@ export * from "./src/types/preview.types";
 export * from "./src/types/withdrawal.types";
 export type { Subscription, TopicInfo } from "./src/WebSocketClient";
 export { WebSocketClient } from "./src/WebSocketClient";
+// Error handling utilities
+export {
+	ERROR_CODES,
+	extractErrorCode,
+	extractErrorTypeInfo,
+	extractErrorResult,
+	type ErrorCode,
+	type ErrorTypeInfo,
+	type BluvoError,
+} from "./src/error-codes";
 
 // API Types - Clean, self-explanatory type exports
 // export * from './src/types/api.types';

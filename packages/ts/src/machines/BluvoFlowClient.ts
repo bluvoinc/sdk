@@ -8,7 +8,7 @@ import {
 	ERROR_CODES,
 	extractErrorCode,
 	extractErrorResult,
-	WITHDRAWAL_EXECUTION_ERROR_TYPES,
+	extractErrorTypeInfo,
 	WITHDRAWAL_QUOTATION_ERROR_TYPES,
 } from "../error-codes";
 import type { FlowActionType, FlowState } from "../types/flow.types";
@@ -22,7 +22,6 @@ import {
 import { createFlowMachine } from "./flowMachine";
 import { transformBalances } from "../utils/balanceTransform";
 import { WithdrawalErrorHandler } from "./withdrawalErrorHandler";
-import { extractErrorMessage, toErrorInstance } from "../utils/errorUtils";
 
 export interface BluvoFlowClientOptions {
 	orgId: string;
@@ -559,22 +558,13 @@ export class BluvoFlowClient {
 		);
 
 		if (!success) {
-			// Extract error code from the error object
-			const errorCode = extractErrorCode(error);
+			// Extract comprehensive error type information
+			const errorInfo = extractErrorTypeInfo(error);
 			let flowError: Error;
 
-			// Try to get raw error type/code even if not in known ERROR_CODES
-			let errorType: TypeEnum2 | undefined = errorCode ? (errorCode as TypeEnum2) : undefined;
-			// If extractErrorCode didn't find it, try to get raw type/errorCode from error object
-			if (!errorCode && error && typeof error === 'object') {
-				const rawType = (error as any)?.type || (error as any)?.errorCode || (error as any)?.code;
-				if (rawType && typeof rawType === 'string') {
-					errorType = rawType as TypeEnum2;
-				}
-			}
-
-			if (errorCode) {
-				switch (errorCode) {
+			// Handle known error codes with specific messages
+			if (errorInfo.knownCode) {
+				switch (errorInfo.knownCode) {
 					case ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE:
 					case ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE:
 					case WITHDRAWAL_QUOTATION_ERROR_TYPES.INSUFFICIENT_BALANCE: // Legacy compatibility
@@ -601,6 +591,7 @@ export class BluvoFlowClient {
 						flowError = error instanceof Error ? error : new Error((error as any)?.error || (error as any)?.message || "Failed to get quote");
 				}
 			} else {
+				// No known error code, use generic error message
 				flowError = error instanceof Error ? error : new Error((error as any)?.error || (error as any)?.message || "Failed to get quote");
 			}
 
@@ -612,7 +603,7 @@ export class BluvoFlowClient {
 			return {
 				success: false,
 				error: flowError.message,
-				type: errorType,
+				type: (errorInfo.rawType as TypeEnum2) || undefined,
 			};
 		}
 

@@ -165,6 +165,13 @@ export interface ExecuteWithdrawalResult {
 	result?: any; // The data returned from executeWithdrawalFn (workflow/transaction info)
 }
 
+export interface Submit2FAResult {
+	success: boolean;
+	error?: string;
+	type?: TypeEnum2;
+	result?: any; // The data returned from executeWithdrawalFn after 2FA submission
+}
+
 export class BluvoFlowClient {
 	private webClient: BluvoWebClient;
 	private flowMachine?: Machine<FlowState, FlowActionType>;
@@ -1012,10 +1019,31 @@ export class BluvoFlowClient {
 	}
 
 	async submit2FA(code: string) {
-		if (!this.flowMachine) return;
+		// Guard: No flow machine
+		if (!this.flowMachine) {
+			return {
+				success: false,
+				error: "Flow machine not initialized",
+			};
+		}
 
 		const state = this.flowMachine.getState();
-		if (state.type !== "withdraw:error2FA") return;
+
+		// Guard: Wrong state
+		if (state.type !== "withdraw:error2FA") {
+			return {
+				success: false,
+				error: `Cannot submit 2FA in state: ${state.type}`,
+			};
+		}
+
+		// Guard: No quote or wallet ID
+		if (!state.context.quote || !state.context.walletId) {
+			return {
+				success: false,
+				error: "Quote or wallet ID not found in state",
+			};
+		}
 
 		this.flowMachine.send({
 			type: "SUBMIT_2FA",
@@ -1024,25 +1052,41 @@ export class BluvoFlowClient {
 
 		// Re-execute withdrawal with 2FA code
 		const quote = state.context.quote;
-		if (quote && state.context.walletId) {
-			const idem = this.generateId();
+		const idem = this.generateId();
 
-			const { data: res, error, success } = await this.options.executeWithdrawalFn(
-				state.context.walletId,
-				idem,
-				quote.id,
-				{ twofa: code },
-			);
+		const { data: res, error, success } = await this.options.executeWithdrawalFn(
+			state.context.walletId,
+			idem,
+			quote.id,
+			{ twofa: code },
+		);
 
+		if (!success) {
+			// Extract error type information
+			const errorInfo = extractErrorTypeInfo(error);
+			const errorMessage = error instanceof Error
+				? error.message
+				: (error as any)?.error || (error as any)?.message || "Failed to submit 2FA code";
 
-			if (!success) {
-				this.handleWithdrawalError(error);
-				return;
-			}
+			this.handleWithdrawalError(error);
 
-			// Withdrawal is in progress, will be handled by WebSocket callbacks
-			return res;
+			return {
+				success: false,
+				error: errorMessage,
+				type: (errorInfo.rawType as TypeEnum2) || undefined,
+			};
 		}
+
+		// Withdrawal is in progress, will be handled by WebSocket callbacks
+		// Return standardized success response
+		return {
+			// Legacy compatibility - direct access to response data
+			...(res ?? {}),
+
+			// New standardized structure
+			success: true,
+			result: res,
+		};
 	}
 
 	async submitSMS(code: string) {

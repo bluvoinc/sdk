@@ -507,13 +507,22 @@ export class BluvoFlowClient {
 	}
 
 	async requestQuote(options: QuoteRequestOptions) {
+		// Guard: No flow machine
 		if (!this.flowMachine) {
-			return undefined;
+			return {
+				success: false,
+				error: "Flow machine not initialized",
+			};
 		}
 
 		const state = this.flowMachine.getState();
+
+		// Guard: No wallet ID
 		if (!state.context.walletId) {
-			return undefined;
+			return {
+				success: false,
+				error: "Wallet ID not found in state",
+			};
 		}
 
 		console.log(
@@ -554,6 +563,16 @@ export class BluvoFlowClient {
 			const errorCode = extractErrorCode(error);
 			let flowError: Error;
 
+			// Try to get raw error type/code even if not in known ERROR_CODES
+			let errorType: TypeEnum2 | undefined = errorCode ? (errorCode as TypeEnum2) : undefined;
+			// If extractErrorCode didn't find it, try to get raw type/errorCode from error object
+			if (!errorCode && error && typeof error === 'object') {
+				const rawType = (error as any)?.type || (error as any)?.errorCode || (error as any)?.code;
+				if (rawType && typeof rawType === 'string') {
+					errorType = rawType as TypeEnum2;
+				}
+			}
+
 			if (errorCode) {
 				switch (errorCode) {
 					case ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE:
@@ -589,15 +608,25 @@ export class BluvoFlowClient {
 				type: "QUOTE_FAILED",
 				error: flowError,
 			});
-			return;
+
+			return {
+				success: false,
+				error: flowError.message,
+				type: errorType,
+			};
 		}
 
 		if (!quote) {
+			const errorMsg = "No quote returned from backend";
 			this.flowMachine.send({
 				type: "QUOTE_FAILED",
-				error: new Error("No quote returned from backend"),
+				error: new Error(errorMsg),
 			});
-			return;
+
+			return {
+				success: false,
+				error: errorMsg,
+			};
 		}
 
 		console.log(
@@ -670,10 +699,19 @@ export class BluvoFlowClient {
 			}, expiresIn);
 		}
 
-		// return the quote
+		// Return success with quote data
 		return {
-			rawQuote: quote,
-			quoteData,
+            // legacy compatibility:
+            // contract
+            rawQuote: quote,
+            quoteData,
+
+            // expand
+			success: true,
+			result: {
+				rawQuote: quote,
+				quoteData,
+			},
 		};
 	}
 

@@ -158,6 +158,13 @@ export interface LoadWalletResult {
 	};
 }
 
+export interface ExecuteWithdrawalResult {
+	success: boolean;
+	error?: string;
+	type?: TypeEnum2;
+	result?: any; // The data returned from executeWithdrawalFn (workflow/transaction info)
+}
+
 export class BluvoFlowClient {
 	private webClient: BluvoWebClient;
 	private flowMachine?: Machine<FlowState, FlowActionType>;
@@ -818,10 +825,30 @@ export class BluvoFlowClient {
 	}
 
 	async executeWithdrawal(quoteId: string) {
-		if (!this.flowMachine) return;
+		// Guard: No flow machine
+		if (!this.flowMachine) {
+			return {
+				success: false,
+				error: "Flow machine not initialized",
+			};
+		}
 
 		const state = this.flowMachine.getState();
-		if (!state.context.walletId || state.type !== "quote:ready") return;
+
+		// Guard: No wallet ID or wrong state
+		if (!state.context.walletId) {
+			return {
+				success: false,
+				error: "Wallet ID not found in state",
+			};
+		}
+
+		if (state.type !== "quote:ready") {
+			return {
+				success: false,
+				error: `Cannot execute withdrawal in state: ${state.type}`,
+			};
+		}
 
 		// Start withdrawal process
 		this.flowMachine.send({
@@ -956,13 +983,32 @@ export class BluvoFlowClient {
 		);
 
 		if (!success) {
+			// Extract error type information
+			const errorInfo = extractErrorTypeInfo(error);
+			const errorMessage = error instanceof Error
+				? error.message
+				: (error as any)?.error || (error as any)?.message || "Failed to execute withdrawal";
+
 			console.error("executeWithdrawal error", error);
 			this.handleWithdrawalError(error);
-			return;
+
+			return {
+				success: false,
+				error: errorMessage,
+				type: (errorInfo.rawType as TypeEnum2) || undefined,
+			};
 		}
 
 		// Withdrawal is in progress, will be handled by WebSocket callbacks
-		return res;
+		// Return standardized success response
+		return {
+			// Legacy compatibility - direct access to response data
+			...(res??{}),
+
+			// New standardized structure
+			success: true,
+			result: res,
+		};
 	}
 
 	async submit2FA(code: string) {

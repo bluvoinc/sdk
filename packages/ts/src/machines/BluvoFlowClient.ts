@@ -132,6 +132,32 @@ export interface LoadExchangesResult {
 	}>;
 }
 
+export interface LoadWalletResult {
+	success: boolean;
+	error?: string;
+	type?: TypeEnum2;
+	result?: {
+		balances: Array<{
+			asset: string;
+			balance: string;
+			balanceInFiat?: string;
+			networks?: Array<{
+				id: string;
+				name: string;
+				displayName: string;
+				minWithdrawal: string;
+				maxWithdrawal?: string;
+				assetName: string;
+				addressRegex?: string;
+			}>;
+			extra?: {
+				slug?: string;
+				assetId?: string;
+			};
+		}>;
+	};
+}
+
 export class BluvoFlowClient {
 	private webClient: BluvoWebClient;
 	private flowMachine?: Machine<FlowState, FlowActionType>;
@@ -521,8 +547,12 @@ export class BluvoFlowClient {
 	}
 
 	private async loadWallet(walletId: string) {
+		// Guard: No flow machine
 		if (!this.flowMachine) {
-			return;
+			return {
+				success: false,
+				error: "Flow machine not initialized",
+			};
 		}
 
 		this.flowMachine.send({ type: "LOAD_WALLET" });
@@ -531,25 +561,59 @@ export class BluvoFlowClient {
 			.fetchWithdrawableBalanceFn(walletId);
 
 		if (!success) {
+			// Extract error type information
+			const errorInfo = extractErrorTypeInfo(error);
+			const errorMessage = error instanceof Error
+				? error.message
+				: (error as any)?.error || (error as any)?.message || "Failed to load wallet";
+			const flowError = new Error(errorMessage);
+
 			this.flowMachine.send({
 				type: "WALLET_FAILED",
-				error: error instanceof Error ? error : new Error((error as any)?.error || (error as any)?.message || "Failed to load wallet"),
+				error: flowError,
 			});
-			return;
+
+			return {
+				success: false,
+				error: errorMessage,
+				type: (errorInfo.rawType as TypeEnum2) || undefined,
+			};
 		}
 
+		// Validate response structure
 		if (!withdrawableBalanceInfo?.balances) {
+			const errorMsg = "No balance data returned";
+			const flowError = new Error(errorMsg);
+
 			this.flowMachine.send({
 				type: "WALLET_FAILED",
-				error: new Error("No balance data returned"),
+				error: flowError,
 			});
-			return;
+
+			return {
+				success: false,
+				error: errorMsg,
+			};
 		}
+
+		// Transform balances
+		const transformedBalances = transformBalances(withdrawableBalanceInfo.balances);
 
 		this.flowMachine.send({
 			type: "WALLET_LOADED",
-			balances: transformBalances(withdrawableBalanceInfo.balances),
+			balances: transformedBalances,
 		});
+
+		return {
+			// Legacy compatibility - flat balances field
+			balances: transformedBalances,
+
+			// New standardized structure
+			success: true,
+			result: {
+				balances: transformedBalances,
+			},
+		};
 	}
 
 	async requestQuote(options: QuoteRequestOptions) {

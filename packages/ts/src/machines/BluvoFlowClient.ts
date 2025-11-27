@@ -361,7 +361,7 @@ export class BluvoFlowClient {
 
 		// Open OAuth window
 		const closeWindow = await this.webClient.oauth2.openWindow(
-			flowOptions.exchange as "coinbase",
+			flowOptions.exchange as any,
 			{
 				walletId: flowOptions.walletId,
 				idem,

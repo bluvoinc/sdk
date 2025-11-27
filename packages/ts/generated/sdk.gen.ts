@@ -79,10 +79,6 @@ export const oauth2Exchangeurlgeturl = <ThrowOnError extends boolean = false>(
         name: "x-bluvo-wallet-id",
         type: "apiKey",
       },
-      {
-        name: "x-bluvo-ott-action-id",
-        type: "apiKey",
-      },
     ],
     url: "/v0/oauth2/{exchange}/url",
     ...options,

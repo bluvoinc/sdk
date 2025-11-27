@@ -11,6 +11,7 @@ export const SchemaEnum = {
   COINBASE: "coinbase",
   KRAKEN: "kraken",
   GEMINI: "gemini",
+  BINANCE: "binance",
   LOCAL_CEX: "local-cex",
 } as const;
 

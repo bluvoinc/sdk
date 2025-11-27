@@ -2,7 +2,7 @@
 
 export const SchemaEnumSchema = {
   type: "string",
-  enum: ["coinbase", "kraken", "gemini", "local-cex"],
+  enum: ["coinbase", "kraken", "gemini", "binance", "local-cex"],
 } as const;
 
 export const StatusEnumSchema = {

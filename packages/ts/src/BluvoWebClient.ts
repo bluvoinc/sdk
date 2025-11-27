@@ -326,7 +326,8 @@ export class BluvoWebClient {
 				client: this.client,
 				query: {
 					idem,
-                    // ignore customDomain for now
+                    // CEX always redirects to bluvo's base-url as callback post OAuth and we could only introduce CSRF check validation errors by swapping DNS in between of pages.
+                    // customDomain: typeof this.customDomain === "string" ? this.customDomain : this.customDomain?.api,
 				},
 			}).then(transformResponse);
 

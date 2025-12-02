@@ -65,6 +65,11 @@ describe('Cross-Browser Compatibility', () => {
             }),
             focus: vi.fn(),
             location: {href: ''} as Location,
+            document: {
+                open: vi.fn(),
+                write: vi.fn(),
+                close: vi.fn(),
+            },
         } as unknown as Window;
 
         mockWindowOpen = vi.fn(() => mockWindow);
@@ -316,8 +321,11 @@ describe('Cross-Browser Compatibility', () => {
             // Verify window.open behavior is consistent
             expect(mockWindowOpen).toHaveBeenCalled();
             const [url, target] = mockWindowOpen.mock.calls[0];
-            expect(url).toContain('binance');
+            expect(url).toBe('about:blank');
             expect(target).toBeTruthy();
+            // Verify loading HTML is written
+            const writtenHTML = (mockWindow!.document.write as any).mock.calls[0][0];
+            expect(writtenHTML).toContain('spinner');
 
             // Verify state transitions work consistently
             machine.send({type: 'OAUTH_WINDOW_OPENED'});

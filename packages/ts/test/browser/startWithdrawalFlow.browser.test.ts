@@ -68,6 +68,11 @@ describe('startWithdrawalFlow - Browser Tests', () => {
             }),
             focus: vi.fn(),
             location: {href: ''} as Location,
+            document: {
+                open: vi.fn(),
+                write: vi.fn(),
+                close: vi.fn(),
+            },
         } as unknown as Window;
 
         mockWindowOpen = vi.fn(() => mockWindow);
@@ -174,9 +179,15 @@ describe('startWithdrawalFlow - Browser Tests', () => {
             // Get the call arguments
             const [url, target, features] = mockWindowOpen.mock.calls[0];
 
-            // Verify URL contains OAuth endpoint
-            expect(url).toContain('/oauth2/authorize');
-            expect(url).toContain('coinbase');
+            // Verify URL is about:blank - window now opens with about:blank
+            // to prevent popup blocking, then writes loading HTML and navigates to OAuth URL asynchronously
+            expect(url).toBe('about:blank');
+
+            // Verify that document.write was called with loading HTML
+            expect(mockWindow.document.write).toHaveBeenCalled();
+            const writtenHTML = (mockWindow.document.write as any).mock.calls[0][0];
+            expect(writtenHTML).toContain('spinner');
+            expect(writtenHTML).toContain('background: #000');
 
             // Verify target is defined (could be window title or _blank)
             expect(target).toBeTruthy();
@@ -511,11 +522,15 @@ describe('startWithdrawalFlow - Browser Tests', () => {
         });
 
         it('should handle different exchanges with same window behavior', async () => {
-            const exchanges = ['coinbase', 'binance', 'kraken'] as const;
+            // Only test with coinbase since it's the only exchange currently supported in the type system
+            const exchanges = ['coinbase'] as const;
 
             for (const exchange of exchanges) {
                 // Reset mocks for each iteration
                 mockWindowOpen.mockClear();
+                (mockWindow.document.write as any).mockClear();
+                (mockWindow.document.open as any).mockClear();
+                (mockWindow.document.close as any).mockClear();
 
                 const client = new BluvoFlowClient({
                     orgId: 'test-org',
@@ -538,8 +553,11 @@ describe('startWithdrawalFlow - Browser Tests', () => {
                 expect(mockWindowOpen).toHaveBeenCalled();
 
                 const [url] = mockWindowOpen.mock.calls[0];
-                // URL should contain the exchange name
-                expect(url).toContain(exchange);
+                // Window should open with about:blank
+                expect(url).toBe('about:blank');
+                // Loading HTML should be written
+                const writtenHTML = (mockWindow.document.write as any).mock.calls[0][0];
+                expect(writtenHTML).toContain('spinner');
             }
         });
     });

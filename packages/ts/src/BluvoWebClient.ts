@@ -174,16 +174,6 @@ export class BluvoWebClient {
 				windowRef = window;
 			}
 
-			const { url, data, success, error } = await this.getURL(exchange, {
-				walletId: options.walletId,
-				idem: options.idem,
-			});
-
-			if (!success || !url) {
-				console.error("Failed to generate OAuth2 URL:", error);
-				return () => {}; // Return empty cleanup function
-			}
-
 			// Set default window options
 			const windowTitle = popupOptions?.title || `${exchange} OAuth`;
 			const windowWidth = popupOptions?.width || 500;
@@ -208,20 +198,196 @@ export class BluvoWebClient {
 				top = screenTop + (screenHeight - windowHeight) / 2;
 			}
 
-			const newWindow = windowRef.open(
-				url,
-				windowTitle,
-				`width=${windowWidth},height=${windowHeight},left=${left},top=${top},status=yes,scrollbars=yes,resizable=yes`,
-			);
+			// Create loading HTML to show while fetching OAuth URL
+			const loadingHTML = `<!DOCTYPE html>
+<html>
+<head>
+    <title>${windowTitle}</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #000;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="spinner"></div>
+</body>
+</html>`;
 
-			if (!newWindow) {
+			// Open window immediately with about:blank to prevent popup blocking
+			// Using about:blank is more reliable than data URLs across different browsers
+			const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},status=yes,scrollbars=yes,resizable=yes`;
+			const newWindow = windowRef.open('about:blank', windowTitle, windowFeatures);
+
+			if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
 				console.error(
 					"Failed to open OAuth2 window. Please allow pop-ups for this site.",
 				);
 				return () => {}; // Return empty cleanup function
 			}
 
+			// Write loading HTML immediately
+			try {
+				newWindow.document.open();
+				newWindow.document.write(loadingHTML);
+				newWindow.document.close();
+			} catch (e) {
+				console.error("Failed to write loading HTML to popup:", e);
+				try {
+					newWindow.close();
+				} catch (closeError) {
+					// Suppress close errors
+				}
+				return () => {};
+			}
+
 			newWindow.focus();
+
+			// Now fetch the OAuth URL asynchronously
+			const { url, data, success, error } = await this.getURL(exchange, {
+				walletId: options.walletId,
+				idem: options.idem,
+			});
+
+			// Check if window was closed during the async operation
+			if (newWindow.closed) {
+				console.warn("OAuth2 window was closed before URL could be loaded");
+				return () => {}; // Return empty cleanup function
+			}
+
+			if (!success || !url) {
+				console.error("Failed to generate OAuth2 URL:", error);
+
+				// Show error state in the popup window
+				const errorHTML = `<!DOCTYPE html>
+<html>
+<head>
+    <title>${windowTitle} - Error</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: #ffffff;
+            padding: 1rem;
+        }
+        .error-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3rem 2rem;
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            max-width: 400px;
+        }
+        .error-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        p {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.9);
+            color: #f5576c;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">⚠️</div>
+        <h2>Connection Failed</h2>
+        <p>We couldn't connect to ${exchange}. Please close this window and try again.</p>
+        <p style="font-size: 0.75rem; opacity: 0.7;">${error || "Unknown error occurred"}</p>
+        <button onclick="window.close()">Close Window</button>
+    </div>
+</body>
+</html>`;
+
+				try {
+					newWindow.document.open();
+					newWindow.document.write(errorHTML);
+					newWindow.document.close();
+				} catch (e) {
+					// If we can't write to the document (cross-origin issues), just close it
+					console.warn("Could not display error in popup window:", e);
+					try {
+						newWindow.close();
+					} catch (closeError) {
+						// Suppress close errors
+					}
+				}
+
+				return () => {
+					try {
+						if (!newWindow.closed) {
+							newWindow.close();
+						}
+					} catch (e) {
+						// Suppress errors
+					}
+				};
+			}
+
+			// Navigate to the OAuth URL
+			try {
+				newWindow.location.href = url;
+			} catch (e) {
+				console.error("Failed to navigate to OAuth URL:", e);
+				try {
+					newWindow.close();
+				} catch (closeError) {
+					// Suppress close errors
+				}
+				return () => {};
+			}
 
 			// Set up window close detection
 			// FIXME: this is not working for all browsers for some we give false-positives

@@ -299,3 +299,18 @@ export const TypeEnum2Schema = {
     "CACHE_INVALID_PATH",
   ],
 } as const;
+
+export const TypeEnum3Schema = {
+  type: "string",
+  enum: ["GOOGLE", "EMAIL", "FACE", "SMS"],
+} as const;
+
+export const StatusEnum4Schema = {
+  type: "string",
+  enum: ["pending", "verified", "failed"],
+} as const;
+
+export const RelationEnumSchema = {
+  type: "string",
+  enum: ["AND", "OR"],
+} as const;

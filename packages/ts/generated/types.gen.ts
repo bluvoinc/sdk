@@ -339,6 +339,30 @@ export const TypeEnum2 = {
 
 export type TypeEnum2 = (typeof TypeEnum2)[keyof typeof TypeEnum2];
 
+export const TypeEnum3 = {
+  GOOGLE: "GOOGLE",
+  EMAIL: "EMAIL",
+  FACE: "FACE",
+  SMS: "SMS",
+} as const;
+
+export type TypeEnum3 = (typeof TypeEnum3)[keyof typeof TypeEnum3];
+
+export const StatusEnum4 = {
+  PENDING: "pending",
+  VERIFIED: "verified",
+  FAILED: "failed",
+} as const;
+
+export type StatusEnum4 = (typeof StatusEnum4)[keyof typeof StatusEnum4];
+
+export const RelationEnum = {
+  AND: "AND",
+  OR: "OR",
+} as const;
+
+export type RelationEnum = (typeof RelationEnum)[keyof typeof RelationEnum];
+
 export type Oauth2ExchangeurlgeturlData = {
   body?: never;
   path: {
@@ -937,7 +961,105 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
   400: {
     error: string;
     type: TypeEnum2;
-    result?: unknown;
+    result?:
+      | {
+          bizNo: string;
+          steps: Array<{
+            type: TypeEnum3;
+            status: StatusEnum4;
+            required: boolean;
+            metadata?: {
+              email?: string;
+              emailSent?: boolean;
+              qrCodeUrl?: string;
+              qrCodeValidSeconds?: number;
+              [key: string]: unknown | string | boolean | number | undefined;
+            };
+            [key: string]:
+              | unknown
+              | TypeEnum3
+              | StatusEnum4
+              | boolean
+              | {
+                  email?: string;
+                  emailSent?: boolean;
+                  qrCodeUrl?: string;
+                  qrCodeValidSeconds?: number;
+                  [key: string]:
+                    | unknown
+                    | string
+                    | boolean
+                    | number
+                    | undefined;
+                }
+              | undefined;
+          }>;
+          relation: RelationEnum;
+          [key: string]:
+            | unknown
+            | string
+            | Array<{
+                type: TypeEnum3;
+                status: StatusEnum4;
+                required: boolean;
+                metadata?: {
+                  email?: string;
+                  emailSent?: boolean;
+                  qrCodeUrl?: string;
+                  qrCodeValidSeconds?: number;
+                  [key: string]:
+                    | unknown
+                    | string
+                    | boolean
+                    | number
+                    | undefined;
+                };
+                [key: string]:
+                  | unknown
+                  | TypeEnum3
+                  | StatusEnum4
+                  | boolean
+                  | {
+                      email?: string;
+                      emailSent?: boolean;
+                      qrCodeUrl?: string;
+                      qrCodeValidSeconds?: number;
+                      [key: string]:
+                        | unknown
+                        | string
+                        | boolean
+                        | number
+                        | undefined;
+                    }
+                  | undefined;
+              }>
+            | RelationEnum;
+        }
+      | {
+          bizNo: string;
+          steps: Array<{
+            type: string;
+            status: StatusEnum4;
+            error?: string;
+            [key: string]: unknown | string | StatusEnum4 | undefined;
+          }>;
+          [key: string]:
+            | unknown
+            | string
+            | Array<{
+                type: string;
+                status: StatusEnum4;
+                error?: string;
+                [key: string]: unknown | string | StatusEnum4 | undefined;
+              }>;
+        }
+      | {
+          valid2FAMethods: Array<string>;
+          [key: string]: unknown | Array<string>;
+        }
+      | {
+          [key: string]: unknown;
+        };
   };
   /**
    * Forbidden - Insufficient API key permissions
@@ -953,7 +1075,105 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
   404: {
     error: string;
     type: TypeEnum2;
-    result?: unknown;
+    result?:
+      | {
+          bizNo: string;
+          steps: Array<{
+            type: TypeEnum3;
+            status: StatusEnum4;
+            required: boolean;
+            metadata?: {
+              email?: string;
+              emailSent?: boolean;
+              qrCodeUrl?: string;
+              qrCodeValidSeconds?: number;
+              [key: string]: unknown | string | boolean | number | undefined;
+            };
+            [key: string]:
+              | unknown
+              | TypeEnum3
+              | StatusEnum4
+              | boolean
+              | {
+                  email?: string;
+                  emailSent?: boolean;
+                  qrCodeUrl?: string;
+                  qrCodeValidSeconds?: number;
+                  [key: string]:
+                    | unknown
+                    | string
+                    | boolean
+                    | number
+                    | undefined;
+                }
+              | undefined;
+          }>;
+          relation: RelationEnum;
+          [key: string]:
+            | unknown
+            | string
+            | Array<{
+                type: TypeEnum3;
+                status: StatusEnum4;
+                required: boolean;
+                metadata?: {
+                  email?: string;
+                  emailSent?: boolean;
+                  qrCodeUrl?: string;
+                  qrCodeValidSeconds?: number;
+                  [key: string]:
+                    | unknown
+                    | string
+                    | boolean
+                    | number
+                    | undefined;
+                };
+                [key: string]:
+                  | unknown
+                  | TypeEnum3
+                  | StatusEnum4
+                  | boolean
+                  | {
+                      email?: string;
+                      emailSent?: boolean;
+                      qrCodeUrl?: string;
+                      qrCodeValidSeconds?: number;
+                      [key: string]:
+                        | unknown
+                        | string
+                        | boolean
+                        | number
+                        | undefined;
+                    }
+                  | undefined;
+              }>
+            | RelationEnum;
+        }
+      | {
+          bizNo: string;
+          steps: Array<{
+            type: string;
+            status: StatusEnum4;
+            error?: string;
+            [key: string]: unknown | string | StatusEnum4 | undefined;
+          }>;
+          [key: string]:
+            | unknown
+            | string
+            | Array<{
+                type: string;
+                status: StatusEnum4;
+                error?: string;
+                [key: string]: unknown | string | StatusEnum4 | undefined;
+              }>;
+        }
+      | {
+          valid2FAMethods: Array<string>;
+          [key: string]: unknown | Array<string>;
+        }
+      | {
+          [key: string]: unknown;
+        };
   };
 };
 
@@ -968,7 +1188,109 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
     success: boolean;
     error?: string;
     type?: TypeEnum2;
-    result?: unknown;
+    result?:
+      | {
+          transactionId: string;
+          [key: string]: unknown | string;
+        }
+      | {
+          bizNo: string;
+          steps: Array<{
+            type: TypeEnum3;
+            status: StatusEnum4;
+            required: boolean;
+            metadata?: {
+              email?: string;
+              emailSent?: boolean;
+              qrCodeUrl?: string;
+              qrCodeValidSeconds?: number;
+              [key: string]: unknown | string | boolean | number | undefined;
+            };
+            [key: string]:
+              | unknown
+              | TypeEnum3
+              | StatusEnum4
+              | boolean
+              | {
+                  email?: string;
+                  emailSent?: boolean;
+                  qrCodeUrl?: string;
+                  qrCodeValidSeconds?: number;
+                  [key: string]:
+                    | unknown
+                    | string
+                    | boolean
+                    | number
+                    | undefined;
+                }
+              | undefined;
+          }>;
+          relation: RelationEnum;
+          [key: string]:
+            | unknown
+            | string
+            | Array<{
+                type: TypeEnum3;
+                status: StatusEnum4;
+                required: boolean;
+                metadata?: {
+                  email?: string;
+                  emailSent?: boolean;
+                  qrCodeUrl?: string;
+                  qrCodeValidSeconds?: number;
+                  [key: string]:
+                    | unknown
+                    | string
+                    | boolean
+                    | number
+                    | undefined;
+                };
+                [key: string]:
+                  | unknown
+                  | TypeEnum3
+                  | StatusEnum4
+                  | boolean
+                  | {
+                      email?: string;
+                      emailSent?: boolean;
+                      qrCodeUrl?: string;
+                      qrCodeValidSeconds?: number;
+                      [key: string]:
+                        | unknown
+                        | string
+                        | boolean
+                        | number
+                        | undefined;
+                    }
+                  | undefined;
+              }>
+            | RelationEnum;
+        }
+      | {
+          bizNo: string;
+          steps: Array<{
+            type: string;
+            status: StatusEnum4;
+            error?: string;
+            [key: string]: unknown | string | StatusEnum4 | undefined;
+          }>;
+          [key: string]:
+            | unknown
+            | string
+            | Array<{
+                type: string;
+                status: StatusEnum4;
+                error?: string;
+                [key: string]: unknown | string | StatusEnum4 | undefined;
+              }>;
+        }
+      | {
+          valid2FAMethods: Array<string>;
+          [key: string]: unknown | Array<string>;
+        }
+      | {
+          [key: string]: unknown;
+        };
   };
 };
 

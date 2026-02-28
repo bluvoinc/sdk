@@ -559,6 +559,67 @@ function handleWithdrawalActions(
       }
       break;
 
+    case 'WITHDRAWAL_REQUIRES_2FA_MULTI_STEPS':
+      // Handle multi-step 2FA requirement (Binance Web, etc.)
+      return createTransition('withdraw:error2FAMultiStep', state.context, {
+        multiStep2FA: {
+          bizNo: action.result.bizNo,
+          steps: action.result.steps,
+          relation: action.result.relation,
+          collectedCodes: {},
+          // Extract FACE step QR code if present
+          faceQrCodeUrl: action.result.steps.find(s => s.type === 'FACE')?.metadata?.qrCodeUrl,
+          faceQrCodeExpiresAt: action.result.steps.find(s => s.type === 'FACE')?.metadata?.qrCodeValidSeconds
+            ? Date.now() + (action.result.steps.find(s => s.type === 'FACE')!.metadata!.qrCodeValidSeconds! * 1000)
+            : undefined,
+        },
+      });
+
+    case 'SUBMIT_2FA_MULTI_STEP':
+      // Store the submitted code for the step and transition to processing
+      if (state.type === 'withdraw:error2FAMultiStep' && state.context.multiStep2FA) {
+        const codeKey = action.stepType === 'GOOGLE' ? 'twofa'
+          : action.stepType === 'EMAIL' ? 'emailCode'
+          : 'smsCode';
+        return createTransition('withdraw:processing', {
+          ...state.context,
+          multiStep2FA: {
+            ...state.context.multiStep2FA,
+            collectedCodes: {
+              ...state.context.multiStep2FA.collectedCodes,
+              [codeKey]: action.code,
+            },
+          },
+        });
+      }
+      break;
+
+    case 'POLL_FACE_VERIFICATION':
+      // Transition to processing for re-invocation (server checks FACE completion)
+      if (state.type === 'withdraw:error2FAMultiStep') {
+        return createTransition('withdraw:processing', state.context);
+      }
+      break;
+
+    case 'WITHDRAWAL_2FA_INCOMPLETE':
+      // Update step statuses and remain in multi-step 2FA state
+      if (state.context.multiStep2FA) {
+        return createTransition('withdraw:error2FAMultiStep', state.context, {
+          multiStep2FA: {
+            ...state.context.multiStep2FA,
+            bizNo: action.result.bizNo,
+            steps: action.result.steps,
+            relation: action.result.relation,
+            // Update FACE step QR code if present
+            faceQrCodeUrl: action.result.steps.find(s => s.type === 'FACE')?.metadata?.qrCodeUrl || state.context.multiStep2FA.faceQrCodeUrl,
+            faceQrCodeExpiresAt: action.result.steps.find(s => s.type === 'FACE')?.metadata?.qrCodeValidSeconds
+              ? Date.now() + (action.result.steps.find(s => s.type === 'FACE')!.metadata!.qrCodeValidSeconds! * 1000)
+              : state.context.multiStep2FA.faceQrCodeExpiresAt,
+          },
+        });
+      }
+      break;
+
     case 'WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED':
       const valid2FAMethods = action.result?.valid2FAMethods;
       const errorMessage = generate2FAMethodErrorMessage(valid2FAMethods);
@@ -601,6 +662,7 @@ export function handleWithdrawalStates(
   const isWithdrawalState = [
     'withdraw:processing',
     'withdraw:error2FA',
+    'withdraw:error2FAMultiStep',
     'withdraw:errorSMS',
     'withdraw:errorKYC',
     'withdraw:errorBalance',

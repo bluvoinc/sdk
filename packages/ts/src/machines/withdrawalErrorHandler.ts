@@ -67,6 +67,47 @@ export class WithdrawalErrorHandler {
       case WITHDRAWAL_EXECUTION_ERROR_TYPES.SMS_CODE_REQUIRED:
         return { type: 'WITHDRAWAL_REQUIRES_SMS' };
 
+      // Multi-step 2FA Requirements
+      case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_MULTI_STEPS:
+        return {
+          type: 'WITHDRAWAL_REQUIRES_2FA_MULTI_STEPS',
+          result: extractErrorResult(error) as {
+            bizNo: string;
+            steps: Array<{
+              type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+              status: 'pending' | 'verified' | 'failed';
+              required: boolean;
+              metadata?: {
+                email?: string;
+                emailSent?: boolean;
+                qrCodeUrl?: string;
+                qrCodeValidSeconds?: number;
+              };
+            }>;
+            relation: 'AND' | 'OR';
+          }
+        };
+
+      case ERROR_CODES.WITHDRAWAL_2FA_INCOMPLETE:
+        return {
+          type: 'WITHDRAWAL_2FA_INCOMPLETE',
+          result: extractErrorResult(error) as {
+            bizNo: string;
+            steps: Array<{
+              type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+              status: 'pending' | 'verified' | 'failed';
+              required: boolean;
+              metadata?: {
+                email?: string;
+                emailSent?: boolean;
+                qrCodeUrl?: string;
+                qrCodeValidSeconds?: number;
+              };
+            }>;
+            relation: 'AND' | 'OR';
+          }
+        };
+
       // KYC Requirements
       case ERROR_CODES.WITHDRAWAL_KYC_REQUIRED:
       case WITHDRAWAL_EXECUTION_ERROR_TYPES.KYC_REQUIRED:
@@ -131,6 +172,8 @@ export class WithdrawalErrorHandler {
     const recoverableErrors = [
       ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP,
       ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_SMS,
+      ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_MULTI_STEPS,
+      ERROR_CODES.WITHDRAWAL_2FA_INCOMPLETE,
       ERROR_CODES.WITHDRAWAL_2FA_INVALID,
       ERROR_CODES.WITHDRAWAL_KYC_REQUIRED,
       ERROR_CODES.WITHDRAWAL_INSUFFICIENT_BALANCE,

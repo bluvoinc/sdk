@@ -97,6 +97,17 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		return await flowClient.retryWithdrawal();
 	}, [flowClient]);
 
+	const submit2FAMultiStep = useCallback(
+		async (stepType: 'GOOGLE' | 'EMAIL' | 'SMS', code: string) => {
+			return await flowClient.submit2FAMultiStep(stepType, code);
+		},
+		[flowClient],
+	);
+
+	const pollFaceVerification = useCallback(async () => {
+		return await flowClient.pollFaceVerification();
+	}, [flowClient]);
+
 	const listExchanges = useCallback(
 		async (status?: "live" | "offline" | "maintenance" | "coming_soon") => {
 			setExchangesLoading(true);
@@ -177,6 +188,8 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		requestQuote,
 		executeWithdrawal,
 		submit2FA,
+		submit2FAMultiStep, // Multi-step 2FA action
+		pollFaceVerification, // Multi-step 2FA FACE polling action
 		retryWithdrawal,
 		cancel,
 		refreshQRCode, // QR Code flow action
@@ -250,6 +263,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 
 		// === Withdrawal Requirements & Errors ===
 		requires2FA: flow.state?.type === "withdraw:error2FA",
+		requires2FAMultiStep: flow.state?.type === "withdraw:error2FAMultiStep",
 		requiresSMS: flow.state?.type === "withdraw:errorSMS",
 		requiresKYC: flow.state?.type === "withdraw:errorKYC",
 		requiresValid2FAMethod:
@@ -305,6 +319,29 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		quote: flow.context?.quote,
 		withdrawal: flow.context?.withdrawal,
 		valid2FAMethods: flow.context?.errorDetails?.valid2FAMethods,
+
+		// === Multi-step 2FA Context ===
+		multiStep2FA: flow.context?.multiStep2FA,
+		multiStep2FASteps: flow.context?.multiStep2FA?.steps || [],
+		multiStep2FABizNo: flow.context?.multiStep2FA?.bizNo,
+		multiStep2FARelation: flow.context?.multiStep2FA?.relation,
+		collectedMultiStep2FACodes: flow.context?.multiStep2FA?.collectedCodes,
+
+		// Multi-step 2FA step type helpers
+		hasGoogleStep: flow.context?.multiStep2FA?.steps?.some(s => s.type === 'GOOGLE') || false,
+		hasEmailStep: flow.context?.multiStep2FA?.steps?.some(s => s.type === 'EMAIL') || false,
+		hasFaceStep: flow.context?.multiStep2FA?.steps?.some(s => s.type === 'FACE') || false,
+		hasSmsStep: flow.context?.multiStep2FA?.steps?.some(s => s.type === 'SMS') || false,
+
+		// Multi-step 2FA step status helpers
+		isGoogleStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'GOOGLE')?.status === 'verified',
+		isEmailStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'EMAIL')?.status === 'verified',
+		isFaceStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'FACE')?.status === 'verified',
+		isSmsStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'SMS')?.status === 'verified',
+
+		// Multi-step 2FA FACE step QR code
+		faceQrCodeUrl: flow.context?.multiStep2FA?.faceQrCodeUrl,
+		faceQrCodeExpiresAt: flow.context?.multiStep2FA?.faceQrCodeExpiresAt,
 
 		// Client instance (for advanced use)
 		client: flowClient,

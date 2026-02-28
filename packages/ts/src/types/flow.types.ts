@@ -34,6 +34,7 @@ export type FlowStateType =
 	| "withdraw:idle"
 	| "withdraw:processing"
 	| "withdraw:error2FA"
+	| "withdraw:error2FAMultiStep"
 	| "withdraw:errorSMS"
 	| "withdraw:errorKYC"
 	| "withdraw:errorBalance"
@@ -117,6 +118,29 @@ export interface FlowContext {
 	qrCodeUrl?: string;
 	qrCodeExpiresAt?: number;
 	isQRCodeFlow?: boolean;
+	// Multi-step 2FA context (for Binance Web and similar)
+	multiStep2FA?: {
+		bizNo: string;
+		steps: Array<{
+			type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+			status: 'pending' | 'verified' | 'failed';
+			required: boolean;
+			metadata?: {
+				email?: string;
+				emailSent?: boolean;
+				qrCodeUrl?: string;
+				qrCodeValidSeconds?: number;
+			};
+		}>;
+		relation: 'AND' | 'OR';
+		collectedCodes?: {
+			twofa?: string;
+			emailCode?: string;
+			smsCode?: string;
+		};
+		faceQrCodeUrl?: string;
+		faceQrCodeExpiresAt?: number;
+	};
 }
 
 export type FlowState = StateValue<FlowStateType> & {
@@ -206,4 +230,47 @@ export type FlowActionType =
 	| { type: "QRCODE_FAILED"; error: Error }
 	| { type: "QRCODE_TIMEOUT" }
 	| { type: "QRCODE_FATAL"; error: Error }
-	| { type: "REFRESH_QRCODE" };
+	| { type: "REFRESH_QRCODE" }
+	// Multi-step 2FA actions
+	| {
+			type: "WITHDRAWAL_REQUIRES_2FA_MULTI_STEPS";
+			result: {
+				bizNo: string;
+				steps: Array<{
+					type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+					status: 'pending' | 'verified' | 'failed';
+					required: boolean;
+					metadata?: {
+						email?: string;
+						emailSent?: boolean;
+						qrCodeUrl?: string;
+						qrCodeValidSeconds?: number;
+					};
+				}>;
+				relation: 'AND' | 'OR';
+			};
+	  }
+	| {
+			type: "SUBMIT_2FA_MULTI_STEP";
+			stepType: 'GOOGLE' | 'EMAIL' | 'SMS';
+			code: string;
+	  }
+	| { type: "POLL_FACE_VERIFICATION" }
+	| {
+			type: "WITHDRAWAL_2FA_INCOMPLETE";
+			result: {
+				bizNo: string;
+				steps: Array<{
+					type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+					status: 'pending' | 'verified' | 'failed';
+					required: boolean;
+					metadata?: {
+						email?: string;
+						emailSent?: boolean;
+						qrCodeUrl?: string;
+						qrCodeValidSeconds?: number;
+					};
+				}>;
+				relation: 'AND' | 'OR';
+			};
+	  };

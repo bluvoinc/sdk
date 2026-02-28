@@ -1368,6 +1368,48 @@ export class BluvoFlowClient {
 							result: extractErrorResult(error) as { valid2FAMethods?: string[] } | undefined,
 						});
 						return;
+
+					case ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_MULTI_STEPS:
+						this.flowMachine?.send({
+							type: "WITHDRAWAL_REQUIRES_2FA_MULTI_STEPS",
+							result: extractErrorResult(error) as {
+								bizNo: string;
+								steps: Array<{
+									type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+									status: 'pending' | 'verified' | 'failed';
+									required: boolean;
+									metadata?: {
+										email?: string;
+										emailSent?: boolean;
+										qrCodeUrl?: string;
+										qrCodeValidSeconds?: number;
+									};
+								}>;
+								relation: 'AND' | 'OR';
+							},
+						});
+						return;
+
+					case ERROR_CODES.WITHDRAWAL_2FA_INCOMPLETE:
+						this.flowMachine?.send({
+							type: "WITHDRAWAL_2FA_INCOMPLETE",
+							result: extractErrorResult(error) as {
+								bizNo: string;
+								steps: Array<{
+									type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+									status: 'pending' | 'verified' | 'failed';
+									required: boolean;
+									metadata?: {
+										email?: string;
+										emailSent?: boolean;
+										qrCodeUrl?: string;
+										qrCodeValidSeconds?: number;
+									};
+								}>;
+								relation: 'AND' | 'OR';
+							},
+						});
+						return;
 				}
 
 				console.error("Unhandled withdrawal error", error);
@@ -1534,6 +1576,165 @@ export class BluvoFlowClient {
 		if (quote) {
 			return await this.executeWithdrawal(quote.id);
 		}
+	}
+
+	/**
+	 * Submit a verification code for a specific step in multi-step 2FA flow.
+	 * This stores the code and re-invokes the withdrawal with all collected codes.
+	 *
+	 * @param stepType The type of step to submit code for (GOOGLE, EMAIL, or SMS)
+	 * @param code The verification code
+	 */
+	async submit2FAMultiStep(stepType: 'GOOGLE' | 'EMAIL' | 'SMS', code: string) {
+		// Guard: No flow machine
+		if (!this.flowMachine) {
+			return {
+				success: false,
+				error: "Flow machine not initialized",
+			};
+		}
+
+		const state = this.flowMachine.getState();
+
+		// Guard: Wrong state
+		if (state.type !== "withdraw:error2FAMultiStep") {
+			return {
+				success: false,
+				error: `Cannot submit multi-step 2FA in state: ${state.type}`,
+			};
+		}
+
+		// Guard: No quote, wallet ID, or multiStep2FA context
+		if (!state.context.quote || !state.context.walletId || !state.context.multiStep2FA) {
+			return {
+				success: false,
+				error: "Quote, wallet ID, or multi-step 2FA context not found",
+			};
+		}
+
+		// Send action to store the code and transition to processing
+		this.flowMachine.send({
+			type: "SUBMIT_2FA_MULTI_STEP",
+			stepType,
+			code,
+		});
+
+		// Build the params with all collected codes plus the new one
+		const multiStep2FA = state.context.multiStep2FA;
+		const collectedCodes = { ...multiStep2FA.collectedCodes };
+
+		// Add the new code
+		if (stepType === 'GOOGLE') collectedCodes.twofa = code;
+		else if (stepType === 'EMAIL') collectedCodes.emailCode = code;
+		else if (stepType === 'SMS') collectedCodes.smsCode = code;
+
+		// Re-execute withdrawal with bizNo + all collected codes
+		const quote = state.context.quote;
+		const idem = this.generateId();
+
+		const { data: res, error, success } = await this.options.executeWithdrawalFn(
+			state.context.walletId,
+			idem,
+			quote.id,
+			{
+				bizNo: multiStep2FA.bizNo,
+				...collectedCodes,
+			},
+		);
+
+		if (!success) {
+			// Extract error type information
+			const errorInfo = extractErrorTypeInfo(error);
+			const errorMessage = error instanceof Error
+				? error.message
+				: (error as any)?.error || (error as any)?.message || "Failed to submit multi-step 2FA";
+
+			this.handleWithdrawalError(error);
+
+			return {
+				success: false,
+				error: errorMessage,
+				type: (errorInfo.rawType as TypeEnum2) || undefined,
+			};
+		}
+
+		// Withdrawal is in progress, will be handled by WebSocket callbacks
+		return {
+			success: true,
+			result: res,
+		};
+	}
+
+	/**
+	 * Poll for FACE verification completion in multi-step 2FA flow.
+	 * This re-invokes the withdrawal with just the bizNo to check if FACE has been verified.
+	 */
+	async pollFaceVerification() {
+		// Guard: No flow machine
+		if (!this.flowMachine) {
+			return {
+				success: false,
+				error: "Flow machine not initialized",
+			};
+		}
+
+		const state = this.flowMachine.getState();
+
+		// Guard: Wrong state
+		if (state.type !== "withdraw:error2FAMultiStep") {
+			return {
+				success: false,
+				error: `Cannot poll FACE verification in state: ${state.type}`,
+			};
+		}
+
+		// Guard: No quote, wallet ID, or multiStep2FA context
+		if (!state.context.quote || !state.context.walletId || !state.context.multiStep2FA) {
+			return {
+				success: false,
+				error: "Quote, wallet ID, or multi-step 2FA context not found",
+			};
+		}
+
+		// Send action to transition to processing
+		this.flowMachine.send({ type: "POLL_FACE_VERIFICATION" });
+
+		// Re-execute withdrawal with bizNo + all previously collected codes
+		const multiStep2FA = state.context.multiStep2FA;
+		const quote = state.context.quote;
+		const idem = this.generateId();
+
+		const { data: res, error, success } = await this.options.executeWithdrawalFn(
+			state.context.walletId,
+			idem,
+			quote.id,
+			{
+				bizNo: multiStep2FA.bizNo,
+				...multiStep2FA.collectedCodes,
+			},
+		);
+
+		if (!success) {
+			// Extract error type information
+			const errorInfo = extractErrorTypeInfo(error);
+			const errorMessage = error instanceof Error
+				? error.message
+				: (error as any)?.error || (error as any)?.message || "Failed to poll FACE verification";
+
+			this.handleWithdrawalError(error);
+
+			return {
+				success: false,
+				error: errorMessage,
+				type: (errorInfo.rawType as TypeEnum2) || undefined,
+			};
+		}
+
+		// Withdrawal is in progress, will be handled by WebSocket callbacks
+		return {
+			success: true,
+			result: res,
+		};
 	}
 
 	private handleWithdrawalError(error: BluvoError) {

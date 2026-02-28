@@ -26,7 +26,17 @@ export function handleIdleState(
         exchange: action.exchange,
         walletId: action.walletId,
         idempotencyKey: action.idem,
-        topicName: action.idem
+        topicName: action.idem,
+        isQRCodeFlow: false
+      });
+
+    case 'START_QRCODE':
+      return createTransition('qrcode:waiting', state.context, {
+        exchange: action.exchange,
+        walletId: action.walletId,
+        idempotencyKey: action.idem,
+        topicName: action.idem,
+        isQRCodeFlow: true
       });
 
     default:
@@ -62,7 +72,17 @@ export function handleExchangeStates(
           exchange: action.exchange,
           walletId: action.walletId,
           idempotencyKey: action.idem,
-          topicName: action.idem
+          topicName: action.idem,
+          isQRCodeFlow: false
+        });
+      }
+      if (action.type === 'START_QRCODE') {
+        return createTransition('qrcode:waiting', state.context, {
+          exchange: action.exchange,
+          walletId: action.walletId,
+          idempotencyKey: action.idem,
+          topicName: action.idem,
+          isQRCodeFlow: true
         });
       }
       return null;
@@ -117,6 +137,95 @@ export function handleOAuthStates(
     case 'oauth:completed':
       if (action.type === 'LOAD_WALLET') {
         return createTransition('wallet:loading', state.context);
+      }
+      return null;
+
+    default:
+      return null;
+  }
+}
+
+/**
+ * Handle transitions for QR code authentication states
+ */
+export function handleQRCodeStates(
+  state: FlowState,
+  action: FlowActionType
+): FlowState | null {
+  switch (state.type) {
+    case 'qrcode:waiting':
+      switch (action.type) {
+        case 'QRCODE_URL_RECEIVED':
+          return createTransition('qrcode:displaying', state.context, {
+            qrCodeUrl: action.qrCodeUrl,
+            qrCodeExpiresAt: action.expiresAt
+          });
+
+        case 'QRCODE_FAILED':
+          return createErrorTransition('qrcode:error', state.context, action.error);
+
+        case 'QRCODE_FATAL':
+          return createErrorTransition('qrcode:fatal', state.context, action.error);
+
+        default:
+          return null;
+      }
+
+    case 'qrcode:displaying':
+      switch (action.type) {
+        case 'QRCODE_SCANNED':
+          return createTransition('qrcode:scanning', state.context);
+
+        case 'QRCODE_COMPLETED':
+          // Transition to oauth:completed to reuse existing wallet loading flow
+          return createTransition('oauth:completed', state.context, {
+            walletId: action.walletId,
+            exchange: action.exchange
+          });
+
+        case 'QRCODE_TIMEOUT':
+          return createErrorTransition(
+            'qrcode:timeout',
+            state.context,
+            new Error('QR code has expired')
+          );
+
+        case 'QRCODE_FAILED':
+          return createErrorTransition('qrcode:error', state.context, action.error);
+
+        case 'QRCODE_FATAL':
+          return createErrorTransition('qrcode:fatal', state.context, action.error);
+
+        default:
+          return null;
+      }
+
+    case 'qrcode:scanning':
+      switch (action.type) {
+        case 'QRCODE_COMPLETED':
+          // Transition to oauth:completed to reuse existing wallet loading flow
+          return createTransition('oauth:completed', state.context, {
+            walletId: action.walletId,
+            exchange: action.exchange
+          });
+
+        case 'QRCODE_FAILED':
+          return createErrorTransition('qrcode:error', state.context, action.error);
+
+        case 'QRCODE_FATAL':
+          return createErrorTransition('qrcode:fatal', state.context, action.error);
+
+        default:
+          return null;
+      }
+
+    case 'qrcode:error':
+    case 'qrcode:timeout':
+      if (action.type === 'REFRESH_QRCODE') {
+        return createTransition('qrcode:waiting', state.context, {
+          qrCodeUrl: undefined,
+          qrCodeExpiresAt: undefined
+        });
       }
       return null;
 

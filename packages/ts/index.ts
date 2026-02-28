@@ -3,7 +3,13 @@ import { BluvoWebClient } from "./src/BluvoWebClient";
 
 export * from "./generated";
 export { BluvoClient } from "./src/BluvoClient";
-export { BluvoWebClient } from "./src/BluvoWebClient";
+export { BluvoWebClient, type QRCodeOptions } from "./src/BluvoWebClient";
+// Workflow Types
+export {
+	WorkflowTypes,
+	type QRCodeAuthWorkflowMessageBody,
+	type WorkflowMessageBody,
+} from "./src/WorkflowTypes";
 // State Machine exports
 export * from "./src/machines";
 export type { SilentResumeWithdrawalFlowOptions } from "./src/machines/BluvoFlowClient";

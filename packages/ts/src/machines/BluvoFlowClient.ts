@@ -23,6 +23,12 @@ import { createFlowMachine } from "./flowMachine";
 import { transformBalances } from "../utils/balanceTransform";
 import { WithdrawalErrorHandler } from "./withdrawalErrorHandler";
 
+// Exchanges that use QR code authentication instead of OAuth popup
+const QR_CODE_EXCHANGES = ['binance-web'];
+
+// Default QR code timeout in milliseconds (5 minutes)
+const DEFAULT_QRCODE_TIMEOUT_MS = 5 * 60 * 1000;
+
 export interface BluvoFlowClientOptions {
 	orgId: string;
 	projectId: string;
@@ -178,6 +184,7 @@ export class BluvoFlowClient {
 	private subscription?: Subscription | null;
 	private generateId: () => string;
 	private quoteRefreshTimer?: ReturnType<typeof setTimeout>;
+	private qrCodeTimeoutTimer?: ReturnType<typeof setTimeout>;
 
 	constructor(private options: BluvoFlowClientOptions) {
 		this.webClient = BluvoWebClient.createClient({
@@ -272,9 +279,13 @@ export class BluvoFlowClient {
 			});
 		}
 
-		// If wallet doesn't exist or check failed, continue with normal OAuth flow
 		if (!success) {
 			console.warn("Error checking wallet existence:", (error as any)?.error || (error as any)?.message || "Unknown error");
+		}
+
+		// Check if this exchange uses QR code authentication
+		if (QR_CODE_EXCHANGES.includes(flowOptions.exchange.toLowerCase())) {
+			return this.startQRCodeFlow(flowOptions);
 		}
 
 		// Dispose any existing flow
@@ -359,6 +370,7 @@ export class BluvoFlowClient {
 			},
 		});
 
+        // TODO: if CEX is not OAuth (i.e. binance) ask for QR-Code instead of openWindow, still we listen the same way with the websocket tho.
 		// Open OAuth window
 		const closeWindow = await this.webClient.oauth2.openWindow(
 			flowOptions.exchange as any,
@@ -385,6 +397,393 @@ export class BluvoFlowClient {
 		return {
 			machine: this.flowMachine,
 			closeOAuthWindow: closeWindow,
+		};
+	}
+
+	/**
+	 * Start a QR code authentication flow for exchanges that don't support OAuth popup
+	 * (e.g., Binance). The flow renders a QR code for mobile app scanning.
+	 */
+	private async startQRCodeFlow(flowOptions: WithdrawalFlowOptions) {
+		// Dispose any existing flow
+		this.dispose();
+
+		// Create new flow machine
+		this.flowMachine = createFlowMachine({
+			orgId: this.options.orgId,
+			projectId: this.options.projectId,
+			maxRetryAttempts: this.options.options?.maxRetryAttempts,
+			autoRefreshQuotation: this.options.options?.autoRefreshQuotation,
+		});
+
+		// Generate idempotency key for QR code flow
+		const idem = this.generateId();
+
+		// Start QR code flow
+		this.flowMachine.send({
+			type: "START_QRCODE",
+			exchange: flowOptions.exchange,
+			walletId: flowOptions.walletId,
+			idem,
+		});
+
+		// Subscribe to workflow messages with QR code callbacks
+		this.subscription = await this.webClient.listen(idem, {
+			onOAuth2Complete: (message) => {
+				// This shouldn't be called for QR code flows, but handle it just in case
+				this.flowMachine?.send({
+					type: "QRCODE_COMPLETED",
+					walletId: message.walletId,
+					exchange: message.exchange,
+				});
+
+				// Call the onWalletConnected hook if provided
+				if (this.options.onWalletConnectedFn) {
+					this.options.onWalletConnectedFn(message.walletId, message.exchange);
+				}
+
+				// Clear QR code timeout
+				if (this.qrCodeTimeoutTimer) {
+					clearTimeout(this.qrCodeTimeoutTimer);
+					this.qrCodeTimeoutTimer = undefined;
+				}
+
+				// Auto-proceed to wallet loading
+				this.loadWallet(message.walletId);
+			},
+			onQRCodeReceived: (message) => {
+				console.log('qrcode received message:', message);
+
+
+				// Clear any existing timeout
+				if (this.qrCodeTimeoutTimer) {
+					clearTimeout(this.qrCodeTimeoutTimer);
+				}
+
+				// Calculate timeout based on expiresAt or use default
+				const expiresAt = message.expiresAt;
+				const timeoutMs = expiresAt
+					? Math.max(0, expiresAt - Date.now())
+					: DEFAULT_QRCODE_TIMEOUT_MS;
+
+				this.flowMachine?.send({
+					type: "QRCODE_URL_RECEIVED",
+					qrCodeUrl: message.qrCodeUrl!,
+					expiresAt: expiresAt || Date.now() + DEFAULT_QRCODE_TIMEOUT_MS,
+				});
+
+				// Set up timeout for QR code expiration
+				this.qrCodeTimeoutTimer = setTimeout(() => {
+					const state = this.flowMachine?.getState();
+					if (state?.type === 'qrcode:displaying' || state?.type === 'qrcode:scanning') {
+						this.flowMachine?.send({ type: "QRCODE_TIMEOUT" });
+					}
+				}, timeoutMs);
+			},
+			onQRCodeComplete: (message) => {
+				this.flowMachine?.send({
+					type: "QRCODE_COMPLETED",
+					walletId: message.walletId,
+					exchange: message.exchange,
+				});
+
+				// Call the onWalletConnected hook if provided
+				if (this.options.onWalletConnectedFn) {
+					this.options.onWalletConnectedFn(message.walletId, message.exchange);
+				}
+
+				// Clear QR code timeout
+				if (this.qrCodeTimeoutTimer) {
+					clearTimeout(this.qrCodeTimeoutTimer);
+					this.qrCodeTimeoutTimer = undefined;
+				}
+
+				// Auto-proceed to wallet loading
+				this.loadWallet(message.walletId);
+			},
+			onQRCodeError: (error) => {
+				// Clear QR code timeout
+				if (this.qrCodeTimeoutTimer) {
+					clearTimeout(this.qrCodeTimeoutTimer);
+					this.qrCodeTimeoutTimer = undefined;
+				}
+
+				this.flowMachine?.send({
+					type: "QRCODE_FAILED",
+					error,
+				});
+			},
+			onError: (error) => {
+				// Extract error code to check for specific errors
+				const errorCode = extractErrorCode(error);
+
+				// Convert error to Error instance with appropriate message
+				let errorInstance: Error;
+				if (error instanceof Error) {
+					errorInstance = error;
+				} else {
+					const errorMessage =
+						error && typeof error === "object" && "message" in error
+							? String((error as any).message)
+							: "QR code authentication failed";
+					errorInstance = new Error(errorMessage);
+				}
+
+				// Clear QR code timeout
+				if (this.qrCodeTimeoutTimer) {
+					clearTimeout(this.qrCodeTimeoutTimer);
+					this.qrCodeTimeoutTimer = undefined;
+				}
+
+				// OAUTH_TOKEN_EXCHANGE_FAILED is a FATAL error
+				if (errorCode === ERROR_CODES.OAUTH_TOKEN_EXCHANGE_FAILED) {
+					this.flowMachine?.send({
+						type: "QRCODE_FATAL",
+						error: errorInstance,
+					});
+				} else {
+					this.flowMachine?.send({
+						type: "QRCODE_FAILED",
+						error: errorInstance,
+					});
+				}
+			},
+		});
+
+		// Fetch the QR code URL from the backend
+		const { url, data, success, error } = await this.webClient.oauth2.getURL(
+			flowOptions.exchange as any,
+			{
+				walletId: flowOptions.walletId,
+				idem,
+			}
+		);
+
+		if (!success || !url) {
+			console.error("Failed to get QR code URL:", error);
+			const errorMessage = typeof error === 'string'
+				? error
+				: (error as any)?.message || (error as any)?.error || "Failed to get QR code URL";
+			this.flowMachine?.send({
+				type: "QRCODE_FAILED",
+				error: new Error(errorMessage),
+			});
+		}
+
+		if (data?.isQRCode === false) {
+			// This means the exchange doesn't support QR code authentication, which is unexpected since we should only be in this flow for QR code exchanges
+			const errorMessage = "Exchange does not support QR code authentication";
+			console.error(errorMessage, { exchange: flowOptions.exchange, data });
+			this.flowMachine?.send({
+				type: "QRCODE_FAILED",
+				error: new Error(errorMessage),
+			});
+			return {
+				machine: this.flowMachine,
+				closeOAuthWindow: null,
+			};
+		}
+
+		// Trigger the backend to generate the QR code by fetching the login URL
+		// The backend will then push the QR code URL via WebSocket to the topic
+		if (url) {
+			try {
+				const response = await fetch(url, {
+					method: 'GET',
+					credentials: 'include',
+				});
+				if (!response.ok) {
+					console.error("Failed to trigger QR code generation:", response.status, response.statusText);
+				}
+			} catch (fetchError) {
+				console.error("Error triggering QR code generation:", fetchError);
+				// Don't fail the flow - the WebSocket might still receive the QR code
+			}
+		}
+
+		return {
+			machine: this.flowMachine,
+			closeOAuthWindow: null, // No OAuth window for QR code flow
+		};
+	}
+
+	/**
+	 * Refresh the QR code after it has expired or encountered an error.
+	 * This can be called when the user is in qrcode:timeout or qrcode:error state.
+	 */
+	async refreshQRCode() {
+		if (!this.flowMachine) {
+			return {
+				success: false,
+				error: "Flow machine not initialized",
+			};
+		}
+
+		const state = this.flowMachine.getState();
+
+		// Guard: Only refresh from error or timeout states
+		if (state.type !== 'qrcode:error' && state.type !== 'qrcode:timeout') {
+			return {
+				success: false,
+				error: `Cannot refresh QR code in state: ${state.type}`,
+			};
+		}
+
+		// Guard: Need exchange and wallet ID from context
+		if (!state.context.exchange || !state.context.walletId) {
+			return {
+				success: false,
+				error: "Exchange or wallet ID not found in state",
+			};
+		}
+
+		// Send refresh action to transition back to waiting state
+		this.flowMachine.send({ type: "REFRESH_QRCODE" });
+
+		// Generate new idempotency key
+		const idem = this.generateId();
+
+		// Update topic name in context (we need to resubscribe)
+		if (this.subscription) {
+			await this.webClient.unsubscribe(this.subscription.topicName);
+		}
+
+		// Re-subscribe with new idem
+		this.subscription = await this.webClient.listen(idem, {
+			onOAuth2Complete: (message) => {
+				this.flowMachine?.send({
+					type: "QRCODE_COMPLETED",
+					walletId: message.walletId,
+					exchange: message.exchange,
+				});
+
+				if (this.options.onWalletConnectedFn) {
+					this.options.onWalletConnectedFn(message.walletId, message.exchange);
+				}
+
+				if (this.qrCodeTimeoutTimer) {
+					clearTimeout(this.qrCodeTimeoutTimer);
+					this.qrCodeTimeoutTimer = undefined;
+				}
+
+				this.loadWallet(message.walletId);
+			},
+			onQRCodeReceived: (message:any) => {
+				if (this.qrCodeTimeoutTimer) {
+					clearTimeout(this.qrCodeTimeoutTimer);
+				}
+
+				const expiresAt = message.expiresAt;
+				const timeoutMs = expiresAt
+					? Math.max(0, expiresAt - Date.now())
+					: DEFAULT_QRCODE_TIMEOUT_MS;
+
+				this.flowMachine?.send({
+					type: "QRCODE_URL_RECEIVED",
+					qrCodeUrl: message.qrCodeUrl!,
+					expiresAt: expiresAt || Date.now() + DEFAULT_QRCODE_TIMEOUT_MS,
+				});
+
+				this.qrCodeTimeoutTimer = setTimeout(() => {
+					const currentState = this.flowMachine?.getState();
+					if (currentState?.type === 'qrcode:displaying' || currentState?.type === 'qrcode:scanning') {
+						this.flowMachine?.send({ type: "QRCODE_TIMEOUT" });
+					}
+				}, timeoutMs);
+			},
+			onQRCodeComplete: (message:any) => {
+				this.flowMachine?.send({
+					type: "QRCODE_COMPLETED",
+					walletId: message.walletId,
+					exchange: message.exchange,
+				});
+
+				if (this.options.onWalletConnectedFn) {
+					this.options.onWalletConnectedFn(message.walletId, message.exchange);
+				}
+
+				if (this.qrCodeTimeoutTimer) {
+					clearTimeout(this.qrCodeTimeoutTimer);
+					this.qrCodeTimeoutTimer = undefined;
+				}
+
+				this.loadWallet(message.walletId);
+			},
+			onQRCodeError: (error:any) => {
+				if (this.qrCodeTimeoutTimer) {
+					clearTimeout(this.qrCodeTimeoutTimer);
+					this.qrCodeTimeoutTimer = undefined;
+				}
+
+				this.flowMachine?.send({
+					type: "QRCODE_FAILED",
+					error,
+				});
+			},
+			onError: (error) => {
+				if (this.qrCodeTimeoutTimer) {
+					clearTimeout(this.qrCodeTimeoutTimer);
+					this.qrCodeTimeoutTimer = undefined;
+				}
+
+				let errorInstance: Error;
+				if (error instanceof Error) {
+					errorInstance = error;
+				} else {
+					const errorMessage =
+						error && typeof error === "object" && "message" in error
+							? String((error as any).message)
+							: "QR code authentication failed";
+					errorInstance = new Error(errorMessage);
+				}
+
+				this.flowMachine?.send({
+					type: "QRCODE_FAILED",
+					error: errorInstance,
+				});
+			},
+		});
+
+		// Fetch new QR code URL
+		const { url, success, error } = await this.webClient.oauth2.getURL(
+			state.context.exchange as any,
+			{
+				walletId: state.context.walletId,
+				idem,
+			}
+		);
+
+		if (!success || !url) {
+			console.error("Failed to refresh QR code URL:", error);
+			const errorMessage = typeof error === 'string'
+				? error
+				: (error as any)?.message || (error as any)?.error || "Failed to refresh QR code URL";
+			this.flowMachine?.send({
+				type: "QRCODE_FAILED",
+				error: new Error(errorMessage),
+			});
+			return {
+				success: false,
+				error: errorMessage,
+			};
+		}
+
+		// Trigger the backend to generate the new QR code by fetching the login URL
+		try {
+			const response = await fetch(url, {
+				method: 'GET',
+				credentials: 'include',
+			});
+			if (!response.ok) {
+				console.error("Failed to trigger QR code refresh:", response.status, response.statusText);
+			}
+		} catch (fetchError) {
+			console.error("Error triggering QR code refresh:", fetchError);
+			// Don't fail the flow - the WebSocket might still receive the QR code
+		}
+
+		return {
+			success: true,
 		};
 	}
 
@@ -1159,6 +1558,11 @@ export class BluvoFlowClient {
 		if (this.quoteRefreshTimer) {
 			clearTimeout(this.quoteRefreshTimer);
 			this.quoteRefreshTimer = undefined;
+		}
+
+		if (this.qrCodeTimeoutTimer) {
+			clearTimeout(this.qrCodeTimeoutTimer);
+			this.qrCodeTimeoutTimer = undefined;
 		}
 
 		if (this.subscription) {

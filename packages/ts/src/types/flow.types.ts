@@ -18,6 +18,12 @@ export type FlowStateType =
 	| "oauth:error"
 	| "oauth:fatal"
 	| "oauth:window_closed_by_user"
+	| "qrcode:waiting"
+	| "qrcode:displaying"
+	| "qrcode:scanning"
+	| "qrcode:error"
+	| "qrcode:timeout"
+	| "qrcode:fatal"
 	| "wallet:loading"
 	| "wallet:ready"
 	| "wallet:error"
@@ -107,6 +113,10 @@ export interface FlowContext {
 	errorDetails?: {
 		valid2FAMethods?: string[];
 	};
+	// QR Code flow context
+	qrCodeUrl?: string;
+	qrCodeExpiresAt?: number;
+	isQRCodeFlow?: boolean;
 }
 
 export type FlowState = StateValue<FlowStateType> & {
@@ -187,4 +197,13 @@ export type FlowActionType =
 	| { type: "WITHDRAWAL_COMPLETED"; transactionId: string }
 	| { type: "WITHDRAWAL_BLOCKED"; reason: string }
 	| { type: "WITHDRAWAL_FATAL"; error: Error }
-	| { type: "CANCEL_FLOW" };
+	| { type: "CANCEL_FLOW" }
+	// QR Code actions
+	| { type: "START_QRCODE"; exchange: string; walletId: string; idem: string }
+	| { type: "QRCODE_URL_RECEIVED"; qrCodeUrl: string; expiresAt?: number }
+	| { type: "QRCODE_SCANNED" }
+	| { type: "QRCODE_COMPLETED"; walletId: string; exchange: string }
+	| { type: "QRCODE_FAILED"; error: Error }
+	| { type: "QRCODE_TIMEOUT" }
+	| { type: "QRCODE_FATAL"; error: Error }
+	| { type: "REFRESH_QRCODE" };

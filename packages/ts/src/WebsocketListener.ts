@@ -12,6 +12,7 @@ export class WebSocketListener {
 
   async connect(idem: string, orgId: string, wsBase: string, options?: WebSocketListenerOptions): Promise<void> {
     return new Promise((resolve, reject) => {
+
       const url = `${wsBase}/v0/ws/oauth2/listen?idem=${encodeURIComponent(idem)}&orgId=${encodeURIComponent(orgId)}`;
 
       this.ws = new WebSocket(url);

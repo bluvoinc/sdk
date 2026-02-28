@@ -2,7 +2,7 @@
 
 export const SchemaEnumSchema = {
   type: "string",
-  enum: ["coinbase", "kraken", "gemini", "binance", "local-cex"],
+  enum: ["coinbase", "kraken", "gemini", "binance", "local-cex", "binance-web"],
 } as const;
 
 export const StatusEnumSchema = {
@@ -18,6 +18,7 @@ export const ExchangeEnumSchema = {
     "bequant",
     "bigone",
     "binance",
+    "binance-web",
     "coinbase",
     "binanceus",
     "bingx",
@@ -125,6 +126,7 @@ export const SchemaEnum2Schema = {
     "bequant",
     "bigone",
     "binance",
+    "binance-web",
     "coinbase",
     "binanceus",
     "bingx",
@@ -274,8 +276,12 @@ export const TypeEnum2Schema = {
     "WITHDRAWAL_PROVIDER_ERROR",
     "WITHDRAWAL_2FA_REQUIRED_TOTP",
     "WITHDRAWAL_2FA_REQUIRED_SMS",
+    "WITHDRAWAL_2FA_REQUIRED_FACE_RECOGNITION",
+    "WITHDRAWAL_2FA_REQUIRED_EMAIL",
     "WITHDRAWAL_2FA_REQUIRED_YUBIKEY",
     "WITHDRAWAL_2FA_REQUIRED_PASSPHRASE",
+    "WITHDRAWAL_2FA_REQUIRED_MULTI_STEPS",
+    "WITHDRAWAL_2FA_INCOMPLETE",
     "WITHDRAWAL_2FA_INVALID",
     "WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED",
     "WITHDRAWAL_KYC_REQUIRED",
@@ -285,5 +291,11 @@ export const TypeEnum2Schema = {
     "OAUTH_TOKEN_EXCHANGE_FAILED",
     "OAUTH_INVALID_STATE",
     "OAUTH_INSUFFICIENT_SCOPE",
+    "WEBHOOK_SIGNATURE_INVALID",
+    "WEBHOOK_MISSING_HEADERS",
+    "WEBHOOK_INVALID_TIMESTAMP",
+    "CACHE_MISS",
+    "CACHE_EXPIRED",
+    "CACHE_INVALID_PATH",
   ],
 } as const;

@@ -4,6 +4,7 @@ import { transformResponse } from "./helpers";
 import { type Subscription, WebSocketClient } from "./WebSocketClient";
 import {
 	type OAuth2WorkflowMessageBody,
+	type QRCodeAuthWorkflowMessageBody,
 	type WithdrawFundsWorkflowMessageBody,
 	type WorkflowMessageBody,
 	WorkflowTypes,
@@ -23,6 +24,12 @@ export type OAuth2Options = BaseOptions & {
 export type WithdrawOptions = BaseOptions & {
 	onWithdrawComplete: (message: WithdrawFundsWorkflowMessageBody) => any;
 	onOAuth2Complete?: never;
+};
+
+export type QRCodeOptions = {
+	onQRCodeReceived: (message: QRCodeAuthWorkflowMessageBody) => any;
+	onQRCodeComplete: (message: QRCodeAuthWorkflowMessageBody) => any;
+	onQRCodeError?: (error: Error) => void;
 };
 
 /**
@@ -164,6 +171,25 @@ export class BluvoWebClient {
 			},
 			windowRef?: Window | undefined,
 		) {
+
+
+			// Now fetch the OAuth URL asynchronously
+			const {
+				url,
+				data,
+				success,
+				error
+			} = await this.getURL(exchange, {
+				walletId: options.walletId,
+				idem: options.idem,
+			});
+
+			if(data?.isQRCode) {
+				// WE DONT NEED TO OPEN A WINDOW, WE JUST NEED TO FETCH GET THE URL AND LISTEN FOR QRCODE flow via websocket
+				return () => {};
+			}
+
+
 			if (typeof windowRef === "undefined") {
 				if (typeof window === "undefined") {
 					console.error(
@@ -259,12 +285,6 @@ export class BluvoWebClient {
 			}
 
 			newWindow.focus();
-
-			// Now fetch the OAuth URL asynchronously
-			const { url, data, success, error } = await this.getURL(exchange, {
-				walletId: options.walletId,
-				idem: options.idem,
-			});
 
 			// Check if window was closed during the async operation
 			if (newWindow.closed) {
@@ -535,9 +555,13 @@ export class BluvoWebClient {
 	 */
 	async listen(
 		topicName: string,
-		options: OAuth2Options | WithdrawOptions,
+		options: (OAuth2Options | WithdrawOptions) & Partial<QRCodeOptions>,
 	): Promise<Subscription | null> {
 		const onMessage = (rawData: any) => {
+
+			console.log("rawData from ws", rawData);
+
+
 			// Extract the body if the message has a wrapper structure
 			// WebSocket messages come in format: { messageId, idem, timestamp, body }
 			// We need to extract the body which contains the actual WorkflowMessageBody
@@ -551,6 +575,24 @@ export class BluvoWebClient {
 			const failure = data?.success === false;
 			const pending =
 				typeof data?.success === "undefined" || (!success && !failure);
+
+			// Handle QR code auth messages
+			if (data.type === WorkflowTypes.QRCodeAuth) {
+				const qrData = data as QRCodeAuthWorkflowMessageBody;
+				if (pending && qrData.qrCodeUrl) {
+					// QR code URL received, display it
+					return options.onQRCodeReceived?.(qrData);
+				}
+				if (success) {
+					return options.onQRCodeComplete?.(qrData);
+				}
+				if (failure) {
+					return options.onQRCodeError?.(
+						new Error(data.error || "QR code authentication failed"),
+					);
+				}
+				return;
+			}
 
 			if (pending) {
 				if (options.onStep) {
@@ -621,6 +663,9 @@ export class BluvoWebClient {
 				}
 			}
 		};
+
+
+		console.log('ws listening on topic', topicName, 'with orgId', this.orgId);
 
 		return this.wsClient.subscribe(topicName, this.orgId, this.wsBase, {
 			onError: options.onError,

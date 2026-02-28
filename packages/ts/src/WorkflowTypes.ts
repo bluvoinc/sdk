@@ -4,6 +4,7 @@ export enum WorkflowTypes {
 	WithdrawFunds = 'withdraw',
 	OAuth2Flow = 'oauth2',
 	ConnectExchange = 'connect',
+	QRCodeAuth = 'qr_code_auth',
 }
 
 export interface BaseWorkflowMessageBody {
@@ -38,8 +39,17 @@ export interface ConnectExchangeWorkflowMessageBody {
 	totalSteps: number;
 }
 
+export interface QRCodeAuthWorkflowMessageBody {
+	type: WorkflowTypes.QRCodeAuth;
+	walletId: string;
+	exchange: string;
+	qrCodeUrl?: string;
+	expiresAt?: number;
+}
+
 export type WorkflowMessageBody = BaseWorkflowMessageBody & (
 	| WithdrawFundsWorkflowMessageBody
 	| OAuth2WorkflowMessageBody
 	| ConnectExchangeWorkflowMessageBody
+	| QRCodeAuthWorkflowMessageBody
 	);

@@ -6,6 +6,7 @@ import {
   handleIdleState,
   handleExchangeStates,
   handleOAuthStates,
+  handleQRCodeStates,
   handleWalletStates,
   handleQuoteStates,
   handleWithdrawalStates,
@@ -44,6 +45,7 @@ function flowTransition(
     () => handleIdleState(state, action),
     () => handleExchangeStates(state, action),
     () => handleOAuthStates(state, action),
+    () => handleQRCodeStates(state, action),
     () => handleWalletStates(state, action),
     () => handleQuoteStates(state, action, instance),
     () => handleWithdrawalStates(state, action, instance)

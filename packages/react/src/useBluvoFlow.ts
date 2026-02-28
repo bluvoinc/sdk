@@ -143,6 +143,10 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		}
 	}, [flowClient]);
 
+	const refreshQRCode = useCallback(async () => {
+		return await flowClient.refreshQRCode();
+	}, [flowClient]);
+
 	// TEST METHOD - For testing withdrawal completion without real transactions
 	const testWithdrawalComplete = useCallback(
 		(transactionId?: string) => {
@@ -175,6 +179,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		submit2FA,
 		retryWithdrawal,
 		cancel,
+		refreshQRCode, // QR Code flow action
 		testWithdrawalComplete, // TEST METHOD
 
 		// === General Flow State ===
@@ -200,10 +205,25 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		isOAuthError:
 			flow.state?.type === "oauth:error" || flow.state?.type === "oauth:fatal",
 		isOAuthFatal: flow.state?.type === "oauth:fatal",
-		isWalletConnectionInvalid: flow.state?.type === "oauth:fatal",
+		isWalletConnectionInvalid: flow.state?.type === "oauth:fatal" || flow.state?.type === "qrcode:fatal",
 		isOAuthComplete: flow.state?.type === "oauth:completed",
 		isOAuthWindowBeenClosedByTheUser:
 			flow.state?.type === "oauth:window_closed_by_user",
+
+		// === QR Code State ===
+		isQRCodePending:
+			flow.state?.type?.startsWith("qrcode:") &&
+			!["qrcode:error", "qrcode:fatal", "qrcode:timeout"].includes(flow.state?.type || ""),
+		isQRCodeWaiting: flow.state?.type === "qrcode:waiting",
+		isQRCodeDisplaying: flow.state?.type === "qrcode:displaying",
+		isQRCodeScanning: flow.state?.type === "qrcode:scanning",
+		isQRCodeError:
+			flow.state?.type === "qrcode:error" || flow.state?.type === "qrcode:fatal",
+		isQRCodeFatal: flow.state?.type === "qrcode:fatal",
+		isQRCodeTimeout: flow.state?.type === "qrcode:timeout",
+		qrCodeUrl: flow.context?.qrCodeUrl,
+		qrCodeExpiresAt: flow.context?.qrCodeExpiresAt,
+		isQRCodeFlow: flow.context?.isQRCodeFlow || false,
 
 		// === Wallet State ===
 		isWalletLoading: flow.state?.type === "wallet:loading",

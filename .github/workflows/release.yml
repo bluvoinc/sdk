@@ -45,8 +45,13 @@ jobs:
       - name: Run tests
         run: pnpm turbo run test
 
-      - name: Sync SDK from OpenAPI
+      - name: Sync SDK from OpenAPI (main)
+        if: github.ref == 'refs/heads/main'
         run: pnpm complete-sync
+
+      - name: Sync SDK from OpenAPI (sandbox)
+        if: github.ref == 'refs/heads/sandbox'
+        run: pnpm complete-sync-test
 
       - name: Build packages
         run: pnpm turbo run build

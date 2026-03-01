@@ -12,6 +12,9 @@ importers:
         specifier: ^1.113.0
         version: 1.116.0
     devDependencies:
+      '@changesets/cli':
+        specifier: ^2.29.7
+        version: 2.29.7(@types/node@20.19.19)
       '@hey-api/openapi-ts':
         specifier: ^0.86.8
         version: 0.86.8(typescript@5.8.2)

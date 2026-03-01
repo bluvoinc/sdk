@@ -1386,6 +1386,14 @@ export class BluvoFlowClient {
 									};
 								}>;
 								relation: 'AND' | 'OR';
+								mfa?: {
+									verified: {
+										GOOGLE?: boolean;
+										EMAIL?: boolean;
+										FACE?: boolean;
+										SMS?: boolean;
+									};
+								};
 							},
 						});
 						return;
@@ -1407,6 +1415,43 @@ export class BluvoFlowClient {
 									};
 								}>;
 								relation: 'AND' | 'OR';
+								mfa?: {
+									verified: {
+										GOOGLE?: boolean;
+										EMAIL?: boolean;
+										FACE?: boolean;
+										SMS?: boolean;
+									};
+								};
+							},
+						});
+						return;
+
+					case ERROR_CODES.WITHDRAWAL_DRY_RUN_COMPLETE:
+						this.flowMachine?.send({
+							type: "WITHDRAWAL_DRY_RUN_COMPLETE",
+							result: extractErrorResult(error) as {
+								bizNo: string;
+								steps: Array<{
+									type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+									status: 'pending' | 'success' | 'failed';
+									required: boolean;
+									metadata?: {
+										email?: string;
+										emailSent?: boolean;
+										qrCodeUrl?: string;
+										qrCodeValidSeconds?: number;
+									};
+								}>;
+								relation: 'AND' | 'OR';
+								mfa?: {
+									verified: {
+										GOOGLE?: boolean;
+										EMAIL?: boolean;
+										FACE?: boolean;
+										SMS?: boolean;
+									};
+								};
 							},
 						});
 						return;
@@ -1648,6 +1693,79 @@ export class BluvoFlowClient {
 			const errorMessage = error instanceof Error
 				? error.message
 				: (error as any)?.error || (error as any)?.message || "Failed to submit multi-step 2FA";
+
+			this.handleWithdrawalError(error);
+
+			return {
+				success: false,
+				error: errorMessage,
+				type: (errorInfo.rawType as TypeEnum2) || undefined,
+			};
+		}
+
+		// Withdrawal is in progress, will be handled by WebSocket callbacks
+		return {
+			success: true,
+			result: res,
+		};
+	}
+
+	/**
+	 * Confirm the withdrawal after all multi-step 2FA steps are verified.
+	 * This executes the withdrawal without dryRun flag.
+	 */
+	async confirmWithdrawal() {
+		// Guard: No flow machine
+		if (!this.flowMachine) {
+			return {
+				success: false,
+				error: "Flow machine not initialized",
+			};
+		}
+
+		const state = this.flowMachine.getState();
+
+		// Guard: Wrong state
+		if (state.type !== "withdraw:readyToConfirm") {
+			return {
+				success: false,
+				error: `Cannot confirm withdrawal in state: ${state.type}`,
+			};
+		}
+
+		// Guard: No quote, wallet ID, or multiStep2FA context
+		if (!state.context.quote || !state.context.walletId || !state.context.multiStep2FA) {
+			return {
+				success: false,
+				error: "Quote, wallet ID, or multi-step 2FA context not found",
+			};
+		}
+
+		// Send action to transition to processing
+		this.flowMachine.send({ type: "CONFIRM_WITHDRAWAL" });
+
+		// Execute withdrawal with bizNo + all collected codes (WITHOUT dryRun)
+		const multiStep2FA = state.context.multiStep2FA;
+		const quote = state.context.quote;
+		const idem = this.generateId();
+
+		const { data: res, error, success } = await this.options.executeWithdrawalFn(
+			state.context.walletId,
+			idem,
+			quote.id,
+			{
+				bizNo: multiStep2FA.bizNo,
+				...multiStep2FA.collectedCodes,
+				// No dryRun flag - this is the real execution
+			},
+		);
+
+		if (!success) {
+			// Extract error type information
+			const errorInfo = extractErrorTypeInfo(error);
+			const errorMessage = error instanceof Error
+				? error.message
+				: (error as any)?.error || (error as any)?.message || "Failed to confirm withdrawal";
 
 			this.handleWithdrawalError(error);
 

@@ -996,6 +996,40 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               | undefined;
           }>;
           relation: RelationEnum;
+          mfa?: {
+            bizNo?: string;
+            verified: {
+              EMAIL?: boolean;
+              SMS?: boolean;
+              GOOGLE?: boolean;
+              FACE?: boolean;
+            };
+            attempts?: Array<{
+              method: TypeEnum3;
+              status: StatusEnum4;
+              createdAt: number;
+              validatedAt?: number;
+              expiresAt?: number;
+              success: boolean;
+            }>;
+            methods?: Array<
+              | {
+                  method: "EMAIL";
+                  email: string;
+                }
+              | {
+                  method: "SMS";
+                  phoneNumber: string;
+                }
+              | {
+                  method: "GOOGLE";
+                }
+              | {
+                  method: "FACE";
+                  viaMobile: boolean;
+                }
+            >;
+          };
           [key: string]:
             | unknown
             | string
@@ -1034,16 +1068,85 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                     }
                   | undefined;
               }>
-            | RelationEnum;
+            | RelationEnum
+            | {
+                bizNo?: string;
+                verified: {
+                  EMAIL?: boolean;
+                  SMS?: boolean;
+                  GOOGLE?: boolean;
+                  FACE?: boolean;
+                };
+                attempts?: Array<{
+                  method: TypeEnum3;
+                  status: StatusEnum4;
+                  createdAt: number;
+                  validatedAt?: number;
+                  expiresAt?: number;
+                  success: boolean;
+                }>;
+                methods?: Array<
+                  | {
+                      method: "EMAIL";
+                      email: string;
+                    }
+                  | {
+                      method: "SMS";
+                      phoneNumber: string;
+                    }
+                  | {
+                      method: "GOOGLE";
+                    }
+                  | {
+                      method: "FACE";
+                      viaMobile: boolean;
+                    }
+                >;
+              }
+            | undefined;
         }
       | {
-          bizNo: string;
-          steps: Array<{
+          bizNo?: string;
+          steps?: Array<{
             type: string;
             status: StatusEnum4;
             error?: string;
             [key: string]: unknown | string | StatusEnum4 | undefined;
           }>;
+          mfa?: {
+            bizNo?: string;
+            verified: {
+              EMAIL?: boolean;
+              SMS?: boolean;
+              GOOGLE?: boolean;
+              FACE?: boolean;
+            };
+            attempts?: Array<{
+              method: TypeEnum3;
+              status: StatusEnum4;
+              createdAt: number;
+              validatedAt?: number;
+              expiresAt?: number;
+              success: boolean;
+            }>;
+            methods?: Array<
+              | {
+                  method: "EMAIL";
+                  email: string;
+                }
+              | {
+                  method: "SMS";
+                  phoneNumber: string;
+                }
+              | {
+                  method: "GOOGLE";
+                }
+              | {
+                  method: "FACE";
+                  viaMobile: boolean;
+                }
+            >;
+          };
           [key: string]:
             | unknown
             | string
@@ -1052,11 +1155,133 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                 status: StatusEnum4;
                 error?: string;
                 [key: string]: unknown | string | StatusEnum4 | undefined;
-              }>;
+              }>
+            | {
+                bizNo?: string;
+                verified: {
+                  EMAIL?: boolean;
+                  SMS?: boolean;
+                  GOOGLE?: boolean;
+                  FACE?: boolean;
+                };
+                attempts?: Array<{
+                  method: TypeEnum3;
+                  status: StatusEnum4;
+                  createdAt: number;
+                  validatedAt?: number;
+                  expiresAt?: number;
+                  success: boolean;
+                }>;
+                methods?: Array<
+                  | {
+                      method: "EMAIL";
+                      email: string;
+                    }
+                  | {
+                      method: "SMS";
+                      phoneNumber: string;
+                    }
+                  | {
+                      method: "GOOGLE";
+                    }
+                  | {
+                      method: "FACE";
+                      viaMobile: boolean;
+                    }
+                >;
+              }
+            | undefined;
         }
       | {
           valid2FAMethods: Array<string>;
           [key: string]: unknown | Array<string>;
+        }
+      | {
+          bizNo?: string;
+          steps?: Array<{
+            type: string;
+            status: "success";
+          }>;
+          accountId?: string;
+          dryRun: true;
+          readyToTransact: true;
+          mfa?: {
+            bizNo?: string;
+            verified: {
+              EMAIL?: boolean;
+              SMS?: boolean;
+              GOOGLE?: boolean;
+              FACE?: boolean;
+            };
+            attempts?: Array<{
+              method: TypeEnum3;
+              status: StatusEnum4;
+              createdAt: number;
+              validatedAt?: number;
+              expiresAt?: number;
+              success: boolean;
+            }>;
+            methods?: Array<
+              | {
+                  method: "EMAIL";
+                  email: string;
+                }
+              | {
+                  method: "SMS";
+                  phoneNumber: string;
+                }
+              | {
+                  method: "GOOGLE";
+                }
+              | {
+                  method: "FACE";
+                  viaMobile: boolean;
+                }
+            >;
+          };
+          [key: string]:
+            | unknown
+            | string
+            | Array<{
+                type: string;
+                status: "success";
+              }>
+            | true
+            | {
+                bizNo?: string;
+                verified: {
+                  EMAIL?: boolean;
+                  SMS?: boolean;
+                  GOOGLE?: boolean;
+                  FACE?: boolean;
+                };
+                attempts?: Array<{
+                  method: TypeEnum3;
+                  status: StatusEnum4;
+                  createdAt: number;
+                  validatedAt?: number;
+                  expiresAt?: number;
+                  success: boolean;
+                }>;
+                methods?: Array<
+                  | {
+                      method: "EMAIL";
+                      email: string;
+                    }
+                  | {
+                      method: "SMS";
+                      phoneNumber: string;
+                    }
+                  | {
+                      method: "GOOGLE";
+                    }
+                  | {
+                      method: "FACE";
+                      viaMobile: boolean;
+                    }
+                >;
+              }
+            | undefined;
         }
       | {
           [key: string]: unknown;
@@ -1110,6 +1335,40 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               | undefined;
           }>;
           relation: RelationEnum;
+          mfa?: {
+            bizNo?: string;
+            verified: {
+              EMAIL?: boolean;
+              SMS?: boolean;
+              GOOGLE?: boolean;
+              FACE?: boolean;
+            };
+            attempts?: Array<{
+              method: TypeEnum3;
+              status: StatusEnum4;
+              createdAt: number;
+              validatedAt?: number;
+              expiresAt?: number;
+              success: boolean;
+            }>;
+            methods?: Array<
+              | {
+                  method: "EMAIL";
+                  email: string;
+                }
+              | {
+                  method: "SMS";
+                  phoneNumber: string;
+                }
+              | {
+                  method: "GOOGLE";
+                }
+              | {
+                  method: "FACE";
+                  viaMobile: boolean;
+                }
+            >;
+          };
           [key: string]:
             | unknown
             | string
@@ -1148,16 +1407,85 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                     }
                   | undefined;
               }>
-            | RelationEnum;
+            | RelationEnum
+            | {
+                bizNo?: string;
+                verified: {
+                  EMAIL?: boolean;
+                  SMS?: boolean;
+                  GOOGLE?: boolean;
+                  FACE?: boolean;
+                };
+                attempts?: Array<{
+                  method: TypeEnum3;
+                  status: StatusEnum4;
+                  createdAt: number;
+                  validatedAt?: number;
+                  expiresAt?: number;
+                  success: boolean;
+                }>;
+                methods?: Array<
+                  | {
+                      method: "EMAIL";
+                      email: string;
+                    }
+                  | {
+                      method: "SMS";
+                      phoneNumber: string;
+                    }
+                  | {
+                      method: "GOOGLE";
+                    }
+                  | {
+                      method: "FACE";
+                      viaMobile: boolean;
+                    }
+                >;
+              }
+            | undefined;
         }
       | {
-          bizNo: string;
-          steps: Array<{
+          bizNo?: string;
+          steps?: Array<{
             type: string;
             status: StatusEnum4;
             error?: string;
             [key: string]: unknown | string | StatusEnum4 | undefined;
           }>;
+          mfa?: {
+            bizNo?: string;
+            verified: {
+              EMAIL?: boolean;
+              SMS?: boolean;
+              GOOGLE?: boolean;
+              FACE?: boolean;
+            };
+            attempts?: Array<{
+              method: TypeEnum3;
+              status: StatusEnum4;
+              createdAt: number;
+              validatedAt?: number;
+              expiresAt?: number;
+              success: boolean;
+            }>;
+            methods?: Array<
+              | {
+                  method: "EMAIL";
+                  email: string;
+                }
+              | {
+                  method: "SMS";
+                  phoneNumber: string;
+                }
+              | {
+                  method: "GOOGLE";
+                }
+              | {
+                  method: "FACE";
+                  viaMobile: boolean;
+                }
+            >;
+          };
           [key: string]:
             | unknown
             | string
@@ -1166,11 +1494,133 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                 status: StatusEnum4;
                 error?: string;
                 [key: string]: unknown | string | StatusEnum4 | undefined;
-              }>;
+              }>
+            | {
+                bizNo?: string;
+                verified: {
+                  EMAIL?: boolean;
+                  SMS?: boolean;
+                  GOOGLE?: boolean;
+                  FACE?: boolean;
+                };
+                attempts?: Array<{
+                  method: TypeEnum3;
+                  status: StatusEnum4;
+                  createdAt: number;
+                  validatedAt?: number;
+                  expiresAt?: number;
+                  success: boolean;
+                }>;
+                methods?: Array<
+                  | {
+                      method: "EMAIL";
+                      email: string;
+                    }
+                  | {
+                      method: "SMS";
+                      phoneNumber: string;
+                    }
+                  | {
+                      method: "GOOGLE";
+                    }
+                  | {
+                      method: "FACE";
+                      viaMobile: boolean;
+                    }
+                >;
+              }
+            | undefined;
         }
       | {
           valid2FAMethods: Array<string>;
           [key: string]: unknown | Array<string>;
+        }
+      | {
+          bizNo?: string;
+          steps?: Array<{
+            type: string;
+            status: "success";
+          }>;
+          accountId?: string;
+          dryRun: true;
+          readyToTransact: true;
+          mfa?: {
+            bizNo?: string;
+            verified: {
+              EMAIL?: boolean;
+              SMS?: boolean;
+              GOOGLE?: boolean;
+              FACE?: boolean;
+            };
+            attempts?: Array<{
+              method: TypeEnum3;
+              status: StatusEnum4;
+              createdAt: number;
+              validatedAt?: number;
+              expiresAt?: number;
+              success: boolean;
+            }>;
+            methods?: Array<
+              | {
+                  method: "EMAIL";
+                  email: string;
+                }
+              | {
+                  method: "SMS";
+                  phoneNumber: string;
+                }
+              | {
+                  method: "GOOGLE";
+                }
+              | {
+                  method: "FACE";
+                  viaMobile: boolean;
+                }
+            >;
+          };
+          [key: string]:
+            | unknown
+            | string
+            | Array<{
+                type: string;
+                status: "success";
+              }>
+            | true
+            | {
+                bizNo?: string;
+                verified: {
+                  EMAIL?: boolean;
+                  SMS?: boolean;
+                  GOOGLE?: boolean;
+                  FACE?: boolean;
+                };
+                attempts?: Array<{
+                  method: TypeEnum3;
+                  status: StatusEnum4;
+                  createdAt: number;
+                  validatedAt?: number;
+                  expiresAt?: number;
+                  success: boolean;
+                }>;
+                methods?: Array<
+                  | {
+                      method: "EMAIL";
+                      email: string;
+                    }
+                  | {
+                      method: "SMS";
+                      phoneNumber: string;
+                    }
+                  | {
+                      method: "GOOGLE";
+                    }
+                  | {
+                      method: "FACE";
+                      viaMobile: boolean;
+                    }
+                >;
+              }
+            | undefined;
         }
       | {
           [key: string]: unknown;
@@ -1227,6 +1677,40 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
               | undefined;
           }>;
           relation: RelationEnum;
+          mfa?: {
+            bizNo?: string;
+            verified: {
+              EMAIL?: boolean;
+              SMS?: boolean;
+              GOOGLE?: boolean;
+              FACE?: boolean;
+            };
+            attempts?: Array<{
+              method: TypeEnum3;
+              status: StatusEnum4;
+              createdAt: number;
+              validatedAt?: number;
+              expiresAt?: number;
+              success: boolean;
+            }>;
+            methods?: Array<
+              | {
+                  method: "EMAIL";
+                  email: string;
+                }
+              | {
+                  method: "SMS";
+                  phoneNumber: string;
+                }
+              | {
+                  method: "GOOGLE";
+                }
+              | {
+                  method: "FACE";
+                  viaMobile: boolean;
+                }
+            >;
+          };
           [key: string]:
             | unknown
             | string
@@ -1265,16 +1749,85 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                     }
                   | undefined;
               }>
-            | RelationEnum;
+            | RelationEnum
+            | {
+                bizNo?: string;
+                verified: {
+                  EMAIL?: boolean;
+                  SMS?: boolean;
+                  GOOGLE?: boolean;
+                  FACE?: boolean;
+                };
+                attempts?: Array<{
+                  method: TypeEnum3;
+                  status: StatusEnum4;
+                  createdAt: number;
+                  validatedAt?: number;
+                  expiresAt?: number;
+                  success: boolean;
+                }>;
+                methods?: Array<
+                  | {
+                      method: "EMAIL";
+                      email: string;
+                    }
+                  | {
+                      method: "SMS";
+                      phoneNumber: string;
+                    }
+                  | {
+                      method: "GOOGLE";
+                    }
+                  | {
+                      method: "FACE";
+                      viaMobile: boolean;
+                    }
+                >;
+              }
+            | undefined;
         }
       | {
-          bizNo: string;
-          steps: Array<{
+          bizNo?: string;
+          steps?: Array<{
             type: string;
             status: StatusEnum4;
             error?: string;
             [key: string]: unknown | string | StatusEnum4 | undefined;
           }>;
+          mfa?: {
+            bizNo?: string;
+            verified: {
+              EMAIL?: boolean;
+              SMS?: boolean;
+              GOOGLE?: boolean;
+              FACE?: boolean;
+            };
+            attempts?: Array<{
+              method: TypeEnum3;
+              status: StatusEnum4;
+              createdAt: number;
+              validatedAt?: number;
+              expiresAt?: number;
+              success: boolean;
+            }>;
+            methods?: Array<
+              | {
+                  method: "EMAIL";
+                  email: string;
+                }
+              | {
+                  method: "SMS";
+                  phoneNumber: string;
+                }
+              | {
+                  method: "GOOGLE";
+                }
+              | {
+                  method: "FACE";
+                  viaMobile: boolean;
+                }
+            >;
+          };
           [key: string]:
             | unknown
             | string
@@ -1283,7 +1836,42 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                 status: StatusEnum4;
                 error?: string;
                 [key: string]: unknown | string | StatusEnum4 | undefined;
-              }>;
+              }>
+            | {
+                bizNo?: string;
+                verified: {
+                  EMAIL?: boolean;
+                  SMS?: boolean;
+                  GOOGLE?: boolean;
+                  FACE?: boolean;
+                };
+                attempts?: Array<{
+                  method: TypeEnum3;
+                  status: StatusEnum4;
+                  createdAt: number;
+                  validatedAt?: number;
+                  expiresAt?: number;
+                  success: boolean;
+                }>;
+                methods?: Array<
+                  | {
+                      method: "EMAIL";
+                      email: string;
+                    }
+                  | {
+                      method: "SMS";
+                      phoneNumber: string;
+                    }
+                  | {
+                      method: "GOOGLE";
+                    }
+                  | {
+                      method: "FACE";
+                      viaMobile: boolean;
+                    }
+                >;
+              }
+            | undefined;
         }
       | {
           valid2FAMethods: Array<string>;

@@ -108,6 +108,10 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		return await flowClient.pollFaceVerification();
 	}, [flowClient]);
 
+	const confirmWithdrawal = useCallback(async () => {
+		return await flowClient.confirmWithdrawal();
+	}, [flowClient]);
+
 	const listExchanges = useCallback(
 		async (status?: "live" | "offline" | "maintenance" | "coming_soon") => {
 			setExchangesLoading(true);
@@ -190,6 +194,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		submit2FA,
 		submit2FAMultiStep, // Multi-step 2FA action
 		pollFaceVerification, // Multi-step 2FA FACE polling action
+		confirmWithdrawal, // Multi-step 2FA confirmation action (after all steps verified)
 		retryWithdrawal,
 		cancel,
 		refreshQRCode, // QR Code flow action
@@ -264,6 +269,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		// === Withdrawal Requirements & Errors ===
 		requires2FA: flow.state?.type === "withdraw:error2FA",
 		requires2FAMultiStep: flow.state?.type === "withdraw:error2FAMultiStep",
+		isReadyToConfirm: flow.state?.type === "withdraw:readyToConfirm",
 		requiresSMS: flow.state?.type === "withdraw:errorSMS",
 		requiresKYC: flow.state?.type === "withdraw:errorKYC",
 		requiresValid2FAMethod:
@@ -333,11 +339,37 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		hasFaceStep: flow.context?.multiStep2FA?.steps?.some(s => s.type === 'FACE') || false,
 		hasSmsStep: flow.context?.multiStep2FA?.steps?.some(s => s.type === 'SMS') || false,
 
-		// Multi-step 2FA step status helpers
-		isGoogleStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'GOOGLE')?.status === 'success',
-		isEmailStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'EMAIL')?.status === 'success',
-		isFaceStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'FACE')?.status === 'success',
-		isSmsStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'SMS')?.status === 'success',
+		// Multi-step 2FA step status helpers (using mfa.verified as PRIMARY source of truth)
+		isGoogleStepVerified: flow.context?.multiStep2FA?.mfa?.verified?.GOOGLE === true ||
+			flow.context?.multiStep2FA?.steps?.find(s => s.type === 'GOOGLE')?.status === 'success',
+		isEmailStepVerified: flow.context?.multiStep2FA?.mfa?.verified?.EMAIL === true ||
+			flow.context?.multiStep2FA?.steps?.find(s => s.type === 'EMAIL')?.status === 'success',
+		isFaceStepVerified: flow.context?.multiStep2FA?.mfa?.verified?.FACE === true ||
+			flow.context?.multiStep2FA?.steps?.find(s => s.type === 'FACE')?.status === 'success',
+		isSmsStepVerified: flow.context?.multiStep2FA?.mfa?.verified?.SMS === true ||
+			flow.context?.multiStep2FA?.steps?.find(s => s.type === 'SMS')?.status === 'success',
+
+		// MFA verified object (PRIMARY source of truth for verification status)
+		mfaVerified: flow.context?.multiStep2FA?.mfa?.verified,
+
+		// Computed: all required steps verified (using mfa.verified as PRIMARY)
+		allMultiStep2FAStepsVerified: (() => {
+			const multiStep2FA = flow.context?.multiStep2FA;
+			if (!multiStep2FA?.steps) return false;
+
+			const requiredSteps = multiStep2FA.steps.filter(s => s.required);
+			if (requiredSteps.length === 0) return false;
+
+			const mfaVerified = multiStep2FA.mfa?.verified;
+
+			// Check using mfa.verified as PRIMARY source
+			if (mfaVerified) {
+				return requiredSteps.every(step => mfaVerified[step.type] === true);
+			}
+
+			// Fallback to step status if no mfa object
+			return requiredSteps.every(step => step.status === 'success');
+		})(),
 
 		// Multi-step 2FA FACE step QR code
 		faceQrCodeUrl: flow.context?.multiStep2FA?.faceQrCodeUrl,

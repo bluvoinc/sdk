@@ -572,6 +572,8 @@ function handleWithdrawalActions(
           faceQrCodeExpiresAt: action.result.steps.find(s => s.type === 'FACE')?.metadata?.qrCodeValidSeconds
             ? Date.now() + (action.result.steps.find(s => s.type === 'FACE')!.metadata!.qrCodeValidSeconds! * 1000)
             : undefined,
+          // MFA verified state (PRIMARY source of truth)
+          mfa: action.result.mfa,
         },
       });
 
@@ -615,10 +617,34 @@ function handleWithdrawalActions(
             faceQrCodeExpiresAt: action.result.steps.find(s => s.type === 'FACE')?.metadata?.qrCodeValidSeconds
               ? Date.now() + (action.result.steps.find(s => s.type === 'FACE')!.metadata!.qrCodeValidSeconds! * 1000)
               : state.context.multiStep2FA.faceQrCodeExpiresAt,
+            // Update MFA verified state (PRIMARY source of truth)
+            mfa: action.result.mfa || state.context.multiStep2FA.mfa,
           },
         });
       }
       break;
+
+    case 'WITHDRAWAL_DRY_RUN_COMPLETE':
+      // All steps verified, transition to ready to confirm state
+      if (state.context.multiStep2FA) {
+        return createTransition('withdraw:readyToConfirm', state.context, {
+          multiStep2FA: {
+            ...state.context.multiStep2FA,
+            bizNo: action.result.bizNo || state.context.multiStep2FA.bizNo,
+            steps: action.result.steps || state.context.multiStep2FA.steps,
+            relation: action.result.relation || state.context.multiStep2FA.relation,
+            // Update MFA verified state (should all be true at this point)
+            mfa: action.result.mfa || state.context.multiStep2FA.mfa,
+          },
+        });
+      }
+      // If no multiStep2FA context, still transition to ready to confirm
+      return createTransition('withdraw:readyToConfirm', state.context);
+
+    case 'CONFIRM_WITHDRAWAL':
+      // User confirmed the withdrawal, transition to processing
+      return createTransition('withdraw:processing', state.context);
+
 
     case 'WITHDRAWAL_2FA_METHOD_NOT_SUPPORTED':
       const valid2FAMethods = action.result?.valid2FAMethods;
@@ -666,7 +692,8 @@ export function handleWithdrawalStates(
     'withdraw:errorSMS',
     'withdraw:errorKYC',
     'withdraw:errorBalance',
-    'withdraw:retrying'
+    'withdraw:retrying',
+    'withdraw:readyToConfirm'
   ].includes(state.type);
 
   if (!isWithdrawalState) {

@@ -1,6 +1,6 @@
 {
   "name": "@bluvo/react",
-  "version": "2.1.4",
+  "version": "2.2.0-beta.0",
   "description": "React hooks for Bluvo SDK - Framework-agnostic state machine for crypto withdrawals",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -44,7 +44,7 @@
     "typescript"
   ],
   "peerDependencies": {
-    "@bluvo/sdk-ts": "2.1.4",
+    "@bluvo/sdk-ts": "2.2.0-beta.0",
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
@@ -54,8 +54,7 @@
     "react": "^18.0.0",
     "tsup": "^8.5.1",
     "typescript": "^5.0.0",
-    "vitest": "^3.1.1",
-    "@changesets/cli": "^2.29.7"
+    "vitest": "^3.1.1"
   },
   "files": [
     "dist/**/*",

@@ -6,17 +6,20 @@ on:
       - main
   workflow_dispatch:
 
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
 permissions:
   contents: write
+  pull-requests: write
   id-token: write
 
 jobs:
   release:
-    name: "Publish packages"
+    name: Release
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out code
+      - name: Checkout Repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -30,6 +33,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          registry-url: https://registry.npmjs.org/
 
       - name: Install dependencies
         run: pnpm i
@@ -37,35 +41,29 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
 
-      - name: Run tests for @bluvo/sdk-ts
-        run: pnpm -F @bluvo/sdk-ts test
-
-      - name: Run tests for @bluvo/react
-        run: pnpm -F @bluvo/react test
+      - name: Run tests
+        run: pnpm turbo run test
 
       - name: Sync SDK from OpenAPI
         run: pnpm complete-sync
 
       - name: Build packages
-        run: |
-          pnpm -F @bluvo/sdk-ts build
-          pnpm -F @bluvo/react build
+        run: pnpm turbo run build
 
-      - name: Configure .npmrc for authentication
-        run: |
-          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm changeset version
+          publish: pnpm changeset publish
+          title: "chore: version packages"
+          commit: "chore: version packages"
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Publish @bluvo/sdk-ts
+      - name: Log published packages
+        if: steps.changesets.outputs.published == 'true'
         run: |
-          pnpm -F @bluvo/sdk-ts publish --no-git-checks --access public
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish @bluvo/react
-        run: |
-          pnpm -F @bluvo/react publish --no-git-checks --access public
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          echo "Published packages:"
+          echo '${{ steps.changesets.outputs.publishedPackages }}'

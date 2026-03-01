@@ -85,6 +85,14 @@ export class WithdrawalErrorHandler {
               };
             }>;
             relation: 'AND' | 'OR';
+            mfa?: {
+              verified: {
+                GOOGLE?: boolean;
+                EMAIL?: boolean;
+                FACE?: boolean;
+                SMS?: boolean;
+              };
+            };
           }
         };
 
@@ -105,6 +113,42 @@ export class WithdrawalErrorHandler {
               };
             }>;
             relation: 'AND' | 'OR';
+            mfa?: {
+              verified: {
+                GOOGLE?: boolean;
+                EMAIL?: boolean;
+                FACE?: boolean;
+                SMS?: boolean;
+              };
+            };
+          }
+        };
+
+      case ERROR_CODES.WITHDRAWAL_DRY_RUN_COMPLETE:
+        return {
+          type: 'WITHDRAWAL_DRY_RUN_COMPLETE',
+          result: extractErrorResult(error) as {
+            bizNo: string;
+            steps: Array<{
+              type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+              status: 'pending' | 'success' | 'failed';
+              required: boolean;
+              metadata?: {
+                email?: string;
+                emailSent?: boolean;
+                qrCodeUrl?: string;
+                qrCodeValidSeconds?: number;
+              };
+            }>;
+            relation: 'AND' | 'OR';
+            mfa?: {
+              verified: {
+                GOOGLE?: boolean;
+                EMAIL?: boolean;
+                FACE?: boolean;
+                SMS?: boolean;
+              };
+            };
           }
         };
 

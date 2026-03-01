@@ -71,7 +71,7 @@ jobs:
 
       - name: Publish beta packages (sandbox)
         if: github.ref == 'refs/heads/sandbox'
-        run: pnpm changeset publish --tag beta
+        run: pnpm changeset publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

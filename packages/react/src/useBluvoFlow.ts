@@ -334,10 +334,10 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		hasSmsStep: flow.context?.multiStep2FA?.steps?.some(s => s.type === 'SMS') || false,
 
 		// Multi-step 2FA step status helpers
-		isGoogleStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'GOOGLE')?.status === 'verified',
-		isEmailStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'EMAIL')?.status === 'verified',
-		isFaceStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'FACE')?.status === 'verified',
-		isSmsStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'SMS')?.status === 'verified',
+		isGoogleStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'GOOGLE')?.status === 'success',
+		isEmailStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'EMAIL')?.status === 'success',
+		isFaceStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'FACE')?.status === 'success',
+		isSmsStepVerified: flow.context?.multiStep2FA?.steps?.find(s => s.type === 'SMS')?.status === 'success',
 
 		// Multi-step 2FA FACE step QR code
 		faceQrCodeUrl: flow.context?.multiStep2FA?.faceQrCodeUrl,

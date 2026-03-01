@@ -82,6 +82,9 @@ export const ERROR_CODES = {
     CACHE_MISS: 'CACHE_MISS',
     CACHE_EXPIRED: 'CACHE_EXPIRED',
     CACHE_INVALID_PATH: 'CACHE_INVALID_PATH',
+
+    // Withdrawal - Dry Run (success signal, not a real error)
+    WITHDRAWAL_DRY_RUN_COMPLETE: 'WITHDRAWAL_DRY_RUN_COMPLETE',
 } as const;
 
 export type ErrorCode = typeof ERROR_CODES[keyof typeof ERROR_CODES];

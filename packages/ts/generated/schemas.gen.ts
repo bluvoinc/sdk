@@ -297,6 +297,7 @@ export const TypeEnum2Schema = {
     "CACHE_MISS",
     "CACHE_EXPIRED",
     "CACHE_INVALID_PATH",
+    "WITHDRAWAL_DRY_RUN_COMPLETE",
   ],
 } as const;
 
@@ -307,7 +308,7 @@ export const TypeEnum3Schema = {
 
 export const StatusEnum4Schema = {
   type: "string",
-  enum: ["pending", "verified", "failed"],
+  enum: ["pending", "success", "failed"],
 } as const;
 
 export const RelationEnumSchema = {

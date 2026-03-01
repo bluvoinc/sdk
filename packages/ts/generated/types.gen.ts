@@ -335,6 +335,7 @@ export const TypeEnum2 = {
   CACHE_MISS: "CACHE_MISS",
   CACHE_EXPIRED: "CACHE_EXPIRED",
   CACHE_INVALID_PATH: "CACHE_INVALID_PATH",
+  WITHDRAWAL_DRY_RUN_COMPLETE: "WITHDRAWAL_DRY_RUN_COMPLETE",
 } as const;
 
 export type TypeEnum2 = (typeof TypeEnum2)[keyof typeof TypeEnum2];
@@ -350,7 +351,7 @@ export type TypeEnum3 = (typeof TypeEnum3)[keyof typeof TypeEnum3];
 
 export const StatusEnum4 = {
   PENDING: "pending",
-  VERIFIED: "verified",
+  SUCCESS: "success",
   FAILED: "failed",
 } as const;
 
@@ -938,8 +939,8 @@ export type WalletwithdrawquoteidexecutewithdrawData = {
     bizNo?: string | null;
     tag?: string | null;
     params?: {
-      alreadyVerified2FAMethods?: Array<string> | null;
-      [key: string]: unknown | Array<string> | null | undefined;
+      dryRun?: boolean;
+      [key: string]: unknown | boolean | undefined;
     } | null;
   };
   path: {

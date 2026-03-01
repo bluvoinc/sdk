@@ -409,6 +409,8 @@ export class BluvoClient {
 				quotationId: string,
 				args: WalletwithdrawquoteidexecutewithdrawData["body"],
 			) => {
+				console.log(`executeWithdrawal: ${walletId}, ${idem}, ${quotationId}, ${JSON.stringify(args)}`);
+
 				const response = await walletwithdrawquoteidexecutewithdraw({
 					client: this.client,
 					path: {

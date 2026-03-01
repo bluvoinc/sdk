@@ -1376,7 +1376,7 @@ export class BluvoFlowClient {
 								bizNo: string;
 								steps: Array<{
 									type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
-									status: 'pending' | 'verified' | 'failed';
+									status: 'pending' | 'success' | 'failed';
 									required: boolean;
 									metadata?: {
 										email?: string;
@@ -1397,7 +1397,7 @@ export class BluvoFlowClient {
 								bizNo: string;
 								steps: Array<{
 									type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
-									status: 'pending' | 'verified' | 'failed';
+									status: 'pending' | 'success' | 'failed';
 									required: boolean;
 									metadata?: {
 										email?: string;
@@ -1710,7 +1710,11 @@ export class BluvoFlowClient {
 			quote.id,
 			{
 				bizNo: multiStep2FA.bizNo,
-				...multiStep2FA.collectedCodes,
+				// ...multiStep2FA.collectedCodes,
+				// WE ONLY PROVIDE THE FACE POLLING PARAMS no collectedCodes so that we do not trigger re-processing of other steps OR re-submissions of codes, we just want to check if FACE step has been completed
+				params: {
+					dryRun: true, // Indicate this is a polling attempt, not a new submission
+				}
 			},
 		);
 

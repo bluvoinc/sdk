@@ -75,7 +75,7 @@ export class WithdrawalErrorHandler {
             bizNo: string;
             steps: Array<{
               type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
-              status: 'pending' | 'verified' | 'failed';
+              status: 'pending' | 'success' | 'failed';
               required: boolean;
               metadata?: {
                 email?: string;
@@ -95,7 +95,7 @@ export class WithdrawalErrorHandler {
             bizNo: string;
             steps: Array<{
               type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
-              status: 'pending' | 'verified' | 'failed';
+              status: 'pending' | 'success' | 'failed';
               required: boolean;
               metadata?: {
                 email?: string;

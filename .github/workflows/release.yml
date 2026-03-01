@@ -69,18 +69,11 @@ jobs:
           git diff --staged --quiet || git commit -m "chore: version packages (beta)"
           git push
 
-      - name: Create .npmrc (sandbox)
-        if: github.ref == 'refs/heads/sandbox'
-        run: |
-          cat << EOF > "$HOME/.npmrc"
-            //registry.npmjs.org/:_authToken=$NPM_TOKEN
-          EOF
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
       - name: Publish beta packages (sandbox)
         if: github.ref == 'refs/heads/sandbox'
         run: pnpm changeset publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create Release Pull Request or Publish
         if: github.ref == 'refs/heads/main'

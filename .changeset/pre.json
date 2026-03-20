@@ -7,6 +7,7 @@
     "@bluvo/sdk-ts": "2.1.4"
   },
   "changesets": [
-    "multi-step-2fa"
+    "multi-step-2fa",
+    "qr-code-status-tracking"
   ]
 }

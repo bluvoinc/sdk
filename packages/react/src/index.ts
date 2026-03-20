@@ -19,6 +19,7 @@ export type {
   WithdrawalState,
   WithdrawalActionType,
   Machine,
+  QRCodeStatus,
   // Preview types
   PreviewWalletInput,
   WalletPreviewState,

@@ -7,6 +7,7 @@ export { BluvoWebClient, type QRCodeOptions } from "./src/BluvoWebClient";
 // Workflow Types
 export {
 	WorkflowTypes,
+	type QRCodeStatus,
 	type QRCodeAuthWorkflowMessageBody,
 	type WorkflowMessageBody,
 } from "./src/WorkflowTypes";

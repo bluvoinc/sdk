@@ -453,32 +453,64 @@ export class BluvoFlowClient {
 			},
 			onQRCodeReceived: (message) => {
 				console.log('qrcode received message:', message);
+				const status = message.qrCodeStatus;
 
-
-				// Clear any existing timeout
-				if (this.qrCodeTimeoutTimer) {
-					clearTimeout(this.qrCodeTimeoutTimer);
-				}
-
-				// Calculate timeout based on expiresAt or use default
-				const expiresAt = message.expiresAt;
-				const timeoutMs = expiresAt
-					? Math.max(0, expiresAt - Date.now())
-					: DEFAULT_QRCODE_TIMEOUT_MS;
-
-				this.flowMachine?.send({
-					type: "QRCODE_URL_RECEIVED",
-					qrCodeUrl: message.qrCodeUrl!,
-					expiresAt: expiresAt || Date.now() + DEFAULT_QRCODE_TIMEOUT_MS,
-				});
-
-				// Set up timeout for QR code expiration
-				this.qrCodeTimeoutTimer = setTimeout(() => {
-					const state = this.flowMachine?.getState();
-					if (state?.type === 'qrcode:displaying' || state?.type === 'qrcode:scanning') {
+				// Backend-driven expiration (authoritative, replaces client-side timeout)
+				if (status === 'expired' || status === 'used') {
+					if (this.qrCodeTimeoutTimer) {
+						clearTimeout(this.qrCodeTimeoutTimer);
+						this.qrCodeTimeoutTimer = undefined;
+					}
+					const s = this.flowMachine?.getState();
+					if (s?.type === 'qrcode:displaying' || s?.type === 'qrcode:scanning') {
 						this.flowMachine?.send({ type: "QRCODE_TIMEOUT" });
 					}
-				}, timeoutMs);
+					return;
+				}
+
+				// Scanned → update status + trigger state transition
+				if (status === 'scanned') {
+					this.flowMachine?.send({ type: "QRCODE_STATUS_UPDATED", qrCodeStatus: status, qrCodeExpiresAt: message.qrCodeExpiresAt || message.expiresAt });
+					this.flowMachine?.send({ type: "QRCODE_SCANNED" });
+					return;
+				}
+
+				// Confirmed → just update context (completion follows via onQRCodeComplete with success=true)
+				if (status === 'confirmed') {
+					this.flowMachine?.send({ type: "QRCODE_STATUS_UPDATED", qrCodeStatus: status, qrCodeExpiresAt: message.qrCodeExpiresAt || message.expiresAt });
+					return;
+				}
+
+				// First URL receipt or status update (available/acquired)
+				const currentState = this.flowMachine?.getState();
+				if (currentState?.type === 'qrcode:waiting' && message.qrCodeUrl) {
+					// Clear any existing timeout
+					if (this.qrCodeTimeoutTimer) {
+						clearTimeout(this.qrCodeTimeoutTimer);
+					}
+
+					// Calculate timeout based on expiresAt or use default
+					const expiresAt = message.qrCodeExpiresAt || message.expiresAt;
+					const timeoutMs = expiresAt
+						? Math.max(0, expiresAt - Date.now())
+						: DEFAULT_QRCODE_TIMEOUT_MS;
+
+					this.flowMachine?.send({
+						type: "QRCODE_URL_RECEIVED",
+						qrCodeUrl: message.qrCodeUrl,
+						expiresAt: expiresAt || Date.now() + DEFAULT_QRCODE_TIMEOUT_MS,
+					});
+
+					// Set up timeout for QR code expiration
+					this.qrCodeTimeoutTimer = setTimeout(() => {
+						const state = this.flowMachine?.getState();
+						if (state?.type === 'qrcode:displaying' || state?.type === 'qrcode:scanning') {
+							this.flowMachine?.send({ type: "QRCODE_TIMEOUT" });
+						}
+					}, timeoutMs);
+				} else if (status && (currentState?.type === 'qrcode:displaying' || currentState?.type === 'qrcode:scanning')) {
+					this.flowMachine?.send({ type: "QRCODE_STATUS_UPDATED", qrCodeStatus: status, qrCodeExpiresAt: message.qrCodeExpiresAt || message.expiresAt });
+				}
 			},
 			onQRCodeComplete: (message) => {
 				this.flowMachine?.send({
@@ -669,27 +701,61 @@ export class BluvoFlowClient {
 				this.loadWallet(message.walletId);
 			},
 			onQRCodeReceived: (message:any) => {
-				if (this.qrCodeTimeoutTimer) {
-					clearTimeout(this.qrCodeTimeoutTimer);
-				}
+				const status = message.qrCodeStatus;
 
-				const expiresAt = message.expiresAt;
-				const timeoutMs = expiresAt
-					? Math.max(0, expiresAt - Date.now())
-					: DEFAULT_QRCODE_TIMEOUT_MS;
-
-				this.flowMachine?.send({
-					type: "QRCODE_URL_RECEIVED",
-					qrCodeUrl: message.qrCodeUrl!,
-					expiresAt: expiresAt || Date.now() + DEFAULT_QRCODE_TIMEOUT_MS,
-				});
-
-				this.qrCodeTimeoutTimer = setTimeout(() => {
-					const currentState = this.flowMachine?.getState();
-					if (currentState?.type === 'qrcode:displaying' || currentState?.type === 'qrcode:scanning') {
+				// Backend-driven expiration
+				if (status === 'expired' || status === 'used') {
+					if (this.qrCodeTimeoutTimer) {
+						clearTimeout(this.qrCodeTimeoutTimer);
+						this.qrCodeTimeoutTimer = undefined;
+					}
+					const s = this.flowMachine?.getState();
+					if (s?.type === 'qrcode:displaying' || s?.type === 'qrcode:scanning') {
 						this.flowMachine?.send({ type: "QRCODE_TIMEOUT" });
 					}
-				}, timeoutMs);
+					return;
+				}
+
+				// Scanned → update status + trigger state transition
+				if (status === 'scanned') {
+					this.flowMachine?.send({ type: "QRCODE_STATUS_UPDATED", qrCodeStatus: status, qrCodeExpiresAt: message.qrCodeExpiresAt || message.expiresAt });
+					this.flowMachine?.send({ type: "QRCODE_SCANNED" });
+					return;
+				}
+
+				// Confirmed → just update context
+				if (status === 'confirmed') {
+					this.flowMachine?.send({ type: "QRCODE_STATUS_UPDATED", qrCodeStatus: status, qrCodeExpiresAt: message.qrCodeExpiresAt || message.expiresAt });
+					return;
+				}
+
+				// First URL receipt or status update
+				const currentState = this.flowMachine?.getState();
+				if (currentState?.type === 'qrcode:waiting' && message.qrCodeUrl) {
+					if (this.qrCodeTimeoutTimer) {
+						clearTimeout(this.qrCodeTimeoutTimer);
+					}
+
+					const expiresAt = message.qrCodeExpiresAt || message.expiresAt;
+					const timeoutMs = expiresAt
+						? Math.max(0, expiresAt - Date.now())
+						: DEFAULT_QRCODE_TIMEOUT_MS;
+
+					this.flowMachine?.send({
+						type: "QRCODE_URL_RECEIVED",
+						qrCodeUrl: message.qrCodeUrl,
+						expiresAt: expiresAt || Date.now() + DEFAULT_QRCODE_TIMEOUT_MS,
+					});
+
+					this.qrCodeTimeoutTimer = setTimeout(() => {
+						const s = this.flowMachine?.getState();
+						if (s?.type === 'qrcode:displaying' || s?.type === 'qrcode:scanning') {
+							this.flowMachine?.send({ type: "QRCODE_TIMEOUT" });
+						}
+					}, timeoutMs);
+				} else if (status && (currentState?.type === 'qrcode:displaying' || currentState?.type === 'qrcode:scanning')) {
+					this.flowMachine?.send({ type: "QRCODE_STATUS_UPDATED", qrCodeStatus: status, qrCodeExpiresAt: message.qrCodeExpiresAt || message.expiresAt });
+				}
 			},
 			onQRCodeComplete: (message:any) => {
 				this.flowMachine?.send({

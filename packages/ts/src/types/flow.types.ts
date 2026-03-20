@@ -1,5 +1,6 @@
 import type {WalletwithdrawbalancebalanceResponse} from "../../generated";
 import type {StateValue} from "./machine.types";
+import type {QRCodeStatus} from "../WorkflowTypes";
 
 type Network =
     WalletwithdrawbalancebalanceResponse["balances"][number]["networks"][number];
@@ -118,6 +119,7 @@ export interface FlowContext {
     // QR Code flow context
     qrCodeUrl?: string;
     qrCodeExpiresAt?: number;
+    qrCodeStatus?: QRCodeStatus;
     isQRCodeFlow?: boolean;
     // Multi-step 2FA context (for Binance Web and similar)
     multiStep2FA?: {
@@ -235,6 +237,7 @@ export type FlowActionType =
     // QR Code actions
     | { type: "START_QRCODE"; exchange: string; walletId: string; idem: string }
     | { type: "QRCODE_URL_RECEIVED"; qrCodeUrl: string; expiresAt?: number }
+    | { type: "QRCODE_STATUS_UPDATED"; qrCodeStatus: QRCodeStatus; qrCodeExpiresAt?: number }
     | { type: "QRCODE_SCANNED" }
     | { type: "QRCODE_COMPLETED"; walletId: string; exchange: string }
     | { type: "QRCODE_FAILED"; error: Error }

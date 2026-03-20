@@ -10,7 +10,6 @@ export type ClientOptions = {
 export const SchemaEnum = {
   COINBASE: "coinbase",
   KRAKEN: "kraken",
-  GEMINI: "gemini",
   BINANCE: "binance",
   LOCAL_CEX: "local-cex",
   BINANCE_WEB: "binance-web",
@@ -329,6 +328,7 @@ export const TypeEnum2 = {
   OAUTH_TOKEN_EXCHANGE_FAILED: "OAUTH_TOKEN_EXCHANGE_FAILED",
   OAUTH_INVALID_STATE: "OAUTH_INVALID_STATE",
   OAUTH_INSUFFICIENT_SCOPE: "OAUTH_INSUFFICIENT_SCOPE",
+  OAUTH_QR_CODE_UNAVAILABLE: "OAUTH_QR_CODE_UNAVAILABLE",
   WEBHOOK_SIGNATURE_INVALID: "WEBHOOK_SIGNATURE_INVALID",
   WEBHOOK_MISSING_HEADERS: "WEBHOOK_MISSING_HEADERS",
   WEBHOOK_INVALID_TIMESTAMP: "WEBHOOK_INVALID_TIMESTAMP",
@@ -336,6 +336,9 @@ export const TypeEnum2 = {
   CACHE_EXPIRED: "CACHE_EXPIRED",
   CACHE_INVALID_PATH: "CACHE_INVALID_PATH",
   WITHDRAWAL_DRY_RUN_COMPLETE: "WITHDRAWAL_DRY_RUN_COMPLETE",
+  ENRICHMENT_NETWORK_NOT_SUPPORTED: "ENRICHMENT_NETWORK_NOT_SUPPORTED",
+  ENRICHMENT_TIMEOUT: "ENRICHMENT_TIMEOUT",
+  ENRICHMENT_API_ERROR: "ENRICHMENT_API_ERROR",
 } as const;
 
 export type TypeEnum2 = (typeof TypeEnum2)[keyof typeof TypeEnum2];
@@ -717,8 +720,11 @@ export type WallettransactionslisttransactionsResponses = {
       addressTo?: string | null;
       network?: string | null;
       addressFrom?: string | null;
+      hash?: string | null;
+      contractAddress?: string | null;
       tag?: string | null;
       exchange?: string | null;
+      rawResponse?: unknown;
     }>;
     pagination: {
       totalCount: number;

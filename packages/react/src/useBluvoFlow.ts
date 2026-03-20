@@ -241,6 +241,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		isQRCodeTimeout: flow.state?.type === "qrcode:timeout",
 		qrCodeUrl: flow.context?.qrCodeUrl,
 		qrCodeExpiresAt: flow.context?.qrCodeExpiresAt,
+		qrCodeStatus: flow.context?.qrCodeStatus,
 		isQRCodeFlow: flow.context?.isQRCodeFlow || false,
 
 		// === Wallet State ===

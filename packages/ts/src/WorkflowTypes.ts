@@ -1,5 +1,7 @@
 // THIS FILE IS ALSO COPY-PASTED IN @bluvo/sdk-ts PACKAGE
 
+export type QRCodeStatus = 'available' | 'acquired' | 'scanned' | 'confirmed' | 'used' | 'expired';
+
 export enum WorkflowTypes {
 	WithdrawFunds = 'withdraw',
 	OAuth2Flow = 'oauth2',
@@ -45,6 +47,8 @@ export interface QRCodeAuthWorkflowMessageBody {
 	exchange: string;
 	qrCodeUrl?: string;
 	expiresAt?: number;
+	qrCodeStatus?: QRCodeStatus;
+	qrCodeExpiresAt?: number;
 }
 
 export type WorkflowMessageBody = BaseWorkflowMessageBody & (

@@ -158,7 +158,8 @@ export function handleQRCodeStates(
         case 'QRCODE_URL_RECEIVED':
           return createTransition('qrcode:displaying', state.context, {
             qrCodeUrl: action.qrCodeUrl,
-            qrCodeExpiresAt: action.expiresAt
+            qrCodeExpiresAt: action.expiresAt,
+            qrCodeStatus: 'available'
           });
 
         case 'QRCODE_FAILED':
@@ -173,8 +174,16 @@ export function handleQRCodeStates(
 
     case 'qrcode:displaying':
       switch (action.type) {
+        case 'QRCODE_STATUS_UPDATED':
+          return createTransition('qrcode:displaying', state.context, {
+            qrCodeStatus: action.qrCodeStatus,
+            qrCodeExpiresAt: action.qrCodeExpiresAt ?? state.context.qrCodeExpiresAt
+          });
+
         case 'QRCODE_SCANNED':
-          return createTransition('qrcode:scanning', state.context);
+          return createTransition('qrcode:scanning', state.context, {
+            qrCodeStatus: 'scanned'
+          });
 
         case 'QRCODE_COMPLETED':
           // Transition to oauth:completed to reuse existing wallet loading flow
@@ -202,6 +211,12 @@ export function handleQRCodeStates(
 
     case 'qrcode:scanning':
       switch (action.type) {
+        case 'QRCODE_STATUS_UPDATED':
+          return createTransition('qrcode:scanning', state.context, {
+            qrCodeStatus: action.qrCodeStatus,
+            qrCodeExpiresAt: action.qrCodeExpiresAt ?? state.context.qrCodeExpiresAt
+          });
+
         case 'QRCODE_COMPLETED':
           // Transition to oauth:completed to reuse existing wallet loading flow
           return createTransition('oauth:completed', state.context, {
@@ -224,7 +239,8 @@ export function handleQRCodeStates(
       if (action.type === 'REFRESH_QRCODE') {
         return createTransition('qrcode:waiting', state.context, {
           qrCodeUrl: undefined,
-          qrCodeExpiresAt: undefined
+          qrCodeExpiresAt: undefined,
+          qrCodeStatus: undefined
         });
       }
       return null;

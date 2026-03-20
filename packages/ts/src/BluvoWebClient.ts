@@ -579,8 +579,8 @@ export class BluvoWebClient {
 			// Handle QR code auth messages
 			if (data.type === WorkflowTypes.QRCodeAuth) {
 				const qrData = data as QRCodeAuthWorkflowMessageBody;
-				if (pending && qrData.qrCodeUrl) {
-					// QR code URL received, display it
+				if (pending && (qrData.qrCodeUrl || qrData.qrCodeStatus)) {
+					// QR code URL received or status update
 					return options.onQRCodeReceived?.(qrData);
 				}
 				if (success) {

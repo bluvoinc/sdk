@@ -2,7 +2,7 @@
 
 export const SchemaEnumSchema = {
   type: "string",
-  enum: ["coinbase", "kraken", "gemini", "binance", "local-cex", "binance-web"],
+  enum: ["coinbase", "kraken", "binance", "local-cex", "binance-web"],
 } as const;
 
 export const StatusEnumSchema = {
@@ -291,6 +291,7 @@ export const TypeEnum2Schema = {
     "OAUTH_TOKEN_EXCHANGE_FAILED",
     "OAUTH_INVALID_STATE",
     "OAUTH_INSUFFICIENT_SCOPE",
+    "OAUTH_QR_CODE_UNAVAILABLE",
     "WEBHOOK_SIGNATURE_INVALID",
     "WEBHOOK_MISSING_HEADERS",
     "WEBHOOK_INVALID_TIMESTAMP",
@@ -298,6 +299,9 @@ export const TypeEnum2Schema = {
     "CACHE_EXPIRED",
     "CACHE_INVALID_PATH",
     "WITHDRAWAL_DRY_RUN_COMPLETE",
+    "ENRICHMENT_NETWORK_NOT_SUPPORTED",
+    "ENRICHMENT_TIMEOUT",
+    "ENRICHMENT_API_ERROR",
   ],
 } as const;
 

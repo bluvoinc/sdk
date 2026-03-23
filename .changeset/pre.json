@@ -8,6 +8,7 @@
   },
   "changesets": [
     "multi-step-2fa",
+    "qr-code-cache-session-reuse",
     "qr-code-status-tracking"
   ]
 }

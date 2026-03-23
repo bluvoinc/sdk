@@ -81,6 +81,7 @@ The main hook that manages the entire withdrawal flow state machine.
 - `maxRetryAttempts?` - Maximum retry attempts (default: 3)
 - `topicToken?` - WebSocket topic token for real-time updates
 - `cacheName?` - Cache name for WebSocket subscriptions
+- `cache?` - QR code caching options (zero config with localStorage, see [core SDK docs](../ts/README.md#qr-code-authentication--caching))
 - `mkUUIDFn?` - Custom UUID generator function
 
 **Returns:**
@@ -115,6 +116,19 @@ The main hook that manages the entire withdrawal flow state machine.
   withdrawal: Withdrawal | null
 }
 ```
+
+#### QR Code Caching
+
+QR code sessions are cached in `localStorage` by default — no setup needed. Users see their QR code instantly on page refresh.
+
+```tsx
+const flow = useBluvoFlow({
+  // ...other options
+  cache: { prefix: "myapp:" }, // Optional: customize caching
+});
+```
+
+Pass `cache: { disabled: true }` to disable. See [core SDK docs](../ts/README.md#qr-code-authentication--caching) for the full `BluvoCacheOptions` API.
 
 ### `useFlowMachine(machine)`
 

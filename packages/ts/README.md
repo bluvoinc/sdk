@@ -12,6 +12,7 @@ Official TypeScript SDK for the [Bluvo API](https://docs.bluvo.co) - Securely au
 -  **Dual SDK Architecture**: Separate browser and server SDKs for security
 -  **Multi-Exchange Support**: Coinbase, Kraken, Binance, KuCoin, OKX, Bitmart, Gemini and more
 -  **Type Safety**: Full TypeScript support with proper types for all API responses
+-  **QR Code Caching**: Persist QR code auth sessions across page refreshes (zero config, localStorage by default)
 
 ## Installation
 
@@ -193,6 +194,44 @@ const withdrawal = await client
 //   total: 0.0502
 // }
 ```
+
+## QR Code Authentication & Caching
+
+Some exchanges (e.g., Binance) use QR code scanning instead of an OAuth2 popup. The SDK handles this automatically — when a QR code flow is detected, you receive `qrCodeUrl` and `qrCodeExpiresAt` in the flow state.
+
+### Zero-Config Caching
+
+QR code sessions are cached in `localStorage` by default, so users see their QR code instantly on page refresh without re-requesting it. No setup required.
+
+### Cache Options
+
+Pass `cache` when creating a `BluvoFlowClient` or via `useBluvoFlow()`:
+
+```typescript
+import { BluvoFlowClient } from "@bluvo/sdk-ts";
+
+const flow = new BluvoFlowClient({
+  // ...other options
+  cache: {
+    adapter: {          // Custom storage adapter (default: localStorage)
+      get: (key) => sessionStorage.getItem(key),
+      set: (key, val) => sessionStorage.setItem(key, val),
+      remove: (key) => sessionStorage.removeItem(key),
+    },
+    prefix: "myapp:",   // Key prefix (default: "bluvo:")
+    minRemainingLifetimeSec: 30, // Ignore cached QR codes expiring within N seconds (default: 15)
+    disabled: false,     // Set true to disable caching entirely
+  },
+});
+```
+
+To disable caching entirely:
+
+```typescript
+cache: { disabled: true }
+```
+
+**Exported types:** `BluvoCacheOptions`, `BluvoCacheAdapter`, `BluvoCache`
 
 ## Security Best Practices
 

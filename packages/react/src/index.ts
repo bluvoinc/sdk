@@ -26,5 +26,8 @@ export type {
   PreviewStatus,
   PreviewCallbacks,
   BluvoPreviewManager,
-  BluvoPreviewManagerOptions
+  BluvoPreviewManagerOptions,
+  // Cache types
+  BluvoCacheOptions,
+  BluvoCacheAdapter,
 } from '@bluvo/sdk-ts';

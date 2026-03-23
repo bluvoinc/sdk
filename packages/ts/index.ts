@@ -34,6 +34,9 @@ export {
 	type BluvoError,
 } from "./src/error-codes";
 
+// Cache
+export { BluvoCache, type BluvoCacheAdapter, type BluvoCacheOptions } from "./src/BluvoCache";
+
 // API Types - Clean, self-explanatory type exports
 // export * from './src/types/api.types';
 

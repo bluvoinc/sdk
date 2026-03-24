@@ -587,10 +587,19 @@ export class BluvoFlowClient {
 
 		const exchange = flowOptions.exchange;
 
-		// Check cache for a valid QR code before hitting the backend
-		// If cache hits, reuse the cached walletId so the backend recognizes the session
-		const cachedQRCode = await this.cache.getCachedQRCode(exchange);
-		const walletId = cachedQRCode?.walletId || flowOptions.walletId;
+		// Always use the caller's walletId — never substitute from cache
+		const walletId = flowOptions.walletId;
+
+		// Check cache for a valid QR code before hitting the backend.
+		// Only reuse cached QR display data when the walletId matches,
+		// otherwise the backend pool entry belongs to a different wallet.
+		const rawCachedQRCode = await this.cache.getCachedQRCode(exchange);
+		const cachedQRCode = rawCachedQRCode?.walletId === walletId ? rawCachedQRCode : null;
+
+		// Evict stale cache entry on walletId mismatch
+		if (rawCachedQRCode && !cachedQRCode) {
+			await this.cache.removeCachedQRCode(exchange);
+		}
 
 		// Create new flow machine
 		this.flowMachine = createFlowMachine({
@@ -635,7 +644,7 @@ export class BluvoFlowClient {
 
 		// If we have a valid cached QR code, replay it as if received from WebSocket
 		if (cachedQRCode) {
-			console.log('[BluvoCache] Replaying cached QR code for', exchange, '(reusing walletId:', walletId, ')');
+			console.log('[BluvoCache] Replaying cached QR code for', exchange);
 			this.handleQRCodeReceived(cachedQRCode, exchange, walletId);
 
 			// Still need to fetch the URL and trigger the backend so the WebSocket

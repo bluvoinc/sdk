@@ -7,9 +7,9 @@
     "@bluvo/sdk-ts": "2.1.4"
   },
   "changesets": [
+    "fix-qr-code-cache-wallet-id",
     "multi-step-2fa",
     "qr-code-cache-session-reuse",
-    "qr-code-status-tracking",
-    "fix-qr-code-cache-wallet-id"
+    "qr-code-status-tracking"
   ]
 }

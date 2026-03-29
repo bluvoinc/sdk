@@ -244,3 +244,5 @@ if (code === ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP) {
 - Read `references/api-client.md` if you need to understand the underlying REST calls, error codes, or authentication configuration.
 - Read `references/types.md` if you need the complete TypeScript type definitions for machine context, events, or state values.
 - Read `references/state-transitions.md` if you need detailed guard conditions, async behavior, or sequence diagrams for specific flows.
+- Read `../react/skill/references/qrcode-binance-web.md` for comprehensive QR code authentication flow implementation patterns including component rendering for `binance-web`.
+- Read `../react/skill/references/multistep-2fa.md` for comprehensive multi-step 2FA implementation patterns including FACE polling, dryRun pattern, and step verification.

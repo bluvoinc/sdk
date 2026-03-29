@@ -18,6 +18,8 @@ When modifying the public API of either package, update the corresponding skill 
 - [ ] Update `references/api-client.md` if REST endpoints or error codes changed
 - [ ] Update `references/state-transitions.md` if transition logic changed
 - [ ] Update `references/hooks-complete.md` if hook return values changed
+- [ ] Update `references/qrcode-binance-web.md` if QR code flow states or caching logic changed
+- [ ] Update `references/multistep-2fa.md` if multi-step 2FA states, step types, or polling logic changed
 
 ## Skill File Locations
 
@@ -34,7 +36,9 @@ packages/react/skill/
 └── references/
     ├── hooks-complete.md             # Full hook signatures and return values
     ├── nextjs-patterns.md            # Next.js App Router integration
-    └── components.md                 # Note: no components exported
+    ├── components.md                 # Note: no components exported
+    ├── qrcode-binance-web.md         # QR code auth flow for binance-web
+    └── multistep-2fa.md              # Multi-step 2FA handling
 ```
 
 ## Installation

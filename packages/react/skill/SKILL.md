@@ -201,3 +201,5 @@ Hooks are browser-only. They use `useState`, `useEffect`, WebSocket subscription
 - Read `references/nextjs-patterns.md` for complete Next.js App Router integration patterns including server actions, environment variables, and the `toPlain()` workaround.
 - Read `references/components.md` if you're looking for exported React components.
 - Read `../ts/skill/SKILL.md` if you need to understand the underlying state machine or need TypeScript-only (non-React) patterns.
+- Read `references/qrcode-binance-web.md` for QR code authentication flow implementation — state machine states, QRCodeStatus lifecycle, caching, component rendering patterns, and refresh handling for `binance-web` exchange.
+- Read `references/multistep-2fa.md` for multi-step 2FA implementation — handling GOOGLE, EMAIL, FACE, SMS verification steps, mfa.verified as primary truth, FACE polling, dryRun pattern, and confirmation flow.

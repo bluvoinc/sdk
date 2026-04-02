@@ -10,7 +10,7 @@ compatibility: "TypeScript 4.7+. React 16.8+ (optional). Next.js 13+ App Router 
 metadata:
   mintlify-proj: bluvo
   author: Bluvo Inc
-  version: "3.0.0"
+  version: "3.1.0"
   docs: "https://docs.bluvo.dev"
   sdk-repo: "https://github.com/bluvoinc/sdk"
 ---
@@ -79,7 +79,7 @@ idle ──→ exchanges:loading ──→ exchanges:ready ──→ oauth:waiti
 
 - Exchange wallet connection flows (OAuth popup or QR code for Binance Web)
 - Withdrawal UIs with real-time quote refresh and fee display
-- Multi-step 2FA verification (TOTP, Email, SMS, Face recognition)
+- Multi-step 2FA verification (TOTP, Email, SMS, Face recognition, Security Key/FIDO)
 - Wallet dashboards with balance previews
 - Server-side credential management and bulk wallet operations
 - Multi-tenant SaaS with isolated crypto operations per customer
@@ -263,11 +263,12 @@ Skip OAuth if wallet already connected:
 
 **Single-step**: `flow.requires2FA` → `flow.submit2FA(code)` → `withdraw:completed`
 
-**Multi-step** (e.g., Binance GOOGLE + EMAIL + FACE + SMS):
+**Multi-step** (e.g., Binance GOOGLE + EMAIL + FACE + SMS + ROAMING_FIDO):
 1. `flow.requires2FAMultiStep` — check `flow.multiStep2FASteps` for required steps
-2. `flow.submit2FAMultiStep('GOOGLE', code)` — submit each step
-3. `flow.pollFaceVerification()` — for FACE steps
-4. When `flow.isReadyToConfirm` → `flow.confirmWithdrawal()` → `withdraw:completed`
+2. `flow.submit2FAMultiStep('GOOGLE', code)` — submit each code-based step
+3. `flow.pollFaceVerification()` — for FACE steps (10s delay, then 5s polling)
+4. `flow.pollRoamingFidoVerification()` — for ROAMING_FIDO steps (immediate 5s polling)
+5. When `flow.isReadyToConfirm` → `flow.confirmWithdrawal()` → `withdraw:completed`
 
 Use `flow.mfaVerified` (not step.status) as the primary source of truth for verification state.
 
@@ -299,7 +300,7 @@ The SDK has detailed skill files for deep implementation guidance. Load these on
 | `nextjs-patterns.md` | Building Next.js App Router with server actions | `https://raw.githubusercontent.com/bluvoinc/sdk/main/packages/react/skill/references/nextjs-patterns.md` |
 | `components.md` | Looking for exported React components | `https://raw.githubusercontent.com/bluvoinc/sdk/main/packages/react/skill/references/components.md` |
 | `qrcode-binance-web.md` | Implementing QR code auth for binance-web | `https://raw.githubusercontent.com/bluvoinc/sdk/main/packages/react/skill/references/qrcode-binance-web.md` |
-| `multistep-2fa.md` | Handling multi-step 2FA (Binance GOOGLE+EMAIL+FACE+SMS) | `https://raw.githubusercontent.com/bluvoinc/sdk/main/packages/react/skill/references/multistep-2fa.md` |
+| `multistep-2fa.md` | Handling multi-step 2FA (Binance GOOGLE+EMAIL+FACE+SMS+ROAMING_FIDO) | `https://raw.githubusercontent.com/bluvoinc/sdk/main/packages/react/skill/references/multistep-2fa.md` |
 
 ### @bluvo/sdk-ts (Core TypeScript)
 

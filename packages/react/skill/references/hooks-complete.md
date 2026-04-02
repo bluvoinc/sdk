@@ -49,6 +49,7 @@ The main hook. Creates a `BluvoFlowClient` internally and exposes the complete f
 | `submit2FA` | `(code: string) => Promise<...>` | Submit TOTP 2FA code |
 | `submit2FAMultiStep` | `(stepType: 'GOOGLE'\|'EMAIL'\|'SMS', code: string) => Promise<...>` | Submit multi-step 2FA code |
 | `pollFaceVerification` | `() => Promise<...>` | Poll for face verification status |
+| `pollRoamingFidoVerification` | `() => Promise<...>` | Poll for ROAMING_FIDO verification status |
 | `confirmWithdrawal` | `() => Promise<...>` | Confirm withdrawal after all 2FA steps verified |
 | `retryWithdrawal` | `() => Promise<...>` | Retry a failed withdrawal |
 | `cancel` | `() => void` | Cancel the flow |
@@ -177,10 +178,12 @@ The main hook. Creates a `BluvoFlowClient` internally and exposes the complete f
 | `hasEmailStep` | `boolean` | Has EMAIL step |
 | `hasFaceStep` | `boolean` | Has FACE step |
 | `hasSmsStep` | `boolean` | Has SMS step |
+| `hasRoamingFidoStep` | `boolean` | Has ROAMING_FIDO step |
 | `isGoogleStepVerified` | `boolean` | GOOGLE step verified (mfa.verified PRIMARY) |
 | `isEmailStepVerified` | `boolean` | EMAIL step verified |
 | `isFaceStepVerified` | `boolean` | FACE step verified |
 | `isSmsStepVerified` | `boolean` | SMS step verified |
+| `isRoamingFidoStepVerified` | `boolean` | ROAMING_FIDO step verified (mfa.verified PRIMARY) |
 | `mfaVerified` | `object \| undefined` | MFA verified object (PRIMARY truth) |
 | `allMultiStep2FAStepsVerified` | `boolean` | All required steps verified |
 | `faceQrCodeUrl` | `string \| undefined` | Face verification QR code URL |

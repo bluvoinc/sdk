@@ -126,6 +126,7 @@ Active withdrawal states: `withdraw:processing`, `withdraw:error2FA`, `withdraw:
 | any withdrawal | `WITHDRAWAL_REQUIRES_2FA_MULTI_STEPS` | `withdraw:error2FAMultiStep` | Sets `multiStep2FA` context |
 | `withdraw:error2FAMultiStep` | `SUBMIT_2FA_MULTI_STEP` | `withdraw:processing` | Stores code in `collectedCodes` |
 | `withdraw:error2FAMultiStep` | `POLL_FACE_VERIFICATION` | `withdraw:processing` | — |
+| `withdraw:error2FAMultiStep` | `POLL_ROAMING_FIDO_VERIFICATION` | `withdraw:processing` | — |
 | any withdrawal | `WITHDRAWAL_2FA_INCOMPLETE` | `withdraw:error2FAMultiStep` | Updates steps and MFA verified state |
 | any withdrawal | `WITHDRAWAL_DRY_RUN_COMPLETE` | `withdraw:readyToConfirm` | All 2FA steps verified |
 | any withdrawal | `CONFIRM_WITHDRAWAL` | `withdraw:processing` | — |
@@ -279,6 +280,7 @@ quote:requesting
 
 ## Important Notes
 
+- **Polling methods skip state machine send**: `pollFaceVerification()` and `pollRoamingFidoVerification()` intentionally skip the state machine `send()` to avoid transitioning to `withdraw:processing` during background polling. The MFA UI stays visible throughout polling.
 - **No-op transitions**: If an action is sent in a state where it's not handled, the state machine returns the current state unchanged. No error is thrown.
 - **CANCEL_FLOW priority**: The `CANCEL_FLOW` action is checked before any state-specific handler and works from ANY state.
 - **Nested withdrawal machine**: The flow machine creates a nested withdrawal machine when `START_WITHDRAWAL` is sent. The withdrawal machine manages retry logic and 2FA state.

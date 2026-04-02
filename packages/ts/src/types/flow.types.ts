@@ -125,7 +125,7 @@ export interface FlowContext {
     multiStep2FA?: {
         bizNo: string;
         steps: Array<{
-            type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+            type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS' | 'ROAMING_FIDO';
             status: 'pending' | 'success' | 'failed';
             required: boolean;
             metadata?: {
@@ -133,6 +133,7 @@ export interface FlowContext {
                 emailSent?: boolean;
                 qrCodeUrl?: string;
                 qrCodeValidSeconds?: number;
+                roamingFlowId?: string;
             };
         }>;
         relation: 'AND' | 'OR';
@@ -150,6 +151,7 @@ export interface FlowContext {
                 EMAIL?: boolean;
                 FACE?: boolean;
                 SMS?: boolean;
+                ROAMING_FIDO?: boolean;
             };
         };
     };
@@ -250,7 +252,7 @@ export type FlowActionType =
     result: {
         bizNo: string;
         steps: Array<{
-            type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+            type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS' | 'ROAMING_FIDO';
             status: 'pending' | 'success' | 'failed';
             required: boolean;
             metadata?: {
@@ -258,6 +260,7 @@ export type FlowActionType =
                 emailSent?: boolean;
                 qrCodeUrl?: string;
                 qrCodeValidSeconds?: number;
+                roamingFlowId?: string;
             };
         }>;
         relation: 'AND' | 'OR';
@@ -267,6 +270,7 @@ export type FlowActionType =
                 EMAIL?: boolean;
                 FACE?: boolean;
                 SMS?: boolean;
+                ROAMING_FIDO?: boolean;
             };
         };
     };
@@ -276,7 +280,7 @@ export type FlowActionType =
         result: {
             bizNo?: string;
             steps?: Array<{
-                type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+                type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS' | 'ROAMING_FIDO';
                 status: 'pending' | 'success' | 'failed';
                 required: boolean;
                 metadata?: {
@@ -284,6 +288,7 @@ export type FlowActionType =
                     emailSent?: boolean;
                     qrCodeUrl?: string;
                     qrCodeValidSeconds?: number;
+                    roamingFlowId?: string;
                 };
             }>;
             relation?: 'AND' | 'OR';
@@ -293,6 +298,7 @@ export type FlowActionType =
                     EMAIL?: boolean;
                     FACE?: boolean;
                     SMS?: boolean;
+                    ROAMING_FIDO?: boolean;
                 };
             };
         };
@@ -304,12 +310,13 @@ export type FlowActionType =
     code: string;
 }
     | { type: "POLL_FACE_VERIFICATION" }
+    | { type: "POLL_ROAMING_FIDO_VERIFICATION" }
     | {
     type: "WITHDRAWAL_2FA_INCOMPLETE";
     result: {
         bizNo: string;
         steps: Array<{
-            type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+            type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS' | 'ROAMING_FIDO';
             status: 'pending' | 'success' | 'failed';
             required: boolean;
             metadata?: {
@@ -317,6 +324,7 @@ export type FlowActionType =
                 emailSent?: boolean;
                 qrCodeUrl?: string;
                 qrCodeValidSeconds?: number;
+                roamingFlowId?: string;
             };
         }>;
         relation: 'AND' | 'OR';
@@ -326,6 +334,7 @@ export type FlowActionType =
                 EMAIL?: boolean;
                 FACE?: boolean;
                 SMS?: boolean;
+                ROAMING_FIDO?: boolean;
             };
         };
     };

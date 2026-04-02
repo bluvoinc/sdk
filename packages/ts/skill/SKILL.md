@@ -4,7 +4,7 @@ description: "Use when implementing cryptocurrency exchange withdrawal flows in 
 license: MIT
 compatibility: "TypeScript 4.7+. Node.js 18+ for server-side use. Browser for client-side OAuth/WebSocket flows."
 metadata:
-  version: "3.0.0"
+  version: "3.1.0"
 ---
 
 # @bluvo/sdk-ts
@@ -168,6 +168,9 @@ Jumps directly to `wallet:ready` with optional preloaded balance data. Used afte
 ### pollFaceVerification()
 **Valid from**: `withdraw:error2FAMultiStep`. Transitions to processing to check FACE step completion.
 
+### pollRoamingFidoVerification()
+**Valid from**: `withdraw:error2FAMultiStep`. Polls backend to check ROAMING_FIDO step completion (no state transition during poll — MFA UI stays visible).
+
 ### confirmWithdrawal()
 **Valid from**: `withdraw:readyToConfirm`. Sends final confirmation after all 2FA steps verified.
 
@@ -192,7 +195,7 @@ The `ERROR_CODES` constant contains 40+ error codes grouped by category:
 - **Withdrawal Balance**: `WITHDRAWAL_INSUFFICIENT_BALANCE`, `WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE`
 - **Withdrawal Address**: `WITHDRAWAL_INVALID_ADDRESS`, `WITHDRAWAL_NETWORK_NOT_SUPPORTED`
 - **Withdrawal Amount**: `WITHDRAWAL_AMOUNT_BELOW_MINIMUM`, `WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM`
-- **Withdrawal 2FA**: `WITHDRAWAL_2FA_REQUIRED_TOTP`, `WITHDRAWAL_2FA_REQUIRED_SMS`, `WITHDRAWAL_2FA_REQUIRED_MULTI_STEPS`, `WITHDRAWAL_2FA_INVALID`, etc.
+- **Withdrawal 2FA**: `WITHDRAWAL_2FA_REQUIRED_TOTP`, `WITHDRAWAL_2FA_REQUIRED_SMS`, `WITHDRAWAL_2FA_REQUIRED_MULTI_STEPS`, `WITHDRAWAL_2FA_INVALID`, etc. (supports GOOGLE, EMAIL, FACE, SMS, ROAMING_FIDO steps)
 - **OAuth**: `OAUTH_AUTHORIZATION_FAILED`, `OAUTH_TOKEN_EXCHANGE_FAILED` (FATAL)
 - **Special**: `WITHDRAWAL_DRY_RUN_COMPLETE` — NOT an error, it's a success signal
 
@@ -229,7 +232,7 @@ if (code === ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP) {
 
 4. **Invalid state transitions are no-ops.** Sending an action in the wrong state returns the current state unchanged — no error is thrown. Check `getState().type` if you need to verify the transition happened.
 
-5. **`multiStep2FA.mfa.verified` is the PRIMARY source of truth** for step verification status, not `step.status`. The `mfa.verified` object is updated by the backend and reflects the actual verification state.
+5. **`multiStep2FA.mfa.verified` is the PRIMARY source of truth** for step verification status, not `step.status`. The `mfa.verified` object is updated by the backend and reflects the actual verification state. Supported keys: `GOOGLE`, `EMAIL`, `FACE`, `SMS`, `ROAMING_FIDO`.
 
 6. **`WITHDRAWAL_DRY_RUN_COMPLETE` is NOT a real error.** It's a success signal indicating all multi-step 2FA steps are verified and the withdrawal is ready to be confirmed. The SDK handles it by transitioning to `withdraw:readyToConfirm`.
 
@@ -245,4 +248,4 @@ if (code === ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP) {
 - Read `references/types.md` if you need the complete TypeScript type definitions for machine context, events, or state values.
 - Read `references/state-transitions.md` if you need detailed guard conditions, async behavior, or sequence diagrams for specific flows.
 - Read `../react/skill/references/qrcode-binance-web.md` for comprehensive QR code authentication flow implementation patterns including component rendering for `binance-web`.
-- Read `../react/skill/references/multistep-2fa.md` for comprehensive multi-step 2FA implementation patterns including FACE polling, dryRun pattern, and step verification.
+- Read `../react/skill/references/multistep-2fa.md` for comprehensive multi-step 2FA implementation patterns including FACE polling, ROAMING_FIDO polling, dryRun pattern, and step verification.

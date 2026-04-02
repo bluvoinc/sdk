@@ -108,6 +108,10 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		return await flowClient.pollFaceVerification();
 	}, [flowClient]);
 
+	const pollRoamingFidoVerification = useCallback(async () => {
+		return await flowClient.pollRoamingFidoVerification();
+	}, [flowClient]);
+
 	const confirmWithdrawal = useCallback(async () => {
 		return await flowClient.confirmWithdrawal();
 	}, [flowClient]);
@@ -194,6 +198,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		submit2FA,
 		submit2FAMultiStep, // Multi-step 2FA action
 		pollFaceVerification, // Multi-step 2FA FACE polling action
+		pollRoamingFidoVerification, // Multi-step 2FA ROAMING_FIDO polling action
 		confirmWithdrawal, // Multi-step 2FA confirmation action (after all steps verified)
 		retryWithdrawal,
 		cancel,
@@ -338,6 +343,7 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		hasGoogleStep: flow.context?.multiStep2FA?.steps?.some(s => s.type === 'GOOGLE') || false,
 		hasEmailStep: flow.context?.multiStep2FA?.steps?.some(s => s.type === 'EMAIL') || false,
 		hasFaceStep: flow.context?.multiStep2FA?.steps?.some(s => s.type === 'FACE') || false,
+		hasRoamingFidoStep: flow.context?.multiStep2FA?.steps?.some(s => s.type === 'ROAMING_FIDO') || false,
 		hasSmsStep: flow.context?.multiStep2FA?.steps?.some(s => s.type === 'SMS') || false,
 
 		// Multi-step 2FA step status helpers (using mfa.verified as PRIMARY source of truth)
@@ -347,6 +353,8 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 			flow.context?.multiStep2FA?.steps?.find(s => s.type === 'EMAIL')?.status === 'success',
 		isFaceStepVerified: flow.context?.multiStep2FA?.mfa?.verified?.FACE === true ||
 			flow.context?.multiStep2FA?.steps?.find(s => s.type === 'FACE')?.status === 'success',
+		isRoamingFidoStepVerified: flow.context?.multiStep2FA?.mfa?.verified?.ROAMING_FIDO === true ||
+			flow.context?.multiStep2FA?.steps?.find(s => s.type === 'ROAMING_FIDO')?.status === 'success',
 		isSmsStepVerified: flow.context?.multiStep2FA?.mfa?.verified?.SMS === true ||
 			flow.context?.multiStep2FA?.steps?.find(s => s.type === 'SMS')?.status === 'success',
 

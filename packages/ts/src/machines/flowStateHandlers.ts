@@ -619,6 +619,13 @@ function handleWithdrawalActions(
       }
       break;
 
+    case 'POLL_ROAMING_FIDO_VERIFICATION':
+      // Transition to processing for re-invocation (server checks ROAMING_FIDO completion)
+      if (state.type === 'withdraw:error2FAMultiStep') {
+        return createTransition('withdraw:processing', state.context);
+      }
+      break;
+
     case 'WITHDRAWAL_2FA_INCOMPLETE':
       // Update step statuses and remain in multi-step 2FA state
       if (state.context.multiStep2FA) {

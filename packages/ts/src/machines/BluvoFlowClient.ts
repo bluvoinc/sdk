@@ -1821,6 +1821,7 @@ export class BluvoFlowClient {
 	/**
 	 * Poll for FACE verification completion in multi-step 2FA flow.
 	 * This re-invokes the withdrawal with just the bizNo to check if FACE has been verified.
+	 * NOTE: Does NOT transition state to processing — keeps the MFA UI visible during polling.
 	 */
 	async pollFaceVerification() {
 		// Guard: No flow machine
@@ -1849,10 +1850,12 @@ export class BluvoFlowClient {
 			};
 		}
 
-		// Send action to transition to processing
-		this.flowMachine.send({ type: "POLL_FACE_VERIFICATION" });
+		// NOTE: We intentionally do NOT send POLL_FACE_VERIFICATION to the state machine here.
+		// Transitioning to withdraw:processing would hide the MFA UI during polling.
+		// The API response will be handled by the error handler which dispatches
+		// WITHDRAWAL_2FA_INCOMPLETE or WITHDRAWAL_DRY_RUN_COMPLETE back to the state machine.
 
-		// Re-execute withdrawal with bizNo + all previously collected codes
+		// Re-execute withdrawal with bizNo only (no collectedCodes to avoid re-triggering other steps)
 		const multiStep2FA = state.context.multiStep2FA;
 		const quote = state.context.quote;
 		const idem = this.generateId();
@@ -1863,8 +1866,6 @@ export class BluvoFlowClient {
 			quote.id,
 			{
 				bizNo: multiStep2FA.bizNo,
-				// ...multiStep2FA.collectedCodes,
-				// WE ONLY PROVIDE THE FACE POLLING PARAMS no collectedCodes so that we do not trigger re-processing of other steps OR re-submissions of codes, we just want to check if FACE step has been completed
 				params: {
 					dryRun: true, // Indicate this is a polling attempt, not a new submission
 				}
@@ -1877,6 +1878,83 @@ export class BluvoFlowClient {
 			const errorMessage = error instanceof Error
 				? error.message
 				: (error as any)?.error || (error as any)?.message || "Failed to poll FACE verification";
+
+			this.handleWithdrawalError(error);
+
+			return {
+				success: false,
+				error: errorMessage,
+				type: (errorInfo.rawType as TypeEnum2) || undefined,
+			};
+		}
+
+		// Withdrawal is in progress, will be handled by WebSocket callbacks
+		return {
+			success: true,
+			result: res,
+		};
+	}
+
+	/**
+	 * Poll for ROAMING_FIDO verification completion in multi-step 2FA flow.
+	 * This re-invokes the withdrawal with just the bizNo to check if ROAMING_FIDO has been verified.
+	 * NOTE: Does NOT transition state to processing — keeps the MFA UI visible during polling.
+	 */
+	async pollRoamingFidoVerification() {
+		// Guard: No flow machine
+		if (!this.flowMachine) {
+			return {
+				success: false,
+				error: "Flow machine not initialized",
+			};
+		}
+
+		const state = this.flowMachine.getState();
+
+		// Guard: Wrong state
+		if (state.type !== "withdraw:error2FAMultiStep") {
+			return {
+				success: false,
+				error: `Cannot poll ROAMING_FIDO verification in state: ${state.type}`,
+			};
+		}
+
+		// Guard: No quote, wallet ID, or multiStep2FA context
+		if (!state.context.quote || !state.context.walletId || !state.context.multiStep2FA) {
+			return {
+				success: false,
+				error: "Quote, wallet ID, or multi-step 2FA context not found",
+			};
+		}
+
+		// NOTE: We intentionally do NOT send a state transition action here.
+		// Transitioning to withdraw:processing would hide the MFA UI during polling.
+		// The API response will be handled by the error handler which dispatches
+		// WITHDRAWAL_2FA_INCOMPLETE or WITHDRAWAL_DRY_RUN_COMPLETE back to the state machine.
+
+		// Re-execute withdrawal with bizNo only (no collectedCodes to avoid re-triggering other steps)
+		const multiStep2FA = state.context.multiStep2FA;
+		const quote = state.context.quote;
+		const idem = this.generateId();
+
+		const { data: res, error, success } = await this.options.executeWithdrawalFn(
+			state.context.walletId,
+			idem,
+			quote.id,
+			{
+				bizNo: multiStep2FA.bizNo,
+				params: {
+					dryRun: true, // Indicate this is a polling attempt, not a new submission
+				}
+			},
+		);
+
+		if (!success) {
+			// Extract error type information
+			const errorInfo = extractErrorTypeInfo(error);
+			const errorMessage = error instanceof Error
+				? error.message
+				: (error as any)?.error || (error as any)?.message || "Failed to poll ROAMING_FIDO verification";
 
 			this.handleWithdrawalError(error);
 

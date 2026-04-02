@@ -74,7 +74,7 @@ export class WithdrawalErrorHandler {
           result: extractErrorResult(error) as {
             bizNo: string;
             steps: Array<{
-              type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+              type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS' | 'ROAMING_FIDO';
               status: 'pending' | 'success' | 'failed';
               required: boolean;
               metadata?: {
@@ -82,6 +82,7 @@ export class WithdrawalErrorHandler {
                 emailSent?: boolean;
                 qrCodeUrl?: string;
                 qrCodeValidSeconds?: number;
+                roamingFlowId?: string;
               };
             }>;
             relation: 'AND' | 'OR';
@@ -91,6 +92,7 @@ export class WithdrawalErrorHandler {
                 EMAIL?: boolean;
                 FACE?: boolean;
                 SMS?: boolean;
+                ROAMING_FIDO?: boolean;
               };
             };
           }
@@ -102,7 +104,7 @@ export class WithdrawalErrorHandler {
           result: extractErrorResult(error) as {
             bizNo: string;
             steps: Array<{
-              type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+              type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS' | 'ROAMING_FIDO';
               status: 'pending' | 'success' | 'failed';
               required: boolean;
               metadata?: {
@@ -110,6 +112,7 @@ export class WithdrawalErrorHandler {
                 emailSent?: boolean;
                 qrCodeUrl?: string;
                 qrCodeValidSeconds?: number;
+                roamingFlowId?: string;
               };
             }>;
             relation: 'AND' | 'OR';
@@ -119,6 +122,7 @@ export class WithdrawalErrorHandler {
                 EMAIL?: boolean;
                 FACE?: boolean;
                 SMS?: boolean;
+                ROAMING_FIDO?: boolean;
               };
             };
           }
@@ -130,7 +134,7 @@ export class WithdrawalErrorHandler {
           result: extractErrorResult(error) as {
             bizNo: string;
             steps: Array<{
-              type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+              type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS' | 'ROAMING_FIDO';
               status: 'pending' | 'success' | 'failed';
               required: boolean;
               metadata?: {
@@ -138,6 +142,7 @@ export class WithdrawalErrorHandler {
                 emailSent?: boolean;
                 qrCodeUrl?: string;
                 qrCodeValidSeconds?: number;
+                roamingFlowId?: string;
               };
             }>;
             relation: 'AND' | 'OR';
@@ -147,6 +152,7 @@ export class WithdrawalErrorHandler {
                 EMAIL?: boolean;
                 FACE?: boolean;
                 SMS?: boolean;
+                ROAMING_FIDO?: boolean;
               };
             };
           }

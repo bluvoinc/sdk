@@ -4,7 +4,7 @@ description: "Use when building cryptocurrency exchange withdrawal UIs in React 
 license: MIT
 compatibility: "React 16.8+. Next.js 13+ App Router supported. Requires @bluvo/sdk-ts@3.0.0 peer dependency."
 metadata:
-  version: "3.0.0"
+  version: "3.1.0"
 ---
 
 # @bluvo/react
@@ -108,7 +108,10 @@ await flow.executeWithdrawal(flow.quote!.id);
 
 // 6. Handle challenges
 if (flow.requires2FA) await flow.submit2FA(userCode);
-if (flow.requires2FAMultiStep) await flow.submit2FAMultiStep('GOOGLE', userCode);
+if (flow.requires2FAMultiStep) {
+  await flow.submit2FAMultiStep('GOOGLE', userCode);  // code-based steps
+  // FACE and ROAMING_FIDO steps are polled automatically by the component
+}
 if (flow.isReadyToConfirm) await flow.confirmWithdrawal();
 
 // 7. Done
@@ -187,7 +190,7 @@ Hooks are browser-only. They use `useState`, `useEffect`, WebSocket subscription
 
 5. **`flow.isWithdrawing` excludes completed/fatal/error states.** It means "actively processing right now" — specifically `withdraw:processing`, `withdraw:retrying`, `withdraw:readyToConfirm`. It does NOT include `withdraw:error2FA`, `withdraw:completed`, etc.
 
-6. **`mfaVerified` from context is the PRIMARY truth for multi-step 2FA.** When checking if a step is verified, prefer `flow.mfaVerified?.GOOGLE === true` over `step.status === 'success'`. The `mfa.verified` object is the authoritative source from the backend.
+6. **`mfaVerified` from context is the PRIMARY truth for multi-step 2FA.** Supported keys: `GOOGLE`, `EMAIL`, `FACE`, `SMS`, `ROAMING_FIDO`. When checking if a step is verified, prefer `flow.mfaVerified?.GOOGLE === true` over `step.status === 'success'`. The `mfa.verified` object is the authoritative source from the backend.
 
 7. **`testWithdrawalComplete()` is TEST-ONLY.** It simulates withdrawal completion without a real transaction. Do not use in production.
 
@@ -202,4 +205,4 @@ Hooks are browser-only. They use `useState`, `useEffect`, WebSocket subscription
 - Read `references/components.md` if you're looking for exported React components.
 - Read `../ts/skill/SKILL.md` if you need to understand the underlying state machine or need TypeScript-only (non-React) patterns.
 - Read `references/qrcode-binance-web.md` for QR code authentication flow implementation — state machine states, QRCodeStatus lifecycle, caching, component rendering patterns, and refresh handling for `binance-web` exchange.
-- Read `references/multistep-2fa.md` for multi-step 2FA implementation — handling GOOGLE, EMAIL, FACE, SMS verification steps, mfa.verified as primary truth, FACE polling, dryRun pattern, and confirmation flow.
+- Read `references/multistep-2fa.md` for multi-step 2FA implementation — handling GOOGLE, EMAIL, FACE, SMS, ROAMING_FIDO verification steps, mfa.verified as primary truth, FACE polling, ROAMING_FIDO polling, dryRun pattern, and confirmation flow.

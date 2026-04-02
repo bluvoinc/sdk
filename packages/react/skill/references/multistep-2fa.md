@@ -6,7 +6,7 @@
 
 ## 1. Overview
 
-Exchanges like Binance require multiple verification factors before allowing a withdrawal. The SDK manages this as a multi-step 2FA flow with 4 possible step types.
+Exchanges like Binance require multiple verification factors before allowing a withdrawal. The SDK manages this as a multi-step 2FA flow with 5 possible step types.
 
 ### Step Types
 
@@ -16,6 +16,7 @@ Exchanges like Binance require multiple verification factors before allowing a w
 | `EMAIL` | 4-10 character code | `{ email: string, emailSent: boolean }` | Code sent to masked email |
 | `FACE` | None (polling) | `{ qrCodeUrl: string, qrCodeValidSeconds: number }` | QR code scanned on exchange mobile app |
 | `SMS` | 4-10 character code | None | SMS verification code |
+| `ROAMING_FIDO` | None (polling) | `{ roamingFlowId: string }` | Security key / Binance app verification |
 
 ### Key Principles
 
@@ -41,6 +42,7 @@ withdraw:error2FAMultiStep  ◄────────────────�
     │                                                       │
     ├─ User submits code → submit2FAMultiStep(type, code)   │
     ├─ FACE auto-poll → pollFaceVerification()              │
+    ├─ ROAMING_FIDO auto-poll → pollRoamingFidoVerification() │
     │                                                       │
     ▼                                                       │
 withdraw:processing (re-invoke with bizNo + collected codes)│
@@ -69,7 +71,7 @@ withdraw:processing (re-invoke with bizNo + collected codes)│
 | State | Meaning | Trigger |
 |-------|---------|---------|
 | `withdraw:error2FAMultiStep` | Multi-step 2FA required, show verification UI | `WITHDRAWAL_2FA_REQUIRED_MULTI_STEPS` or `WITHDRAWAL_2FA_INCOMPLETE` |
-| `withdraw:processing` | Code submission or confirmation in progress | `submit2FAMultiStep()`, `pollFaceVerification()`, or `confirmWithdrawal()` |
+| `withdraw:processing` | Code submission or confirmation in progress | `submit2FAMultiStep()` or `confirmWithdrawal()` |
 | `withdraw:readyToConfirm` | All steps verified, awaiting final confirmation | `WITHDRAWAL_DRY_RUN_COMPLETE` |
 | `withdraw:completed` | Withdrawal successful | Successful `confirmWithdrawal()` |
 | `withdraw:fatal` | Unrecoverable error | Fatal error during confirmation |
@@ -84,7 +86,7 @@ withdraw:processing (re-invoke with bizNo + collected codes)│
 multiStep2FA?: {
   bizNo: string;                    // Transaction identifier — preserve across ALL calls
   steps: Array<{
-    type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS';
+    type: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS' | 'ROAMING_FIDO';
     status: 'pending' | 'success' | 'failed';
     required: boolean;
     metadata?: {
@@ -92,6 +94,7 @@ multiStep2FA?: {
       emailSent?: boolean;          // EMAIL: whether code was sent
       qrCodeUrl?: string;           // FACE: QR code URL to display
       qrCodeValidSeconds?: number;  // FACE: QR code validity duration
+      roamingFlowId?: string;       // ROAMING_FIDO: flow identifier
     };
   }>;
   relation: 'AND' | 'OR';          // 'AND' = all required, 'OR' = any one
@@ -108,6 +111,7 @@ multiStep2FA?: {
       EMAIL?: boolean;
       FACE?: boolean;
       SMS?: boolean;
+      ROAMING_FIDO?: boolean;
     };
   };
 };
@@ -121,6 +125,7 @@ interface MfaVerified {
   EMAIL?: boolean;
   FACE?: boolean;
   SMS?: boolean;
+  ROAMING_FIDO?: boolean;
 }
 ```
 
@@ -132,6 +137,7 @@ interface MfaVerified {
 | `EMAIL` | `email: string`, `emailSent: boolean` | Email is masked: `"j***@gmail.com"` |
 | `FACE` | `qrCodeUrl: string`, `qrCodeValidSeconds: number` | QR code for exchange mobile app |
 | `SMS` | None | — |
+| `ROAMING_FIDO` | `roamingFlowId: string` | Flow identifier for security key verification |
 
 ### Verification Helpers
 
@@ -144,7 +150,7 @@ function isStepVerified(step: MultiStep2FAStep, mfaVerified?: MfaVerified): bool
 
 // Detect wrong code submission
 function isStepVerificationFailed(
-  stepType: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS',
+  stepType: 'GOOGLE' | 'EMAIL' | 'FACE' | 'SMS' | 'ROAMING_FIDO',
   mfaVerified?: MfaVerified
 ): boolean {
   return mfaVerified?.[stepType] === false;
@@ -173,6 +179,7 @@ All `useBluvoFlow()` return fields for multi-step 2FA:
 | `hasEmailStep` | Steps array contains type `'EMAIL'` |
 | `hasFaceStep` | Steps array contains type `'FACE'` |
 | `hasSmsStep` | Steps array contains type `'SMS'` |
+| `hasRoamingFidoStep` | Steps array contains type `'ROAMING_FIDO'` |
 
 ### Step Verification (PRIMARY = `mfa.verified`)
 
@@ -182,6 +189,7 @@ All `useBluvoFlow()` return fields for multi-step 2FA:
 | `isEmailStepVerified` | `mfaVerified?.EMAIL === true` OR step status `'success'` |
 | `isFaceStepVerified` | `mfaVerified?.FACE === true` OR step status `'success'` |
 | `isSmsStepVerified` | `mfaVerified?.SMS === true` OR step status `'success'` |
+| `isRoamingFidoStepVerified` | `mfaVerified?.ROAMING_FIDO === true` OR step status `'success'` |
 | `allMultiStep2FAStepsVerified` | All required steps verified |
 
 ### Context Data
@@ -203,6 +211,7 @@ All `useBluvoFlow()` return fields for multi-step 2FA:
 |--------|-----------|------|
 | `submit2FAMultiStep` | `(stepType: 'GOOGLE' \| 'EMAIL' \| 'SMS', code: string) => Promise<...>` | Submit code for a step |
 | `pollFaceVerification` | `() => Promise<...>` | Check if FACE step is verified |
+| `pollRoamingFidoVerification` | `() => Promise<...>` | Poll for ROAMING_FIDO verification status |
 | `confirmWithdrawal` | `() => Promise<...>` | Execute real withdrawal after all steps verified |
 
 ---
@@ -281,6 +290,19 @@ Each step should have:
 - Polling happens automatically (see section 6)
 - No submit button — verification is detected via polling
 
+### ROAMING_FIDO Step
+
+**No code input.** Shows instruction message + polling indicator.
+
+```tsx
+<p style={{ fontWeight: '600' }}>Complete the verification in your Binance App</p>
+<p>Auto-checking every 5 seconds...</p>
+```
+
+- User completes verification in Binance mobile app
+- Polling happens automatically (see section 6b)
+- No submit button, no QR code — just an instruction message
+
 ### Verified State (All Types)
 
 When `isStepVerified(step, mfaVerified)` returns `true`:
@@ -304,7 +326,7 @@ When `isStepVerificationFailed(step.type, mfaVerified)` returns `true`:
 
 ---
 
-## 6. FACE Step Polling Implementation
+## 6. FACE & ROAMING_FIDO Polling Implementation
 
 ### Why Polling
 
@@ -381,6 +403,29 @@ const shouldPoll = !isFaceVerified && faceStepPending && faceQrCodeUrl;
 
 Calls `executeWithdrawalFn()` with `dryRun: true` and `bizNo` — backend checks if FACE step is complete without processing the withdrawal. Returns updated `mfa.verified` state.
 
+**Important:** `pollFaceVerification()` does NOT transition the state machine to `withdraw:processing`. The MFA UI stays visible during polling.
+
+### 6b. ROAMING_FIDO Polling
+
+Same mechanism as FACE but with different timing and no QR code dependency.
+
+| Parameter | Value | Reason |
+|-----------|-------|--------|
+| Initial delay | **None** (immediate) | No QR code to scan — user already prompted |
+| Poll interval | 5 seconds | Same as FACE |
+| Concurrency guard | `isPollingRoamingFidoRef` | Separate from FACE refs |
+
+**shouldPollRoamingFido Condition:**
+
+```typescript
+const isRoamingFidoVerified = mfaVerified?.ROAMING_FIDO === true ||
+  steps.find(s => s.type === 'ROAMING_FIDO')?.status === 'success';
+const roamingFidoStepPending = steps.find(s => s.type === 'ROAMING_FIDO' && s.status === 'pending');
+const shouldPollRoamingFido = !isRoamingFidoVerified && !!roamingFidoStepPending;
+```
+
+**Critical: No loading spinner during polling.** Both `pollFaceVerification()` and `pollRoamingFidoVerification()` do NOT transition the state machine to `withdraw:processing`. The MFA UI stays visible throughout polling.
+
 ---
 
 ## 7. The dryRun Pattern Explained
@@ -399,6 +444,7 @@ When `submit2FAMultiStep()` is called, the SDK sends the code to the backend. Th
 
 - `submit2FAMultiStep()` sends accumulated `collectedCodes` + `bizNo`
 - `pollFaceVerification()` sends `dryRun: true` explicitly (no collected codes, just checking)
+- `pollRoamingFidoVerification()` sends `dryRun: true` explicitly (same as FACE — just checking)
 - `confirmWithdrawal()` sends the final request WITHOUT `dryRun` — the actual withdrawal executes
 - `bizNo` is preserved across all calls in the same multi-step flow
 - `WITHDRAWAL_DRY_RUN_COMPLETE` is mapped to `withdraw:readyToConfirm` by `withdrawalErrorHandler.ts`
@@ -515,6 +561,7 @@ function WithdrawalVerification() {
       relation={flow.multiStep2FARelation || 'AND'}
       onSubmitCode={flow.submit2FAMultiStep}
       onPollFaceVerification={flow.pollFaceVerification}
+      onPollRoamingFidoVerification={flow.pollRoamingFidoVerification}
       onConfirm={flow.confirmWithdrawal}
       isSubmitting={flow.isWithdrawProcessing}
       isReadyToConfirm={flow.isReadyToConfirm}
@@ -536,6 +583,7 @@ interface MultiStep2FAComponentProps {
   relation: 'AND' | 'OR';
   onSubmitCode: (stepType: 'GOOGLE' | 'EMAIL' | 'SMS', code: string) => void;
   onPollFaceVerification: () => void;
+  onPollRoamingFidoVerification: () => void;
   onConfirm?: () => void;
   isSubmitting?: boolean;
   isReadyToConfirm?: boolean;
@@ -551,6 +599,6 @@ interface MultiStep2FAComponentProps {
 
 1. Render progress indicator (section 9)
 2. Render each step based on type (section 5)
-3. Manage FACE polling lifecycle (section 6)
+3. Manage FACE and ROAMING_FIDO polling lifecycles (section 6)
 4. Show confirmation UI when all steps verified (section 8)
 5. Display quote expiration countdown if `expiresAt` is provided

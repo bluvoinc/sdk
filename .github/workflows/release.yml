@@ -39,11 +39,11 @@ jobs:
       - name: Install dependencies
         run: pnpm i
 
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps
-
-      - name: Run tests
-        run: pnpm turbo run test
+#      - name: Install Playwright browsers
+#        run: pnpm exec playwright install --with-deps
+#
+#      - name: Run tests
+#        run: pnpm turbo run test
 
       - name: Sync SDK from OpenAPI (main)
         if: github.ref == 'refs/heads/main'

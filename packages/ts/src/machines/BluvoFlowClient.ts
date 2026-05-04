@@ -26,7 +26,7 @@ import { BluvoCache, type BluvoCacheOptions } from "../BluvoCache";
 import type { QRCodeAuthWorkflowMessageBody } from "../WorkflowTypes";
 
 // Exchanges that use QR code authentication instead of OAuth popup
-const QR_CODE_EXCHANGES = ['binance-web'];
+const QR_CODE_EXCHANGES = ['binance-web', 'bybit-web'];
 
 // Default QR code timeout in milliseconds (5 minutes)
 const DEFAULT_QRCODE_TIMEOUT_MS = 5 * 60 * 1000;

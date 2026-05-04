@@ -13,6 +13,7 @@ export const SchemaEnum = {
   BINANCE: "binance",
   LOCAL_CEX: "local-cex",
   BINANCE_WEB: "binance-web",
+  BYBIT_WEB: "bybit-web",
 } as const;
 
 export type SchemaEnum = (typeof SchemaEnum)[keyof typeof SchemaEnum];
@@ -54,6 +55,7 @@ export const ExchangeEnum = {
   BITTEAM: "bitteam",
   BITVAVO: "bitvavo",
   BYBIT: "bybit",
+  BYBIT_WEB: "bybit-web",
   BL3P: "bl3p",
   BLOCKCHAINCOM: "blockchaincom",
   BLOFIN: "blofin",
@@ -163,6 +165,7 @@ export const SchemaEnum2 = {
   BITTEAM: "bitteam",
   BITVAVO: "bitvavo",
   BYBIT: "bybit",
+  BYBIT_WEB: "bybit-web",
   BL3P: "bl3p",
   BLOCKCHAINCOM: "blockchaincom",
   BLOFIN: "blofin",
@@ -330,6 +333,9 @@ export const TypeEnum2 = {
   OAUTH_INVALID_STATE: "OAUTH_INVALID_STATE",
   OAUTH_INSUFFICIENT_SCOPE: "OAUTH_INSUFFICIENT_SCOPE",
   OAUTH_QR_CODE_UNAVAILABLE: "OAUTH_QR_CODE_UNAVAILABLE",
+  OAUTH_COUNTRY_NOT_DETECTED: "OAUTH_COUNTRY_NOT_DETECTED",
+  OAUTH_COUNTRY_NOT_SUPPORTED: "OAUTH_COUNTRY_NOT_SUPPORTED",
+  OAUTH_COUNTRY_CODE_INVALID: "OAUTH_COUNTRY_CODE_INVALID",
   WEBHOOK_SIGNATURE_INVALID: "WEBHOOK_SIGNATURE_INVALID",
   WEBHOOK_MISSING_HEADERS: "WEBHOOK_MISSING_HEADERS",
   WEBHOOK_INVALID_TIMESTAMP: "WEBHOOK_INVALID_TIMESTAMP",
@@ -349,6 +355,7 @@ export const TypeEnum3 = {
   EMAIL: "EMAIL",
   FACE: "FACE",
   SMS: "SMS",
+  ROAMING_FIDO: "ROAMING_FIDO",
 } as const;
 
 export type TypeEnum3 = (typeof TypeEnum3)[keyof typeof TypeEnum3];
@@ -981,6 +988,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               emailSent?: boolean;
               qrCodeUrl?: string;
               qrCodeValidSeconds?: number;
+              roamingFlowId?: string;
               [key: string]: unknown | string | boolean | number | undefined;
             };
             [key: string]:
@@ -993,6 +1001,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   emailSent?: boolean;
                   qrCodeUrl?: string;
                   qrCodeValidSeconds?: number;
+                  roamingFlowId?: string;
                   [key: string]:
                     | unknown
                     | string
@@ -1010,6 +1019,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               SMS?: boolean;
               GOOGLE?: boolean;
               FACE?: boolean;
+              ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
               method: TypeEnum3;
@@ -1035,6 +1045,9 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   method: "FACE";
                   viaMobile: boolean;
                 }
+              | {
+                  method: "ROAMING_FIDO";
+                }
             >;
           };
           [key: string]:
@@ -1049,6 +1062,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   emailSent?: boolean;
                   qrCodeUrl?: string;
                   qrCodeValidSeconds?: number;
+                  roamingFlowId?: string;
                   [key: string]:
                     | unknown
                     | string
@@ -1066,6 +1080,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                       emailSent?: boolean;
                       qrCodeUrl?: string;
                       qrCodeValidSeconds?: number;
+                      roamingFlowId?: string;
                       [key: string]:
                         | unknown
                         | string
@@ -1083,6 +1098,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   SMS?: boolean;
                   GOOGLE?: boolean;
                   FACE?: boolean;
+                  ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
                   method: TypeEnum3;
@@ -1107,6 +1123,9 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   | {
                       method: "FACE";
                       viaMobile: boolean;
+                    }
+                  | {
+                      method: "ROAMING_FIDO";
                     }
                 >;
               }
@@ -1127,6 +1146,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               SMS?: boolean;
               GOOGLE?: boolean;
               FACE?: boolean;
+              ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
               method: TypeEnum3;
@@ -1152,6 +1172,9 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   method: "FACE";
                   viaMobile: boolean;
                 }
+              | {
+                  method: "ROAMING_FIDO";
+                }
             >;
           };
           [key: string]:
@@ -1170,6 +1193,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   SMS?: boolean;
                   GOOGLE?: boolean;
                   FACE?: boolean;
+                  ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
                   method: TypeEnum3;
@@ -1194,6 +1218,9 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   | {
                       method: "FACE";
                       viaMobile: boolean;
+                    }
+                  | {
+                      method: "ROAMING_FIDO";
                     }
                 >;
               }
@@ -1219,6 +1246,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               SMS?: boolean;
               GOOGLE?: boolean;
               FACE?: boolean;
+              ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
               method: TypeEnum3;
@@ -1244,6 +1272,9 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   method: "FACE";
                   viaMobile: boolean;
                 }
+              | {
+                  method: "ROAMING_FIDO";
+                }
             >;
           };
           [key: string]:
@@ -1261,6 +1292,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   SMS?: boolean;
                   GOOGLE?: boolean;
                   FACE?: boolean;
+                  ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
                   method: TypeEnum3;
@@ -1285,6 +1317,9 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   | {
                       method: "FACE";
                       viaMobile: boolean;
+                    }
+                  | {
+                      method: "ROAMING_FIDO";
                     }
                 >;
               }
@@ -1320,6 +1355,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               emailSent?: boolean;
               qrCodeUrl?: string;
               qrCodeValidSeconds?: number;
+              roamingFlowId?: string;
               [key: string]: unknown | string | boolean | number | undefined;
             };
             [key: string]:
@@ -1332,6 +1368,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   emailSent?: boolean;
                   qrCodeUrl?: string;
                   qrCodeValidSeconds?: number;
+                  roamingFlowId?: string;
                   [key: string]:
                     | unknown
                     | string
@@ -1349,6 +1386,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               SMS?: boolean;
               GOOGLE?: boolean;
               FACE?: boolean;
+              ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
               method: TypeEnum3;
@@ -1374,6 +1412,9 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   method: "FACE";
                   viaMobile: boolean;
                 }
+              | {
+                  method: "ROAMING_FIDO";
+                }
             >;
           };
           [key: string]:
@@ -1388,6 +1429,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   emailSent?: boolean;
                   qrCodeUrl?: string;
                   qrCodeValidSeconds?: number;
+                  roamingFlowId?: string;
                   [key: string]:
                     | unknown
                     | string
@@ -1405,6 +1447,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                       emailSent?: boolean;
                       qrCodeUrl?: string;
                       qrCodeValidSeconds?: number;
+                      roamingFlowId?: string;
                       [key: string]:
                         | unknown
                         | string
@@ -1422,6 +1465,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   SMS?: boolean;
                   GOOGLE?: boolean;
                   FACE?: boolean;
+                  ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
                   method: TypeEnum3;
@@ -1446,6 +1490,9 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   | {
                       method: "FACE";
                       viaMobile: boolean;
+                    }
+                  | {
+                      method: "ROAMING_FIDO";
                     }
                 >;
               }
@@ -1466,6 +1513,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               SMS?: boolean;
               GOOGLE?: boolean;
               FACE?: boolean;
+              ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
               method: TypeEnum3;
@@ -1491,6 +1539,9 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   method: "FACE";
                   viaMobile: boolean;
                 }
+              | {
+                  method: "ROAMING_FIDO";
+                }
             >;
           };
           [key: string]:
@@ -1509,6 +1560,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   SMS?: boolean;
                   GOOGLE?: boolean;
                   FACE?: boolean;
+                  ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
                   method: TypeEnum3;
@@ -1533,6 +1585,9 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   | {
                       method: "FACE";
                       viaMobile: boolean;
+                    }
+                  | {
+                      method: "ROAMING_FIDO";
                     }
                 >;
               }
@@ -1558,6 +1613,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               SMS?: boolean;
               GOOGLE?: boolean;
               FACE?: boolean;
+              ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
               method: TypeEnum3;
@@ -1583,6 +1639,9 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   method: "FACE";
                   viaMobile: boolean;
                 }
+              | {
+                  method: "ROAMING_FIDO";
+                }
             >;
           };
           [key: string]:
@@ -1600,6 +1659,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   SMS?: boolean;
                   GOOGLE?: boolean;
                   FACE?: boolean;
+                  ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
                   method: TypeEnum3;
@@ -1624,6 +1684,9 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   | {
                       method: "FACE";
                       viaMobile: boolean;
+                    }
+                  | {
+                      method: "ROAMING_FIDO";
                     }
                 >;
               }
@@ -1662,6 +1725,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
               emailSent?: boolean;
               qrCodeUrl?: string;
               qrCodeValidSeconds?: number;
+              roamingFlowId?: string;
               [key: string]: unknown | string | boolean | number | undefined;
             };
             [key: string]:
@@ -1674,6 +1738,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                   emailSent?: boolean;
                   qrCodeUrl?: string;
                   qrCodeValidSeconds?: number;
+                  roamingFlowId?: string;
                   [key: string]:
                     | unknown
                     | string
@@ -1691,6 +1756,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
               SMS?: boolean;
               GOOGLE?: boolean;
               FACE?: boolean;
+              ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
               method: TypeEnum3;
@@ -1716,6 +1782,9 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                   method: "FACE";
                   viaMobile: boolean;
                 }
+              | {
+                  method: "ROAMING_FIDO";
+                }
             >;
           };
           [key: string]:
@@ -1730,6 +1799,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                   emailSent?: boolean;
                   qrCodeUrl?: string;
                   qrCodeValidSeconds?: number;
+                  roamingFlowId?: string;
                   [key: string]:
                     | unknown
                     | string
@@ -1747,6 +1817,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                       emailSent?: boolean;
                       qrCodeUrl?: string;
                       qrCodeValidSeconds?: number;
+                      roamingFlowId?: string;
                       [key: string]:
                         | unknown
                         | string
@@ -1764,6 +1835,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                   SMS?: boolean;
                   GOOGLE?: boolean;
                   FACE?: boolean;
+                  ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
                   method: TypeEnum3;
@@ -1788,6 +1860,9 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                   | {
                       method: "FACE";
                       viaMobile: boolean;
+                    }
+                  | {
+                      method: "ROAMING_FIDO";
                     }
                 >;
               }
@@ -1808,6 +1883,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
               SMS?: boolean;
               GOOGLE?: boolean;
               FACE?: boolean;
+              ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
               method: TypeEnum3;
@@ -1833,6 +1909,9 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                   method: "FACE";
                   viaMobile: boolean;
                 }
+              | {
+                  method: "ROAMING_FIDO";
+                }
             >;
           };
           [key: string]:
@@ -1851,6 +1930,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                   SMS?: boolean;
                   GOOGLE?: boolean;
                   FACE?: boolean;
+                  ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
                   method: TypeEnum3;
@@ -1875,6 +1955,9 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                   | {
                       method: "FACE";
                       viaMobile: boolean;
+                    }
+                  | {
+                      method: "ROAMING_FIDO";
                     }
                 >;
               }

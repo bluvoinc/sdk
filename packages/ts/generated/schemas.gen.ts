@@ -2,7 +2,14 @@
 
 export const SchemaEnumSchema = {
   type: "string",
-  enum: ["coinbase", "kraken", "binance", "local-cex", "binance-web"],
+  enum: [
+    "coinbase",
+    "kraken",
+    "binance",
+    "local-cex",
+    "binance-web",
+    "bybit-web",
+  ],
 } as const;
 
 export const StatusEnumSchema = {
@@ -40,6 +47,7 @@ export const ExchangeEnumSchema = {
     "bitteam",
     "bitvavo",
     "bybit",
+    "bybit-web",
     "bl3p",
     "blockchaincom",
     "blofin",
@@ -148,6 +156,7 @@ export const SchemaEnum2Schema = {
     "bitteam",
     "bitvavo",
     "bybit",
+    "bybit-web",
     "bl3p",
     "blockchaincom",
     "blofin",
@@ -293,6 +302,9 @@ export const TypeEnum2Schema = {
     "OAUTH_INVALID_STATE",
     "OAUTH_INSUFFICIENT_SCOPE",
     "OAUTH_QR_CODE_UNAVAILABLE",
+    "OAUTH_COUNTRY_NOT_DETECTED",
+    "OAUTH_COUNTRY_NOT_SUPPORTED",
+    "OAUTH_COUNTRY_CODE_INVALID",
     "WEBHOOK_SIGNATURE_INVALID",
     "WEBHOOK_MISSING_HEADERS",
     "WEBHOOK_INVALID_TIMESTAMP",
@@ -308,7 +320,7 @@ export const TypeEnum2Schema = {
 
 export const TypeEnum3Schema = {
   type: "string",
-  enum: ["GOOGLE", "EMAIL", "FACE", "SMS"],
+  enum: ["GOOGLE", "EMAIL", "FACE", "SMS", "ROAMING_FIDO"],
 } as const;
 
 export const StatusEnum4Schema = {

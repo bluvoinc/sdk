@@ -2,19 +2,17 @@
 
 export const SchemaEnumSchema = {
   type: "string",
-  enum: [
-    "coinbase",
-    "kraken",
-    "binance",
-    "local-cex",
-    "binance-web",
-    "bybit-web",
-  ],
+  enum: ["coinbase", "kraken", "local-cex", "binance-web", "bybit-web", "kucoin"],
 } as const;
 
 export const StatusEnumSchema = {
   type: "string",
   enum: ["live", "offline", "maintenance", "coming_soon"],
+} as const;
+
+export const RestrictionTypeEnumSchema = {
+  type: "string",
+  enum: ["none", "allowlist", "denylist"],
 } as const;
 
 export const ExchangeEnumSchema = {
@@ -124,6 +122,11 @@ export const ExchangeEnumSchema = {
 export const StatusEnum2Schema = {
   type: "string",
   enum: ["SUCCESS", "INVALID_API_CREDENTIALS"],
+} as const;
+
+export const TypeEnumSchema = {
+  type: "string",
+  enum: ["WALLET_NOT_FOUND", "WALLET_IDENTITY_NOT_FOUND"],
 } as const;
 
 export const SchemaEnum2Schema = {
@@ -236,7 +239,7 @@ export const SchemaEnum3Schema = {
   enum: ["true", "false", null],
 } as const;
 
-export const TypeEnumSchema = {
+export const TypeEnum2Schema = {
   type: "string",
   enum: ["deposit", "withdrawal", "transaction"],
 } as const;
@@ -261,7 +264,7 @@ export const CategoryEnumSchema = {
   enum: ["exchange_withdrawal_fee", "network_fee", "provider_fee", "other"],
 } as const;
 
-export const TypeEnum2Schema = {
+export const TypeEnum3Schema = {
   type: "string",
   enum: [
     "GENERIC_NOT_FOUND",
@@ -273,6 +276,7 @@ export const TypeEnum2Schema = {
     "APIKEY_INSUFFICIENT_PERMISSIONS",
     "WALLET_NOT_FOUND",
     "WALLET_INVALID_CREDENTIALS",
+    "WALLET_IDENTITY_NOT_FOUND",
     "QUOTE_NOT_FOUND",
     "QUOTE_EXPIRED",
     "WITHDRAWAL_INSUFFICIENT_BALANCE",
@@ -280,6 +284,7 @@ export const TypeEnum2Schema = {
     "WITHDRAWAL_INVALID_ADDRESS",
     "WITHDRAWAL_NETWORK_NOT_SUPPORTED",
     "WITHDRAWAL_TOO_MANY_ADDRESSES",
+    "WITHDRAWAL_FUNDING_ADDRESS_CONFLICT",
     "WITHDRAWAL_AMOUNT_BELOW_MINIMUM",
     "WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM",
     "WITHDRAWAL_ASSET_NOT_SUPPORTED",
@@ -311,14 +316,23 @@ export const TypeEnum2Schema = {
     "CACHE_MISS",
     "CACHE_EXPIRED",
     "CACHE_INVALID_PATH",
+    "DEPOSIT_NOT_IMPLEMENTED",
+    "DEPOSIT_ASSET_REQUIRED",
+    "DEPOSIT_NETWORK_REQUIRED",
+    "DEPOSIT_METHODS_UNAVAILABLE",
+    "DEPOSIT_ADDRESS_UNAVAILABLE",
+    "DEPOSIT_EXCHANGE_NOT_SUPPORTED",
+    "DEPOSIT_METHOD_NOT_RESOLVED",
     "WITHDRAWAL_DRY_RUN_COMPLETE",
+    "INFO_ASSET_REQUIRED",
+    "INFO_FEE_EXCHANGE_NOT_SUPPORTED",
     "ENRICHMENT_NETWORK_NOT_SUPPORTED",
     "ENRICHMENT_TIMEOUT",
     "ENRICHMENT_API_ERROR",
   ],
 } as const;
 
-export const TypeEnum3Schema = {
+export const TypeEnum4Schema = {
   type: "string",
   enum: ["GOOGLE", "EMAIL", "FACE", "SMS", "ROAMING_FIDO"],
 } as const;
@@ -331,4 +345,38 @@ export const StatusEnum4Schema = {
 export const RelationEnumSchema = {
   type: "string",
   enum: ["AND", "OR"],
+} as const;
+
+export const TagTypeEnumSchema = {
+  type: ["string", "null"],
+  enum: ["memo", "destinationTag", "message", null],
+} as const;
+
+export const TypeEnum5Schema = {
+  type: "string",
+  enum: [
+    "DEPOSIT_ASSET_REQUIRED",
+    "DEPOSIT_NETWORK_REQUIRED",
+    "DEPOSIT_EXCHANGE_NOT_SUPPORTED",
+    "DEPOSIT_METHOD_NOT_RESOLVED",
+  ],
+} as const;
+
+export const TypeEnum6Schema = {
+  type: "string",
+  enum: ["WALLET_NOT_FOUND", "DEPOSIT_ADDRESS_UNAVAILABLE"],
+} as const;
+
+export const SchemaEnum4Schema = {
+  type: "string",
+  enum: ["reuse_or_create", "reuse_only", "create_new"],
+} as const;
+
+export const TypeEnum7Schema = {
+  type: "string",
+  enum: [
+    "INFO_ASSET_REQUIRED",
+    "INFO_FEE_EXCHANGE_NOT_SUPPORTED",
+    "WITHDRAWAL_ASSET_NOT_SUPPORTED",
+  ],
 } as const;

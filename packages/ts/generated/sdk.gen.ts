@@ -3,6 +3,8 @@
 import type { Client, Options as Options2, TDataShape } from "./client";
 import { client } from "./client.gen";
 import type {
+  Oauth2ExchangecountriesgetsupportedcountriesData,
+  Oauth2ExchangecountriesgetsupportedcountriesResponses,
   Oauth2ExchangeslistexchangesData,
   Oauth2ExchangeslistexchangesResponses,
   Oauth2ExchangeurlgeturlData,
@@ -13,9 +15,18 @@ import type {
   WalletdeleteData,
   WalletdeleteErrors,
   WalletdeleteResponses,
+  WalletdepositaddressdepositaddressData,
+  WalletdepositaddressdepositaddressErrors,
+  WalletdepositaddressdepositaddressResponses,
   WalletgetData,
   WalletgetErrors,
   WalletgetResponses,
+  WalletinfofeewithdrawalfeeData,
+  WalletinfofeewithdrawalfeeErrors,
+  WalletinfofeewithdrawalfeeResponses,
+  WalletkycgetkycidentityData,
+  WalletkycgetkycidentityErrors,
+  WalletkycgetkycidentityResponses,
   WalletlistlistwalletsData,
   WalletlistlistwalletsErrors,
   WalletlistlistwalletsResponses,
@@ -25,6 +36,9 @@ import type {
   WallettransactionslisttransactionsData,
   WallettransactionslisttransactionsErrors,
   WallettransactionslisttransactionsResponses,
+  WallettransactiontransactionidgettransactionData,
+  WallettransactiontransactionidgettransactionErrors,
+  WallettransactiontransactionidgettransactionResponses,
   WalletwithdrawbalancebalanceData,
   WalletwithdrawbalancebalanceErrors,
   WalletwithdrawbalancebalanceResponses,
@@ -101,6 +115,29 @@ export const oauth2Exchangeslistexchanges = <
     ThrowOnError
   >({
     url: "/v0/oauth2/exchanges",
+    ...options,
+  });
+};
+
+/**
+ * Get Supported Countries
+ *
+ * Returns the list of countries where the specified exchange is available for OAuth2 connectivity. For geo-restricted exchanges (e.g. `binance-web`, `bybit-web`), the response contains the explicit list of supported countries. For exchanges with no geo-restrictions, an empty array is returned — meaning all countries are supported. Use this endpoint before initiating an OAuth2 flow to verify that the end-user's country is eligible.
+ */
+export const oauth2Exchangecountriesgetsupportedcountries = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<
+    Oauth2ExchangecountriesgetsupportedcountriesData,
+    ThrowOnError
+  >,
+) => {
+  return (options.client ?? client).get<
+    Oauth2ExchangecountriesgetsupportedcountriesResponses,
+    unknown,
+    ThrowOnError
+  >({
+    url: "/v0/oauth2/{exchange}/countries",
     ...options,
   });
 };
@@ -220,6 +257,44 @@ export const walletpingping = <ThrowOnError extends boolean = false>(
 };
 
 /**
+ * Get KYC Identity
+ *
+ * Retrieve KYC identity information associated with a wallet. Returns the user's full name, email, IBAN, and country as provided by the exchange during the OAuth flow. Returns 404 if the wallet has no linked identity.
+ *
+ * **Required API Key Scopes:** `read`, `kyc`
+ */
+export const walletkycgetkycidentity = <ThrowOnError extends boolean = false>(
+  options?: Options<WalletkycgetkycidentityData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    WalletkycgetkycidentityResponses,
+    WalletkycgetkycidentityErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "x-bluvo-api-key",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-org-id",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-project-id",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-wallet-id",
+        type: "apiKey",
+      },
+    ],
+    url: "/v0/wallet/kyc",
+    ...options,
+  });
+};
+
+/**
  * List Wallets
  *
  * List all connected exchange wallets.
@@ -285,6 +360,45 @@ export const wallettransactionslisttransactions = <
       },
     ],
     url: "/v0/wallet/transactions",
+    ...options,
+  });
+};
+
+/**
+ * Get Transaction
+ *
+ * Get a single transaction by its ID.
+ *
+ * **Required API Key Scopes:** `read`
+ */
+export const wallettransactiontransactionidgettransaction = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<
+    WallettransactiontransactionidgettransactionData,
+    ThrowOnError
+  >,
+) => {
+  return (options.client ?? client).get<
+    WallettransactiontransactionidgettransactionResponses,
+    WallettransactiontransactionidgettransactionErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "x-bluvo-api-key",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-org-id",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-project-id",
+        type: "apiKey",
+      },
+    ],
+    url: "/v0/wallet/transaction/{transactionId}",
     ...options,
   });
 };
@@ -414,6 +528,86 @@ export const walletwithdrawquoteidexecutewithdraw = <
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+};
+
+/**
+ * Deposit Address
+ *
+ * Get or create a deposit address for a specific asset and network (network and asset must follow the same shaped used in the quotation endpoint).
+ *
+ * **Required API Key Scopes:** `read`, `deposit`
+ */
+export const walletdepositaddressdepositaddress = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<WalletdepositaddressdepositaddressData, ThrowOnError>,
+) => {
+  return (options.client ?? client).get<
+    WalletdepositaddressdepositaddressResponses,
+    WalletdepositaddressdepositaddressErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "x-bluvo-api-key",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-org-id",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-project-id",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-wallet-id",
+        type: "apiKey",
+      },
+    ],
+    url: "/v0/wallet/deposit/address",
+    ...options,
+  });
+};
+
+/**
+ * Withdrawal Fee
+ *
+ * Get withdrawal fee and minimum amount information for a given asset without creating a quote. Returns fee details per network.
+ *
+ * **Required API Key Scopes:** `read`
+ */
+export const walletinfofeewithdrawalfee = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<WalletinfofeewithdrawalfeeData, ThrowOnError>,
+) => {
+  return (options.client ?? client).get<
+    WalletinfofeewithdrawalfeeResponses,
+    WalletinfofeewithdrawalfeeErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "x-bluvo-api-key",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-org-id",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-project-id",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-wallet-id",
+        type: "apiKey",
+      },
+    ],
+    url: "/v0/wallet/info/fee",
+    ...options,
   });
 };
 

@@ -493,7 +493,7 @@ export class BluvoWebClient {
 		 * @returns A URL string that can be used to initiate the OAuth2 flow.
 		 */
 		getURL: async (
-			exchange: "coinbase" | "kraken",
+			exchange: "coinbase" | "kraken" | "kucoin",
 			{
 				walletId,
 				idem,

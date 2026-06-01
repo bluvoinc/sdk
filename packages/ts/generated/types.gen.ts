@@ -10,10 +10,10 @@ export type ClientOptions = {
 export const SchemaEnum = {
   COINBASE: "coinbase",
   KRAKEN: "kraken",
-  BINANCE: "binance",
   LOCAL_CEX: "local-cex",
   BINANCE_WEB: "binance-web",
   BYBIT_WEB: "bybit-web",
+  KUCOIN: "kucoin",
 } as const;
 
 export type SchemaEnum = (typeof SchemaEnum)[keyof typeof SchemaEnum];
@@ -26,6 +26,15 @@ export const StatusEnum = {
 } as const;
 
 export type StatusEnum = (typeof StatusEnum)[keyof typeof StatusEnum];
+
+export const RestrictionTypeEnum = {
+  NONE: "none",
+  ALLOWLIST: "allowlist",
+  DENYLIST: "denylist",
+} as const;
+
+export type RestrictionTypeEnum =
+  (typeof RestrictionTypeEnum)[keyof typeof RestrictionTypeEnum];
 
 export const ExchangeEnum = {
   ACE: "ace",
@@ -136,6 +145,13 @@ export const StatusEnum2 = {
 } as const;
 
 export type StatusEnum2 = (typeof StatusEnum2)[keyof typeof StatusEnum2];
+
+export const TypeEnum = {
+  WALLET_NOT_FOUND: "WALLET_NOT_FOUND",
+  WALLET_IDENTITY_NOT_FOUND: "WALLET_IDENTITY_NOT_FOUND",
+} as const;
+
+export type TypeEnum = (typeof TypeEnum)[keyof typeof TypeEnum];
 
 export const SchemaEnum2 = {
   ACE: "ace",
@@ -249,13 +265,13 @@ export const SchemaEnum3 = {
 
 export type SchemaEnum3 = (typeof SchemaEnum3)[keyof typeof SchemaEnum3];
 
-export const TypeEnum = {
+export const TypeEnum2 = {
   DEPOSIT: "deposit",
   WITHDRAWAL: "withdrawal",
   TRANSACTION: "transaction",
 } as const;
 
-export type TypeEnum = (typeof TypeEnum)[keyof typeof TypeEnum];
+export type TypeEnum2 = (typeof TypeEnum2)[keyof typeof TypeEnum2];
 
 export const DirectionEnum = {
   IN: "in",
@@ -292,7 +308,7 @@ export const CategoryEnum = {
 
 export type CategoryEnum = (typeof CategoryEnum)[keyof typeof CategoryEnum];
 
-export const TypeEnum2 = {
+export const TypeEnum3 = {
   GENERIC_NOT_FOUND: "GENERIC_NOT_FOUND",
   GENERIC_UNAUTHORIZED: "GENERIC_UNAUTHORIZED",
   GENERIC_INTERNAL_SERVER_ERROR: "GENERIC_INTERNAL_SERVER_ERROR",
@@ -302,6 +318,7 @@ export const TypeEnum2 = {
   APIKEY_INSUFFICIENT_PERMISSIONS: "APIKEY_INSUFFICIENT_PERMISSIONS",
   WALLET_NOT_FOUND: "WALLET_NOT_FOUND",
   WALLET_INVALID_CREDENTIALS: "WALLET_INVALID_CREDENTIALS",
+  WALLET_IDENTITY_NOT_FOUND: "WALLET_IDENTITY_NOT_FOUND",
   QUOTE_NOT_FOUND: "QUOTE_NOT_FOUND",
   QUOTE_EXPIRED: "QUOTE_EXPIRED",
   WITHDRAWAL_INSUFFICIENT_BALANCE: "WITHDRAWAL_INSUFFICIENT_BALANCE",
@@ -310,6 +327,7 @@ export const TypeEnum2 = {
   WITHDRAWAL_INVALID_ADDRESS: "WITHDRAWAL_INVALID_ADDRESS",
   WITHDRAWAL_NETWORK_NOT_SUPPORTED: "WITHDRAWAL_NETWORK_NOT_SUPPORTED",
   WITHDRAWAL_TOO_MANY_ADDRESSES: "WITHDRAWAL_TOO_MANY_ADDRESSES",
+  WITHDRAWAL_FUNDING_ADDRESS_CONFLICT: "WITHDRAWAL_FUNDING_ADDRESS_CONFLICT",
   WITHDRAWAL_AMOUNT_BELOW_MINIMUM: "WITHDRAWAL_AMOUNT_BELOW_MINIMUM",
   WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM: "WITHDRAWAL_AMOUNT_ABOVE_MAXIMUM",
   WITHDRAWAL_ASSET_NOT_SUPPORTED: "WITHDRAWAL_ASSET_NOT_SUPPORTED",
@@ -342,15 +360,24 @@ export const TypeEnum2 = {
   CACHE_MISS: "CACHE_MISS",
   CACHE_EXPIRED: "CACHE_EXPIRED",
   CACHE_INVALID_PATH: "CACHE_INVALID_PATH",
+  DEPOSIT_NOT_IMPLEMENTED: "DEPOSIT_NOT_IMPLEMENTED",
+  DEPOSIT_ASSET_REQUIRED: "DEPOSIT_ASSET_REQUIRED",
+  DEPOSIT_NETWORK_REQUIRED: "DEPOSIT_NETWORK_REQUIRED",
+  DEPOSIT_METHODS_UNAVAILABLE: "DEPOSIT_METHODS_UNAVAILABLE",
+  DEPOSIT_ADDRESS_UNAVAILABLE: "DEPOSIT_ADDRESS_UNAVAILABLE",
+  DEPOSIT_EXCHANGE_NOT_SUPPORTED: "DEPOSIT_EXCHANGE_NOT_SUPPORTED",
+  DEPOSIT_METHOD_NOT_RESOLVED: "DEPOSIT_METHOD_NOT_RESOLVED",
   WITHDRAWAL_DRY_RUN_COMPLETE: "WITHDRAWAL_DRY_RUN_COMPLETE",
+  INFO_ASSET_REQUIRED: "INFO_ASSET_REQUIRED",
+  INFO_FEE_EXCHANGE_NOT_SUPPORTED: "INFO_FEE_EXCHANGE_NOT_SUPPORTED",
   ENRICHMENT_NETWORK_NOT_SUPPORTED: "ENRICHMENT_NETWORK_NOT_SUPPORTED",
   ENRICHMENT_TIMEOUT: "ENRICHMENT_TIMEOUT",
   ENRICHMENT_API_ERROR: "ENRICHMENT_API_ERROR",
 } as const;
 
-export type TypeEnum2 = (typeof TypeEnum2)[keyof typeof TypeEnum2];
+export type TypeEnum3 = (typeof TypeEnum3)[keyof typeof TypeEnum3];
 
-export const TypeEnum3 = {
+export const TypeEnum4 = {
   GOOGLE: "GOOGLE",
   EMAIL: "EMAIL",
   FACE: "FACE",
@@ -358,7 +385,7 @@ export const TypeEnum3 = {
   ROAMING_FIDO: "ROAMING_FIDO",
 } as const;
 
-export type TypeEnum3 = (typeof TypeEnum3)[keyof typeof TypeEnum3];
+export type TypeEnum4 = (typeof TypeEnum4)[keyof typeof TypeEnum4];
 
 export const StatusEnum4 = {
   PENDING: "pending",
@@ -374,6 +401,47 @@ export const RelationEnum = {
 } as const;
 
 export type RelationEnum = (typeof RelationEnum)[keyof typeof RelationEnum];
+
+export const TagTypeEnum = {
+  MEMO: "memo",
+  DESTINATION_TAG: "destinationTag",
+  MESSAGE: "message",
+  NULL: null,
+} as const;
+
+export type TagTypeEnum = (typeof TagTypeEnum)[keyof typeof TagTypeEnum];
+
+export const TypeEnum5 = {
+  DEPOSIT_ASSET_REQUIRED: "DEPOSIT_ASSET_REQUIRED",
+  DEPOSIT_NETWORK_REQUIRED: "DEPOSIT_NETWORK_REQUIRED",
+  DEPOSIT_EXCHANGE_NOT_SUPPORTED: "DEPOSIT_EXCHANGE_NOT_SUPPORTED",
+  DEPOSIT_METHOD_NOT_RESOLVED: "DEPOSIT_METHOD_NOT_RESOLVED",
+} as const;
+
+export type TypeEnum5 = (typeof TypeEnum5)[keyof typeof TypeEnum5];
+
+export const TypeEnum6 = {
+  WALLET_NOT_FOUND: "WALLET_NOT_FOUND",
+  DEPOSIT_ADDRESS_UNAVAILABLE: "DEPOSIT_ADDRESS_UNAVAILABLE",
+} as const;
+
+export type TypeEnum6 = (typeof TypeEnum6)[keyof typeof TypeEnum6];
+
+export const SchemaEnum4 = {
+  REUSE_OR_CREATE: "reuse_or_create",
+  REUSE_ONLY: "reuse_only",
+  CREATE_NEW: "create_new",
+} as const;
+
+export type SchemaEnum4 = (typeof SchemaEnum4)[keyof typeof SchemaEnum4];
+
+export const TypeEnum7 = {
+  INFO_ASSET_REQUIRED: "INFO_ASSET_REQUIRED",
+  INFO_FEE_EXCHANGE_NOT_SUPPORTED: "INFO_FEE_EXCHANGE_NOT_SUPPORTED",
+  WITHDRAWAL_ASSET_NOT_SUPPORTED: "WITHDRAWAL_ASSET_NOT_SUPPORTED",
+} as const;
+
+export type TypeEnum7 = (typeof TypeEnum7)[keyof typeof TypeEnum7];
 
 export type Oauth2ExchangeurlgeturlData = {
   body?: never;
@@ -392,6 +460,10 @@ export type Oauth2ExchangeurlgeturlData = {
      * Custom base domain for redirect URI i.e. 'example.com'.
      */
     customDomain?: string | null;
+    /**
+     * Optional Unix timestamp (seconds) for API key expiration. If provided, the generated API key will expire at this time. If omitted, the key will not expire.
+     */
+    expiresAt?: string | null;
   };
   url: "/v0/oauth2/{exchange}/url";
 };
@@ -434,6 +506,36 @@ export type Oauth2ExchangeslistexchangesResponses = {
 
 export type Oauth2ExchangeslistexchangesResponse =
   Oauth2ExchangeslistexchangesResponses[keyof Oauth2ExchangeslistexchangesResponses];
+
+export type Oauth2ExchangecountriesgetsupportedcountriesData = {
+  body?: never;
+  path: {
+    /**
+     * Exchange identifier.
+     */
+    exchange: SchemaEnum;
+  };
+  query?: never;
+  url: "/v0/oauth2/{exchange}/countries";
+};
+
+export type Oauth2ExchangecountriesgetsupportedcountriesResponses = {
+  /**
+   * Successful response
+   */
+  200: {
+    success: boolean;
+    exchange: string;
+    countries: Array<{
+      name: string;
+      countryCode: string;
+    }>;
+    restrictionType: RestrictionTypeEnum;
+  };
+};
+
+export type Oauth2ExchangecountriesgetsupportedcountriesResponse =
+  Oauth2ExchangecountriesgetsupportedcountriesResponses[keyof Oauth2ExchangecountriesgetsupportedcountriesResponses];
 
 export type WalletdeleteData = {
   body?: never;
@@ -569,11 +671,60 @@ export type WalletpingpingResponses = {
     exchange: ExchangeEnum;
     status: StatusEnum2;
     success: boolean;
+    validUntil?: number;
+    permissions?: Array<string>;
+    ipAllowlist?: Array<string>;
+    lastUsed?: number;
+    createdTime?: number;
+    modifiedTime?: number;
   };
 };
 
 export type WalletpingpingResponse =
   WalletpingpingResponses[keyof WalletpingpingResponses];
+
+export type WalletkycgetkycidentityData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v0/wallet/kyc";
+};
+
+export type WalletkycgetkycidentityErrors = {
+  /**
+   * Forbidden - Insufficient API key permissions
+   */
+  403: {
+    error: string;
+    type: "APIKEY_INSUFFICIENT_PERMISSIONS";
+    missing: Array<string>;
+  };
+  /**
+   * Not Found
+   */
+  404: {
+    error: string;
+    type: TypeEnum;
+  };
+};
+
+export type WalletkycgetkycidentityError =
+  WalletkycgetkycidentityErrors[keyof WalletkycgetkycidentityErrors];
+
+export type WalletkycgetkycidentityResponses = {
+  /**
+   * Successful response
+   */
+  200: {
+    fullName: string | null;
+    email: string | null;
+    iban: string | null;
+    country: string | null;
+  };
+};
+
+export type WalletkycgetkycidentityResponse =
+  WalletkycgetkycidentityResponses[keyof WalletkycgetkycidentityResponses];
 
 export type WalletlistlistwalletsData = {
   body?: never;
@@ -715,7 +866,7 @@ export type WallettransactionslisttransactionsResponses = {
       createdAt?: string | number | null;
       updatedAt?: string | number | null;
       timestamp?: string | number | null;
-      type: TypeEnum;
+      type: TypeEnum2;
       amount: number;
       currency: string;
       direction?: DirectionEnum;
@@ -746,6 +897,74 @@ export type WallettransactionslisttransactionsResponses = {
 
 export type WallettransactionslisttransactionsResponse =
   WallettransactionslisttransactionsResponses[keyof WallettransactionslisttransactionsResponses];
+
+export type WallettransactiontransactionidgettransactionData = {
+  body?: never;
+  path: {
+    /**
+     * The transaction ID
+     */
+    transactionId: string;
+  };
+  query?: never;
+  url: "/v0/wallet/transaction/{transactionId}";
+};
+
+export type WallettransactiontransactionidgettransactionErrors = {
+  /**
+   * Forbidden - Insufficient API key permissions
+   */
+  403: {
+    error: string;
+    type: "APIKEY_INSUFFICIENT_PERMISSIONS";
+    missing: Array<string>;
+  };
+  /**
+   * Not Found
+   */
+  404: {
+    error: string;
+    type: "GENERIC_NOT_FOUND";
+  };
+};
+
+export type WallettransactiontransactionidgettransactionError =
+  WallettransactiontransactionidgettransactionErrors[keyof WallettransactiontransactionidgettransactionErrors];
+
+export type WallettransactiontransactionidgettransactionResponses = {
+  /**
+   * Successful response
+   */
+  200: {
+    id: string;
+    walletId: string;
+    createdAt?: string | number | null;
+    updatedAt?: string | number | null;
+    timestamp?: string | number | null;
+    type: TypeEnum2;
+    amount: number;
+    currency: string;
+    direction?: DirectionEnum;
+    feeCost?: number | null;
+    feeCurrency?: string | null;
+    amountInFiat?: number | null;
+    feeInFiat?: number | null;
+    fiatCurrency?: FiatCurrencyEnum;
+    status: StatusEnum3;
+    addressTo?: string | null;
+    address?: string | null;
+    network?: string | null;
+    addressFrom?: string | null;
+    hash?: string | null;
+    contractAddress?: string | null;
+    tag?: string | null;
+    exchange?: string | null;
+    rawResponse?: unknown;
+  };
+};
+
+export type WallettransactiontransactionidgettransactionResponse =
+  WallettransactiontransactionidgettransactionResponses[keyof WallettransactiontransactionidgettransactionResponses];
 
 export type WalletwithdrawbalancebalanceData = {
   body?: never;
@@ -886,7 +1105,7 @@ export type WalletwithdrawquotequotationErrors = {
    */
   400: {
     error: string;
-    type: TypeEnum2;
+    type: TypeEnum3;
     result?: unknown;
   };
   /**
@@ -975,12 +1194,12 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
    */
   400: {
     error: string;
-    type: TypeEnum2;
+    type: TypeEnum3;
     result?:
       | {
           bizNo: string;
           steps: Array<{
-            type: TypeEnum3;
+            type: TypeEnum4;
             status: StatusEnum4;
             required: boolean;
             metadata?: {
@@ -993,7 +1212,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
             };
             [key: string]:
               | unknown
-              | TypeEnum3
+              | TypeEnum4
               | StatusEnum4
               | boolean
               | {
@@ -1022,7 +1241,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
-              method: TypeEnum3;
+              method: TypeEnum4;
               status: StatusEnum4;
               createdAt: number;
               validatedAt?: number;
@@ -1054,7 +1273,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
             | unknown
             | string
             | Array<{
-                type: TypeEnum3;
+                type: TypeEnum4;
                 status: StatusEnum4;
                 required: boolean;
                 metadata?: {
@@ -1072,7 +1291,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                 };
                 [key: string]:
                   | unknown
-                  | TypeEnum3
+                  | TypeEnum4
                   | StatusEnum4
                   | boolean
                   | {
@@ -1101,7 +1320,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
-                  method: TypeEnum3;
+                  method: TypeEnum4;
                   status: StatusEnum4;
                   createdAt: number;
                   validatedAt?: number;
@@ -1149,7 +1368,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
-              method: TypeEnum3;
+              method: TypeEnum4;
               status: StatusEnum4;
               createdAt: number;
               validatedAt?: number;
@@ -1196,7 +1415,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
-                  method: TypeEnum3;
+                  method: TypeEnum4;
                   status: StatusEnum4;
                   createdAt: number;
                   validatedAt?: number;
@@ -1249,7 +1468,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
-              method: TypeEnum3;
+              method: TypeEnum4;
               status: StatusEnum4;
               createdAt: number;
               validatedAt?: number;
@@ -1295,7 +1514,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
-                  method: TypeEnum3;
+                  method: TypeEnum4;
                   status: StatusEnum4;
                   createdAt: number;
                   validatedAt?: number;
@@ -1342,12 +1561,12 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
    */
   404: {
     error: string;
-    type: TypeEnum2;
+    type: TypeEnum3;
     result?:
       | {
           bizNo: string;
           steps: Array<{
-            type: TypeEnum3;
+            type: TypeEnum4;
             status: StatusEnum4;
             required: boolean;
             metadata?: {
@@ -1360,7 +1579,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
             };
             [key: string]:
               | unknown
-              | TypeEnum3
+              | TypeEnum4
               | StatusEnum4
               | boolean
               | {
@@ -1389,7 +1608,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
-              method: TypeEnum3;
+              method: TypeEnum4;
               status: StatusEnum4;
               createdAt: number;
               validatedAt?: number;
@@ -1421,7 +1640,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
             | unknown
             | string
             | Array<{
-                type: TypeEnum3;
+                type: TypeEnum4;
                 status: StatusEnum4;
                 required: boolean;
                 metadata?: {
@@ -1439,7 +1658,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                 };
                 [key: string]:
                   | unknown
-                  | TypeEnum3
+                  | TypeEnum4
                   | StatusEnum4
                   | boolean
                   | {
@@ -1468,7 +1687,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
-                  method: TypeEnum3;
+                  method: TypeEnum4;
                   status: StatusEnum4;
                   createdAt: number;
                   validatedAt?: number;
@@ -1516,7 +1735,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
-              method: TypeEnum3;
+              method: TypeEnum4;
               status: StatusEnum4;
               createdAt: number;
               validatedAt?: number;
@@ -1563,7 +1782,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
-                  method: TypeEnum3;
+                  method: TypeEnum4;
                   status: StatusEnum4;
                   createdAt: number;
                   validatedAt?: number;
@@ -1616,7 +1835,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
               ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
-              method: TypeEnum3;
+              method: TypeEnum4;
               status: StatusEnum4;
               createdAt: number;
               validatedAt?: number;
@@ -1662,7 +1881,7 @@ export type WalletwithdrawquoteidexecutewithdrawErrors = {
                   ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
-                  method: TypeEnum3;
+                  method: TypeEnum4;
                   status: StatusEnum4;
                   createdAt: number;
                   validatedAt?: number;
@@ -1708,7 +1927,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
   200: {
     success: boolean;
     error?: string;
-    type?: TypeEnum2;
+    type?: TypeEnum3;
     result?:
       | {
           transactionId: string;
@@ -1717,7 +1936,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
       | {
           bizNo: string;
           steps: Array<{
-            type: TypeEnum3;
+            type: TypeEnum4;
             status: StatusEnum4;
             required: boolean;
             metadata?: {
@@ -1730,7 +1949,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
             };
             [key: string]:
               | unknown
-              | TypeEnum3
+              | TypeEnum4
               | StatusEnum4
               | boolean
               | {
@@ -1759,7 +1978,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
               ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
-              method: TypeEnum3;
+              method: TypeEnum4;
               status: StatusEnum4;
               createdAt: number;
               validatedAt?: number;
@@ -1791,7 +2010,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
             | unknown
             | string
             | Array<{
-                type: TypeEnum3;
+                type: TypeEnum4;
                 status: StatusEnum4;
                 required: boolean;
                 metadata?: {
@@ -1809,7 +2028,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                 };
                 [key: string]:
                   | unknown
-                  | TypeEnum3
+                  | TypeEnum4
                   | StatusEnum4
                   | boolean
                   | {
@@ -1838,7 +2057,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                   ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
-                  method: TypeEnum3;
+                  method: TypeEnum4;
                   status: StatusEnum4;
                   createdAt: number;
                   validatedAt?: number;
@@ -1886,7 +2105,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
               ROAMING_FIDO?: boolean;
             };
             attempts?: Array<{
-              method: TypeEnum3;
+              method: TypeEnum4;
               status: StatusEnum4;
               createdAt: number;
               validatedAt?: number;
@@ -1933,7 +2152,7 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
                   ROAMING_FIDO?: boolean;
                 };
                 attempts?: Array<{
-                  method: TypeEnum3;
+                  method: TypeEnum4;
                   status: StatusEnum4;
                   createdAt: number;
                   validatedAt?: number;
@@ -1975,6 +2194,143 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
 
 export type WalletwithdrawquoteidexecutewithdrawResponse =
   WalletwithdrawquoteidexecutewithdrawResponses[keyof WalletwithdrawquoteidexecutewithdrawResponses];
+
+export type WalletdepositaddressdepositaddressData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * Asset symbol (e.g. BTC, ETH) the same used in quotation endpoint
+     */
+    asset: string;
+    /**
+     * Network identifier (e.g. Bitcoin, Ethereum) the same used in quotation endpoint
+     */
+    network: string;
+    /**
+     * Address reuse policy: reuse_or_create (default), reuse_only, or create_new
+     */
+    policy?: SchemaEnum4;
+  };
+  url: "/v0/wallet/deposit/address";
+};
+
+export type WalletdepositaddressdepositaddressErrors = {
+  /**
+   * Bad Request
+   */
+  400: {
+    error: string;
+    type: TypeEnum5;
+    candidates?: Array<{
+      method: string;
+      score: number;
+      network: string | null;
+    }>;
+  };
+  /**
+   * Forbidden - Insufficient API key permissions
+   */
+  403: {
+    error: string;
+    type: "APIKEY_INSUFFICIENT_PERMISSIONS";
+    missing: Array<string>;
+  };
+  /**
+   * Not Found
+   */
+  404: {
+    error: string;
+    type: TypeEnum6;
+  };
+};
+
+export type WalletdepositaddressdepositaddressError =
+  WalletdepositaddressdepositaddressErrors[keyof WalletdepositaddressdepositaddressErrors];
+
+export type WalletdepositaddressdepositaddressResponses = {
+  /**
+   * Successful response
+   */
+  200: {
+    address: string;
+    tag?: string | null;
+    tagType?: TagTypeEnum;
+    network: string;
+    asset: string;
+    exchange: string;
+    cached: boolean;
+    fetchedAt: number;
+    minimum?: string | null;
+    fee?: string | null;
+    limit?: string | null;
+    canGenerateAddress?: boolean | null;
+  };
+};
+
+export type WalletdepositaddressdepositaddressResponse =
+  WalletdepositaddressdepositaddressResponses[keyof WalletdepositaddressdepositaddressResponses];
+
+export type WalletinfofeewithdrawalfeeData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * Asset symbol (e.g. BTC, ETH)
+     */
+    asset: string;
+    /**
+     * Network filter. If omitted, returns all networks for the asset
+     */
+    network?: string;
+    /**
+     * Amount intended to withdraw for more accurate fee calculation
+     */
+    amount?: string;
+  };
+  url: "/v0/wallet/info/fee";
+};
+
+export type WalletinfofeewithdrawalfeeErrors = {
+  /**
+   * Bad Request
+   */
+  400: {
+    error: string;
+    type: TypeEnum7;
+  };
+  /**
+   * Not Found
+   */
+  404: {
+    error: string;
+    type: "WALLET_NOT_FOUND";
+  };
+};
+
+export type WalletinfofeewithdrawalfeeError =
+  WalletinfofeewithdrawalfeeErrors[keyof WalletinfofeewithdrawalfeeErrors];
+
+export type WalletinfofeewithdrawalfeeResponses = {
+  /**
+   * Successful response
+   */
+  200: {
+    asset: string;
+    exchange: string;
+    networks: Array<{
+      network: string | null;
+      fee: number | null;
+      feeAsset: string;
+      feeType: string;
+      minimumWithdrawal: number | null;
+      maximumWithdrawal: number | null;
+    }>;
+  };
+};
+
+export type WalletinfofeewithdrawalfeeResponse =
+  WalletinfofeewithdrawalfeeResponses[keyof WalletinfofeewithdrawalfeeResponses];
 
 export type OrganizationapikeyapikeyinfoData = {
   body?: never;

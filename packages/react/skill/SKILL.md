@@ -1,8 +1,8 @@
 ---
 name: bluvo-react
-description: "Use when building cryptocurrency exchange withdrawal UIs in React or Next.js. Provides hooks (useBluvoFlow, useFlowMachine, useWithdrawMachine, useWalletPreviews) that wrap the @bluvo/sdk-ts state machine. No context providers needed — just call the hook. Works with Next.js App Router (requires 'use client'). Choose this over the TS skill when building React applications."
+description: "Use when building cryptocurrency exchange withdrawal UIs in React or Next.js, including optional auto-swap before withdrawal. Provides hooks (useBluvoFlow, useFlowMachine, useWithdrawMachine, useWalletPreviews) that wrap the @bluvo/sdk-ts state machine. No context providers needed — just call the hook. Works with Next.js App Router (requires 'use client'). Choose this over the TS skill when building React applications."
 license: MIT
-compatibility: "React 16.8+. Next.js 13+ App Router supported. Requires @bluvo/sdk-ts@3.0.0 peer dependency."
+compatibility: "React 16.8+. Next.js 13+ App Router supported. Requires a @bluvo/sdk-ts version compatible with the installed @bluvo/react version."
 metadata:
   version: "3.1.0"
 ---
@@ -41,6 +41,9 @@ const flow = useBluvoFlow({
   fetchWithdrawableBalanceFn: serverFetchBalances,
   requestQuotationFn: serverRequestQuote,
   executeWithdrawalFn: serverExecuteWithdrawal,
+  getTradableAssetsFn: serverGetTradableAssets,  // optional, required for auto-swap
+  placeOrderFn: serverPlaceOrder,                // optional, required for auto-swap
+  getOrderFn: serverGetOrder,                    // optional, required for auto-swap polling
   getWalletByIdFn: serverGetWallet,
   pingWalletByIdFn: serverPingWallet,
   options: { sandbox: false, autoRefreshQuotation: true },
@@ -97,16 +100,28 @@ await flow.startWithdrawalFlow({ exchange: 'coinbase', walletId: generateId() })
 
 // 3. OAuth/QR code completes → wallet loads automatically
 
-// 4. User fills form → request quote
+// 4. Optional auto-swap: user converts source asset into withdrawal asset
+await flow.loadTradableAssets();
+const placed = await flow.placeTradeOrder({
+  routeId: 'kraken:spot:DOGE/USDC',
+  side: 'sell',
+  type: 'market',
+  volume: '100',
+});
+if (placed.success) {
+  await flow.pollTradeOrder(placed.result!.orderId);
+}
+
+// 5. User fills form → request quote for the asset now available after swap
 await flow.requestQuote({
-  asset: 'BTC', amount: '0.001',
-  destinationAddress: 'bc1q...', network: 'bitcoin',
+  asset: 'USDC', amount: '10',
+  destinationAddress: '0x...', network: 'base',
 });
 
-// 5. User confirms → execute withdrawal
+// 6. User confirms → execute withdrawal
 await flow.executeWithdrawal(flow.quote!.id);
 
-// 6. Handle challenges
+// 7. Handle challenges
 if (flow.requires2FA) await flow.submit2FA(userCode);
 if (flow.requires2FAMultiStep) {
   await flow.submit2FAMultiStep('GOOGLE', userCode);  // code-based steps
@@ -114,7 +129,7 @@ if (flow.requires2FAMultiStep) {
 }
 if (flow.isReadyToConfirm) await flow.confirmWithdrawal();
 
-// 7. Done
+// 8. Done
 if (flow.isWithdrawalComplete) showSuccess(flow.withdrawal);
 ```
 
@@ -123,6 +138,10 @@ if (flow.isWithdrawalComplete) showSuccess(flow.withdrawal);
 ### Loading States
 - `flow.isExchangesLoading` — Loading exchange list
 - `flow.isWalletLoading` — Loading wallet balances
+- `flow.isTradableAssetsLoading` — Loading tradable assets/routes
+- `flow.isTradeOrderPlacing` — Placing the trade order
+- `flow.isTradeOrderPolling` — Polling the trade order until filled
+- `flow.isTrading` — Any active trading state, excluding ready/error/filled terminal states
 - `flow.isQuoteLoading` — Requesting quote
 - `flow.isWithdrawing` — Withdrawal actively processing (excludes completed/fatal/error)
 - `flow.isWithdrawProcessing` — Specifically in `withdraw:processing`
@@ -148,6 +167,7 @@ if (flow.isWithdrawalComplete) showSuccess(flow.withdrawal);
 - `flow.isWithdrawalComplete` — Success. Access `flow.withdrawal.transactionId`.
 - `flow.isFlowCancelled` — User cancelled.
 - `flow.isWithdrawBlocked` — Withdrawal blocked by exchange.
+- `flow.isTradeOrderFilled` — Trade order has filled. `pollTradeOrder()` usually refreshes wallet balances immediately afterward, so the stable final state is commonly `wallet:ready`.
 
 ## Next.js Specifics
 
@@ -197,6 +217,12 @@ Hooks are browser-only. They use `useState`, `useEffect`, WebSocket subscription
 8. **Re-renders on every machine state change.** The hook subscribes to the machine and calls `setState` on every transition. For complex UIs, extract smaller components that receive only the data they need as props.
 
 9. **`cancel()` also closes the OAuth popup window.** The hook maintains a ref to the OAuth window cleanup function and calls it on cancel.
+
+10. **Trading callbacks must be passed to use auto-swap.** `loadTradableAssets()`, `placeTradeOrder()`, and `pollTradeOrder()` require `getTradableAssetsFn`, `placeOrderFn`, and `getOrderFn` respectively. These should be server actions that call `BluvoClient.wallet.trading`.
+
+11. **`placeTradeOrder()` places exactly one backend order.** Store the returned `orderId`/`txid` in component state before polling or remounting UI.
+
+12. **A filled trade refreshes wallet balances by default.** After `pollTradeOrder()` succeeds, read `flow.walletBalances` for the destination asset and `flow.lastTradeOrderStatus` for execution details.
 
 ## References
 

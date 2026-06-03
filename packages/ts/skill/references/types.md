@@ -46,6 +46,8 @@ type FlowStateType =
     | "oauth:waiting" | "oauth:processing" | "oauth:completed" | "oauth:error" | "oauth:fatal" | "oauth:window_closed_by_user"
     | "qrcode:waiting" | "qrcode:displaying" | "qrcode:scanning" | "qrcode:error" | "qrcode:timeout" | "qrcode:fatal"
     | "wallet:loading" | "wallet:ready" | "wallet:error"
+    | "trade:assetsLoading" | "trade:assetsReady" | "trade:assetsError"
+    | "trade:orderPlacing" | "trade:orderPlaced" | "trade:orderPolling" | "trade:orderFilled" | "trade:orderError"
     | "quote:requesting" | "quote:ready" | "quote:expired" | "quote:error"
     | "withdraw:idle" | "withdraw:processing" | "withdraw:error2FA" | "withdraw:error2FAMultiStep"
     | "withdraw:errorSMS" | "withdraw:errorKYC" | "withdraw:errorBalance" | "withdraw:retrying"
@@ -94,6 +96,10 @@ interface FlowContext {
             assetId?: string;
         };
     }>;
+    tradableAssets?: WallettradetradableassetstradableassetsResponse;
+    lastTradeRequest?: WallettradeorderplaceorderData["body"];
+    tradeOrder?: WallettradeorderplaceorderResponse;
+    lastTradeOrderStatus?: WallettradeorderorderidgetorderResponse;
     quote?: {
         id: string;
         asset: string;
@@ -220,6 +226,34 @@ type FlowActionType =
         }>;
     }
     | { type: "WALLET_FAILED"; error: Error }
+    | { type: "LOAD_TRADABLE_ASSETS" }
+    | {
+        type: "TRADABLE_ASSETS_LOADED";
+        tradableAssets: WallettradetradableassetstradableassetsResponse;
+    }
+    | { type: "TRADABLE_ASSETS_FAILED"; error: Error }
+    | {
+        type: "PLACE_TRADE_ORDER";
+        request: WallettradeorderplaceorderData["body"];
+    }
+    | {
+        type: "TRADE_ORDER_PLACED";
+        order: WallettradeorderplaceorderResponse;
+    }
+    | { type: "POLL_TRADE_ORDER"; orderId: string }
+    | {
+        type: "TRADE_ORDER_STATUS_RECEIVED";
+        orderStatus: WallettradeorderorderidgetorderResponse;
+    }
+    | {
+        type: "TRADE_ORDER_FILLED";
+        orderStatus: WallettradeorderorderidgetorderResponse;
+    }
+    | {
+        type: "TRADE_ORDER_FAILED";
+        error: Error;
+        orderStatus?: WallettradeorderorderidgetorderResponse;
+    }
     | {
         type: "REQUEST_QUOTE";
         asset: string;
@@ -424,6 +458,9 @@ interface BluvoFlowClientOptions {
     fetchWithdrawableBalanceFn: BluvoClient["wallet"]["withdrawals"]["getWithdrawableBalance"];
     requestQuotationFn: BluvoClient["wallet"]["withdrawals"]["requestQuotation"];
     executeWithdrawalFn: BluvoClient["wallet"]["withdrawals"]["executeWithdrawal"];
+    getTradableAssetsFn?: BluvoClient["wallet"]["trading"]["getTradableAssets"];
+    placeOrderFn?: BluvoClient["wallet"]["trading"]["placeOrder"];
+    getOrderFn?: BluvoClient["wallet"]["trading"]["getOrder"];
     getWalletByIdFn: BluvoClient["wallet"]["get"];
     pingWalletByIdFn: BluvoClient["wallet"]["ping"];
     mkUUIDFn?: () => string;
@@ -513,6 +550,76 @@ interface QuoteRequestOptions {
 }
 ```
 
+Options for placing and polling an exchange trade before withdrawal.
+
+```typescript
+type PlaceTradeOrderOptions = WallettradeorderplaceorderData["body"];
+
+interface PollTradeOrderOptions {
+    maxAttempts?: number;           // default: 30
+    intervalMs?: number;            // default: 1000
+    refreshWalletOnFilled?: boolean; // default: true
+}
+```
+
+Normalized trading API response types used in flow context.
+
+```typescript
+type TradableAssetsResponse = {
+    schemaVersion: 1;
+    exchange: string;
+    generatedAt: string;
+    source: { api: string; fetchedAt: string };
+    assets: Array<{
+        assetId: string;
+        symbol: string;
+        name?: string;
+        assetType?: string;
+        exchangeSymbols: string[];
+    }>;
+    routes: Array<{
+        routeId: string;
+        exchange: string;
+        marketType: "spot" | string;
+        baseAsset: string;
+        quoteAsset: string;
+        displaySymbol: string;
+        exchangeSymbol?: string;
+        status: string;
+        isTradingEnabled: boolean;
+        orderTypes: Array<"market" | "limit" | string>;
+        tradingRules?: unknown;
+        fees?: unknown;
+    }>;
+    stats: { totalAssets: number; totalRoutes: number; tradableRoutes: number };
+};
+
+type PlaceOrderResponse = {
+    orderId: string;
+    txid: string[];
+    exchange: string;
+    routeId: string;
+    description: string;
+    rawResponse?: unknown;
+};
+
+type GetOrderResponse = {
+    orderId: string;
+    exchange: string;
+    status: "open" | "filled" | "canceled" | "expired" | "unknown";
+    rawStatus: string;
+    volume?: string;
+    executedVolume?: string;
+    cost?: string;
+    averagePrice?: string;
+    fee?: string;
+    openedAt?: number;
+    closedAt?: number;
+    description?: { pair?: string; side?: string; type?: string };
+    rawResponse?: unknown;
+};
+```
+
 ## Error Types
 
 Structured error codes and error-handling types used across the SDK.
@@ -538,6 +645,9 @@ const ERROR_CODES = {
     // Wallet errors
     WALLET_NOT_FOUND: 'WALLET_NOT_FOUND',
     WALLET_INVALID_CREDENTIALS: 'WALLET_INVALID_CREDENTIALS',
+
+    // Trading APIs may also surface generic validation/provider failures
+    // plus APIKEY_INSUFFICIENT_PERMISSIONS when trading scopes are missing.
 
     // Quote errors
     QUOTE_NOT_FOUND: 'QUOTE_NOT_FOUND',

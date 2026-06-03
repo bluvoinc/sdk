@@ -52,6 +52,24 @@ export async function executeWithdrawal(
     return toPlain(await loadBluvoClient().wallet.withdrawals.executeWithdrawal(walletId, idem, quoteId, params ?? {}));
 }
 
+export async function getTradableAssets(walletId: string) {
+    return toPlain(await loadBluvoClient().wallet.trading.getTradableAssets(walletId));
+}
+
+export async function placeOrder(walletId: string, params: {
+    routeId: string;
+    side: 'buy' | 'sell';
+    type: 'market' | 'limit';
+    volume: string;
+    price?: string;
+}) {
+    return toPlain(await loadBluvoClient().wallet.trading.placeOrder(walletId, params));
+}
+
+export async function getOrder(walletId: string, orderId: string) {
+    return toPlain(await loadBluvoClient().wallet.trading.getOrder(walletId, orderId));
+}
+
 export async function getWalletById(walletId: string) {
     return toPlain(await loadBluvoClient().wallet.get(walletId));
 }
@@ -70,7 +88,8 @@ export async function pingWalletById(walletId: string) {
 import { useBluvoFlow } from "@bluvo/react";
 import {
     fetchWithdrawableBalances, requestQuotation, executeWithdrawal,
-    listExchanges, getWalletById, pingWalletById
+    listExchanges, getWalletById, pingWalletById,
+    getTradableAssets, placeOrder, getOrder
 } from '../actions/flowActions';
 
 export default function Home() {
@@ -90,6 +109,9 @@ export default function Home() {
         fetchWithdrawableBalanceFn: fetchWithdrawableBalances,
         requestQuotationFn: requestQuotation,
         executeWithdrawalFn: executeWithdrawal,
+        getTradableAssetsFn: getTradableAssets,
+        placeOrderFn: placeOrder,
+        getOrderFn: getOrder,
         getWalletByIdFn: getWalletById,
         pingWalletByIdFn: pingWalletById,
         onWalletConnectedFn: (walletId, exchange) => {
@@ -102,6 +124,43 @@ export default function Home() {
     // Use flow.startWithdrawalFlow(), flow.requestQuote(), etc. for actions
 }
 ```
+
+## Auto-swap Before Quote
+
+Use the trading methods only after a flow has a wallet id in state, usually after OAuth/QR completion or `silentResumeWithdrawalFlow()`.
+
+```typescript
+await flow.loadTradableAssets();
+
+const placed = await flow.placeTradeOrder({
+    routeId: 'kraken:spot:DOGE/USDC',
+    side: 'sell',
+    type: 'market',
+    volume: '100',
+});
+
+if (!placed.success || !placed.result?.orderId) {
+    throw new Error(placed.error || 'Trade order was not placed');
+}
+
+const filled = await flow.pollTradeOrder(placed.result.orderId, {
+    maxAttempts: 30,
+    intervalMs: 1000,
+});
+
+if (!filled.success) {
+    throw new Error(filled.error || 'Trade order did not fill');
+}
+
+await flow.requestQuote({
+    asset: 'USDC',
+    amount: '10',
+    destinationAddress: '0x...',
+    network: 'base',
+});
+```
+
+`pollTradeOrder()` refreshes wallet balances after a filled order by default. The UI can inspect `flow.walletBalances` for the destination asset and `flow.lastTradeOrderStatus` for executed volume, average price, cost, and fee.
 
 ## Environment Variables
 

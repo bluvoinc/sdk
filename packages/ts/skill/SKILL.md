@@ -1,6 +1,6 @@
 ---
 name: bluvo-sdk-ts
-description: "Use when implementing cryptocurrency exchange withdrawal flows in TypeScript without React. Provides a state machine that orchestrates OAuth/QR-code wallet connection, balance loading, quote generation, withdrawal execution with 2FA/SMS/KYC challenges, and real-time WebSocket updates. Choose this over the React skill when building server-side integrations, non-React frontends, or custom UI frameworks."
+description: "Use when implementing cryptocurrency exchange withdrawal flows in TypeScript without React, including optional exchange auto-swap before withdrawal. Provides a state machine that orchestrates OAuth/QR-code wallet connection, balance loading, tradable asset discovery, trade order placement and polling, quote generation, withdrawal execution with 2FA/SMS/KYC challenges, and real-time WebSocket updates. Choose this over the React skill when building server-side integrations, non-React frontends, or custom UI frameworks."
 license: MIT
 compatibility: "TypeScript 4.7+. Node.js 18+ for server-side use. Browser for client-side OAuth/WebSocket flows."
 metadata:
@@ -15,7 +15,7 @@ The Bluvo SDK uses a **state machine paradigm**: you send events and the machine
 
 There are two client models: **`BluvoClient`** runs server-side (requires API key, never in browser) and provides direct REST access. **`BluvoWebClient`** runs in the browser (no API key, uses OAuth popups and WebSocket). **`BluvoFlowClient`** is the high-level orchestrator that wraps both — it accepts server-side callback functions and manages the complete withdrawal flow through a nested state machine.
 
-The flow progresses through phases: **exchanges** → **oauth/qrcode** → **wallet** → **quote** → **withdraw**. Each phase has loading, ready, and error states. Invalid state transitions are silently ignored (return current state unchanged), not errors.
+The flow progresses through phases: **exchanges** → **oauth/qrcode** → **wallet** → optional **trade/convert** → **quote** → **withdraw**. Each phase has loading, ready, and error states. Invalid state transitions are silently ignored (return current state unchanged), not errors.
 
 ### State Diagram
 
@@ -29,7 +29,21 @@ idle ──→ exchanges:loading ──→ exchanges:ready ──→ oauth:waiti
                                                    wallet:loading
                                                           │
                                                    wallet:ready
-                                                          │
+                                                      │       │
+                                  LOAD_TRADABLE_ASSETS│       │REQUEST_QUOTE
+                                                      ▼       │
+                                             trade:assetsReady │
+                                                      │        │
+                                               PLACE_TRADE_ORDER
+                                                      │
+                                             trade:orderPlaced
+                                                      │
+                                               POLL_TRADE_ORDER
+                                                      │
+                                             trade:orderFilled
+                                                      │
+                                             wallet:ready (refreshed)
+                                                      │
                                                   quote:requesting
                                                           │
                                                    quote:ready ←─ (auto-refresh)
@@ -83,6 +97,9 @@ const flowClient = new BluvoFlowClient({
   fetchWithdrawableBalanceFn: serverFetchBalances,
   requestQuotationFn: serverRequestQuote,
   executeWithdrawalFn: serverExecuteWithdrawal,
+  getTradableAssetsFn: serverGetTradableAssets,  // optional, required for auto-swap
+  placeOrderFn: serverPlaceOrder,                // optional, required for auto-swap
+  getOrderFn: serverGetOrder,                    // optional, required for auto-swap polling
   getWalletByIdFn: serverGetWallet,
   pingWalletByIdFn: serverPingWallet,
 
@@ -121,6 +138,12 @@ QR code authentication (for `binance-web`). Displays QR code, tracks scan status
 ### wallet:loading / wallet:ready / wallet:error
 Wallet balance loading phase. `wallet:ready` makes `walletBalances` available in context.
 
+### trade:assetsLoading / trade:assetsReady / trade:assetsError
+Tradable asset discovery phase. `trade:assetsReady` makes `tradableAssets` available in context, including normalized assets and spot routes such as `kraken:spot:DOGE/USDC`.
+
+### trade:orderPlacing / trade:orderPlaced / trade:orderPolling / trade:orderFilled / trade:orderError
+Trade order phase. `placeTradeOrder()` places the order exactly once and stores `tradeOrder` with the returned `orderId`/`txid`. `pollTradeOrder()` then polls that order until it is `filled`, moves through `trade:orderPolling`, stores `lastTradeOrderStatus`, and refreshes wallet balances by default before returning to `wallet:ready`.
+
 ### quote:requesting / quote:ready / quote:expired / quote:error
 Quote phase. `quote:ready` makes `quote` available (id, amount, fee, expiresAt). Auto-refreshes by default.
 
@@ -153,8 +176,20 @@ Skips OAuth. Transitions through OAuth states synthetically, then loads wallet b
 ### silentResumeWithdrawalFlow({ walletId, exchange, preloadedBalances?, callbacks... })
 Jumps directly to `wallet:ready` with optional preloaded balance data. Used after wallet preview.
 
+### loadTradableAssets()
+**Valid from**: `wallet:ready`, `trade:assetsReady`, `trade:assetsError`. Calls `getTradableAssetsFn(walletId)` and stores normalized tradable assets/routes in `context.tradableAssets`.
+
+### placeTradeOrder({ routeId, side, type, volume, price? })
+**Valid from**: `wallet:ready`, `trade:assetsReady`, `trade:orderPlaced`, `trade:orderError`. Calls `placeOrderFn(walletId, body)` once and stores the returned `tradeOrder`. Use the returned `orderId` for polling; do not retry blindly unless the previous call failed before returning an order id.
+
+### pollTradeOrder(orderId, { maxAttempts?, intervalMs?, refreshWalletOnFilled? })
+**Valid from**: `wallet:ready`, `trade:assetsReady`, `trade:orderPlaced`, `trade:orderError`. Calls `getOrderFn(walletId, orderId)` until the normalized status is `filled`, `canceled`, `expired`, or polling times out. Defaults: `maxAttempts: 30`, `intervalMs: 1000`, `refreshWalletOnFilled: true`.
+
+### Auto-swap before withdrawal
+Use this sequence when the wallet has a source asset but the withdrawal needs a different asset: load balances, load tradable routes, place a market order once, poll until `filled`, let the wallet refresh, then request a quote for the destination asset and withdraw it.
+
 ### requestQuote({ asset, amount, destinationAddress, network?, tag?, includeFee? })
-**Valid from**: `wallet:ready`, `quote:ready` (refresh), `quote:expired`. Requests a quote from the backend. Sets up auto-refresh timer if `autoRefreshQuotation` is true.
+**Valid from**: `wallet:ready`, `trade:assetsReady`, `trade:orderFilled`, `quote:ready` (refresh), `quote:expired`. Requests a quote from the backend. Sets up auto-refresh timer if `autoRefreshQuotation` is true.
 
 ### executeWithdrawal(quoteId)
 **Valid from**: `quote:ready`. Starts withdrawal, subscribes to WebSocket for progress and completion.
@@ -191,6 +226,7 @@ The `ERROR_CODES` constant contains 40+ error codes grouped by category:
 
 - **Generic**: `GENERIC_NOT_FOUND`, `GENERIC_UNAUTHORIZED`, `GENERIC_INTERNAL_SERVER_ERROR`, etc.
 - **Wallet**: `WALLET_NOT_FOUND`, `WALLET_INVALID_CREDENTIALS`
+- **Trading**: trading APIs surface validation/provider errors via backend error codes and may return `APIKEY_INSUFFICIENT_PERMISSIONS` when the project key lacks trading scopes.
 - **Quote**: `QUOTE_NOT_FOUND`, `QUOTE_EXPIRED`
 - **Withdrawal Balance**: `WITHDRAWAL_INSUFFICIENT_BALANCE`, `WITHDRAWAL_INSUFFICIENT_BALANCE_FOR_FEE`
 - **Withdrawal Address**: `WITHDRAWAL_INVALID_ADDRESS`, `WITHDRAWAL_NETWORK_NOT_SUPPORTED`
@@ -241,6 +277,12 @@ if (code === ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP) {
 8. **Cache has 15-second safety threshold.** QR code cache entries with less than 15 seconds remaining are treated as expired and ignored. Configurable via `cache.minRemainingLifetimeSec`.
 
 9. **`startWithdrawalFlow` checks if wallet exists first.** If `getWalletByIdFn` returns a wallet, it automatically calls `resumeWithdrawalFlow` instead of opening OAuth.
+
+10. **Trading callbacks are optional but required for auto-swap.** If `getTradableAssetsFn`, `placeOrderFn`, or `getOrderFn` are missing, the flow moves to a trade error state and returns `"Trading API callbacks are not configured"`.
+
+11. **`placeTradeOrder()` is a one-shot action.** It calls the backend Place Order API once and returns the exchange order id/txid. Persist or hold that id in UI state before polling so refreshes do not accidentally place a second order.
+
+12. **Filled trade polling refreshes balances by default.** `pollTradeOrder()` calls `loadWallet()` after a filled order unless `refreshWalletOnFilled: false` is passed. Because of that, the visible final state is normally `wallet:ready`, with `lastTradeOrderStatus.status === "filled"` still available in context.
 
 ## References
 

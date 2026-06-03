@@ -16,6 +16,9 @@ The main hook. Creates a `BluvoFlowClient` internally and exposes the complete f
 | `fetchWithdrawableBalanceFn` | `(walletId) => Promise<...>` | Yes | Server action to fetch balances |
 | `requestQuotationFn` | `(walletId, body) => Promise<...>` | Yes | Server action to request quote |
 | `executeWithdrawalFn` | `(walletId, idem, quoteId, body) => Promise<...>` | Yes | Server action to execute withdrawal |
+| `getTradableAssetsFn` | `(walletId) => Promise<...>` | No | Server action to load tradable assets/routes; required for auto-swap |
+| `placeOrderFn` | `(walletId, body) => Promise<...>` | No | Server action to place one trade order; required for auto-swap |
+| `getOrderFn` | `(walletId, orderId) => Promise<...>` | No | Server action to poll order status; required for auto-swap |
 | `getWalletByIdFn` | `(walletId) => Promise<...>` | Yes | Server action to get wallet |
 | `pingWalletByIdFn` | `(walletId) => Promise<...>` | Yes | Server action to ping wallet |
 | `mkUUIDFn` | `() => string` | No | Custom UUID generator (default: `crypto.randomUUID()`) |
@@ -44,6 +47,9 @@ The main hook. Creates a `BluvoFlowClient` internally and exposes the complete f
 | `startWithdrawalFlow` | `(options: WithdrawalFlowOptions) => Promise<...>` | Start a new withdrawal flow |
 | `resumeWithdrawalFlow` | `(options: ResumeWithdrawalFlowOptions) => Promise<...>` | Resume with existing wallet |
 | `silentResumeWithdrawalFlow` | `(options: SilentResumeWithdrawalFlowOptions) => Promise<...>` | Resume with preloaded data |
+| `loadTradableAssets` | `() => Promise<...>` | Load tradable assets and routes for the current wallet exchange |
+| `placeTradeOrder` | `(options: PlaceTradeOrderOptions) => Promise<...>` | Place one trade order and store returned `orderId`/`txid` |
+| `pollTradeOrder` | `(orderId: string, options?: PollTradeOrderOptions) => Promise<...>` | Poll order status until filled, canceled, expired, or timeout |
 | `requestQuote` | `(options: QuoteRequestOptions) => Promise<...>` | Request a withdrawal quote |
 | `executeWithdrawal` | `(quoteId: string) => Promise<...>` | Execute withdrawal |
 | `submit2FA` | `(code: string) => Promise<...>` | Submit TOTP 2FA code |
@@ -109,6 +115,20 @@ The main hook. Creates a `BluvoFlowClient` internally and exposes the complete f
 | `isWalletError` | `boolean` | `wallet:error` |
 | `isWalletReady` | `boolean` | `wallet:ready` |
 
+**Trading State:**
+
+| Field | Type | Description |
+|---|---|---|
+| `isTradableAssetsLoading` | `boolean` | `trade:assetsLoading` |
+| `isTradableAssetsReady` | `boolean` | `trade:assetsReady` |
+| `isTradableAssetsError` | `boolean` | `trade:assetsError` |
+| `isTradeOrderPlacing` | `boolean` | `trade:orderPlacing` |
+| `isTradeOrderPlaced` | `boolean` | `trade:orderPlaced` |
+| `isTradeOrderPolling` | `boolean` | `trade:orderPolling` |
+| `isTradeOrderFilled` | `boolean` | `trade:orderFilled` |
+| `isTradeOrderError` | `boolean` | `trade:orderError` |
+| `isTrading` | `boolean` | Any active `trade:*` state excluding ready/error/filled terminal states |
+
 **Quote State:**
 
 | Field | Type | Description |
@@ -161,6 +181,10 @@ The main hook. Creates a `BluvoFlowClient` internally and exposes the complete f
 | `maxRetryAttempts` | `number` | Maximum retries allowed |
 | `exchanges` | `Exchange[]` | Available exchanges |
 | `walletBalances` | `Balance[]` | Wallet balances |
+| `tradableAssets` | `TradableAssetsResponse \| undefined` | Normalized assets and trade routes |
+| `tradeOrder` | `PlaceOrderResponse \| undefined` | Last placed trade order with `orderId`/`txid` |
+| `lastTradeOrderStatus` | `GetOrderResponse \| undefined` | Latest polled trade order status |
+| `lastTradeRequest` | `PlaceTradeOrderOptions \| undefined` | Last order placement request body |
 | `quote` | `Quote \| undefined` | Current quote |
 | `withdrawal` | `Withdrawal \| undefined` | Withdrawal result |
 | `valid2FAMethods` | `string[] \| undefined` | Valid 2FA methods (when fatal) |

@@ -6,6 +6,7 @@ Headers used:
 - `x-bluvo-api-key` — Server-side only (BluvoClient)
 - `x-bluvo-org-id` — Both clients
 - `x-bluvo-project-id` — Both clients
+- `x-bluvo-wallet-id` — Wallet-scoped REST calls, including withdrawals and trading
 
 ## Base URLs
 
@@ -51,6 +52,55 @@ Requires `apiKey`. Never use in browser.
 - `wallet.withdrawals.requestQuotation(walletId, body)` — Request a withdrawal quote. Body: `{ asset, amount, address, network?, tag?, includeFee? }`
 - `wallet.withdrawals.executeWithdrawal(walletId, idem, quotationId, body)` — Execute a withdrawal. Body: `{ twofa?, emailCode?, smsCode?, bizNo?, tag?, params?: { dryRun? } }`
 
+### Trading Operations
+- `wallet.trading.getTradableAssets(walletId)` — Get normalized tradable assets and routes for the wallet exchange. Calls `GET /v0/wallet/trade/tradable-assets` with `x-bluvo-wallet-id`.
+- `wallet.trading.placeOrder(walletId, body)` — Place a single trade order. Calls `POST /v0/wallet/trade/order` with body `{ routeId, side, type, volume, price? }`.
+- `wallet.trading.getOrder(walletId, orderId)` — Query normalized order status. Calls `GET /v0/wallet/trade/order/{orderId}` and returns status plus execution details.
+
+`getTradableAssets()` is wallet-scoped in the high-level client. The generated low-level endpoint also supports exchange-only lookup and filtering query params: `exchange`, `sources`, and `destinations`. `sources` and `destinations` are comma-separated asset symbols, for example `sources=DOGE,USDC&destinations=USDT,BTC`.
+
+The current auto-swap flow uses these operations in order:
+
+1. Load wallet balances with `wallet.withdrawals.getWithdrawableBalance(walletId)`.
+2. Load tradable routes with `wallet.trading.getTradableAssets(walletId)`.
+3. Place the desired order once with `wallet.trading.placeOrder(walletId, body)`.
+4. Poll `wallet.trading.getOrder(walletId, orderId)` until status is `filled`.
+5. Reload wallet balances so the destination asset can be quoted.
+6. Continue with `requestQuotation()` and `executeWithdrawal()`.
+
+Trade order response shape:
+
+```typescript
+type PlaceOrderResponse = {
+  orderId: string;
+  txid: string[];
+  exchange: string;
+  routeId: string;
+  description: string;
+  rawResponse?: unknown;
+};
+```
+
+Order status response shape:
+
+```typescript
+type GetOrderResponse = {
+  orderId: string;
+  exchange: string;
+  status: "open" | "filled" | "canceled" | "expired" | "unknown";
+  rawStatus: string;
+  volume?: string;
+  executedVolume?: string;
+  cost?: string;
+  averagePrice?: string;
+  fee?: string;
+  openedAt?: number;
+  closedAt?: number;
+  description?: { pair?: string; side?: string; type?: string };
+  rawResponse?: unknown;
+};
+```
+
 ### OAuth2 Operations
 - `oauth2.getLink(exchange, walletId, idem)` — Get OAuth2 URL for an exchange
 - `oauth2.listExchanges(status?)` — List available exchanges. Returns array of `{ id, name, logoUrl, status }`
@@ -89,6 +139,9 @@ All error codes from ERROR_CODES constant:
 | API Key | `APIKEY_INSUFFICIENT_PERMISSIONS` | API key lacks required permissions |
 | Wallet | `WALLET_NOT_FOUND` | Wallet not found |
 | Wallet | `WALLET_INVALID_CREDENTIALS` | Invalid wallet credentials |
+| Trading | `APIKEY_INSUFFICIENT_PERMISSIONS` | Project API key lacks trading permissions |
+| Trading | `GENERIC_VALIDATION_ERROR` | Invalid route, side, type, volume, or filter |
+| Trading | `GENERIC_INVALID_REQUEST` | Exchange rejected or could not normalize the trade request |
 | Quote | `QUOTE_NOT_FOUND` | Quote not found |
 | Quote | `QUOTE_EXPIRED` | Quote has expired |
 | Withdrawal - Balance | `WITHDRAWAL_INSUFFICIENT_BALANCE` | Insufficient balance |

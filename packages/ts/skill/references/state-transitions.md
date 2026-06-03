@@ -78,7 +78,60 @@
 ### wallet:ready
 | Action | Next State | Notes |
 |---|---|---|
+| `LOAD_TRADABLE_ASSETS` | `trade:assetsLoading` | Starts tradable asset discovery |
+| `PLACE_TRADE_ORDER` | `trade:orderPlacing` | Sets `lastTradeRequest`, clears `tradeOrder` and `lastTradeOrderStatus` |
+| `POLL_TRADE_ORDER` | `trade:orderPolling` | Starts polling an existing order id |
 | `REQUEST_QUOTE` | `quote:requesting` | Sets `lastQuoteRequest` |
+
+### trade:assetsLoading
+| Action | Next State | Notes |
+|---|---|---|
+| `TRADABLE_ASSETS_LOADED` | `trade:assetsReady` | Sets `tradableAssets` |
+| `TRADABLE_ASSETS_FAILED` | `trade:assetsError` | error set |
+
+### trade:assetsReady
+| Action | Next State | Notes |
+|---|---|---|
+| `LOAD_TRADABLE_ASSETS` | `trade:assetsLoading` | Refreshes tradable routes |
+| `PLACE_TRADE_ORDER` | `trade:orderPlacing` | Sets `lastTradeRequest`, clears previous order data |
+| `POLL_TRADE_ORDER` | `trade:orderPolling` | Polls an already placed order |
+| `REQUEST_QUOTE` | `quote:requesting` | Allows skipping trade if destination asset is already available |
+
+### trade:assetsError
+| Action | Next State | Notes |
+|---|---|---|
+| `LOAD_TRADABLE_ASSETS` | `trade:assetsLoading` | Retry asset discovery |
+
+### trade:orderPlacing
+| Action | Next State | Notes |
+|---|---|---|
+| `TRADE_ORDER_PLACED` | `trade:orderPlaced` | Sets `tradeOrder` |
+| `TRADE_ORDER_FAILED` | `trade:orderError` | error set, optionally stores `lastTradeOrderStatus` |
+
+### trade:orderPlaced
+| Action | Next State | Notes |
+|---|---|---|
+| `POLL_TRADE_ORDER` | `trade:orderPolling` | Polls returned `orderId` |
+| `PLACE_TRADE_ORDER` | `trade:orderPlacing` | Places a new order; use carefully to avoid duplicate trades |
+
+### trade:orderPolling
+| Action | Next State | Notes |
+|---|---|---|
+| `TRADE_ORDER_STATUS_RECEIVED` | `trade:orderPolling` | Updates `lastTradeOrderStatus` for non-terminal statuses |
+| `TRADE_ORDER_FILLED` | `trade:orderFilled` | Stores filled status |
+| `TRADE_ORDER_FAILED` | `trade:orderError` | error set, optionally stores terminal non-filled status |
+
+### trade:orderFilled
+| Action | Next State | Notes |
+|---|---|---|
+| `LOAD_WALLET` | `wallet:loading` | Default `pollTradeOrder()` behavior refreshes balances after fill |
+| `REQUEST_QUOTE` | `quote:requesting` | Use when balances were refreshed elsewhere or `refreshWalletOnFilled: false` |
+
+### trade:orderError
+| Action | Next State | Notes |
+|---|---|---|
+| `PLACE_TRADE_ORDER` | `trade:orderPlacing` | Retry placement with a new explicit user action |
+| `POLL_TRADE_ORDER` | `trade:orderPolling` | Retry polling an existing order id |
 
 ### quote:requesting
 | Action | Next State |
@@ -178,6 +231,37 @@ withdraw:processing
   │ WITHDRAWAL_SUCCESS + WITHDRAWAL_COMPLETED (via WebSocket)
   ▼
 withdraw:completed
+```
+
+### Auto-swap Then Withdrawal
+
+```
+wallet:ready
+  │ LOAD_TRADABLE_ASSETS
+  ▼
+trade:assetsLoading
+  │ TRADABLE_ASSETS_LOADED
+  ▼
+trade:assetsReady
+  │ PLACE_TRADE_ORDER (routeId, side, type, volume, price?)
+  ▼
+trade:orderPlacing
+  │ TRADE_ORDER_PLACED (orderId/txid returned)
+  ▼
+trade:orderPlaced
+  │ POLL_TRADE_ORDER
+  ▼
+trade:orderPolling
+  │ TRADE_ORDER_STATUS_RECEIVED (open, repeat)
+  │ TRADE_ORDER_FILLED
+  ▼
+trade:orderFilled
+  │ LOAD_WALLET (default inside pollTradeOrder)
+  ▼
+wallet:ready
+  │ REQUEST_QUOTE for destination asset
+  ▼
+quote:requesting → quote:ready → withdraw:processing → withdraw:completed
 ```
 
 ### QR Code Path
@@ -287,3 +371,5 @@ quote:requesting
 - **QR code → OAuth completed**: The QR code flow transitions to `oauth:completed` when the QR code is scanned and confirmed, reusing the existing wallet loading path.
 - **Auto-detected QR code**: `startWithdrawalFlow()` automatically detects `binance-web` exchange and routes to QR code flow instead of OAuth popup.
 - **Cache replay**: Cached QR codes are replayed immediately on `startQRCodeFlow()` to avoid re-fetching. WebSocket still subscribes for status updates.
+- **Trade polling refreshes wallet by default**: `BluvoFlowClient.pollTradeOrder()` sends `TRADE_ORDER_FILLED`, then calls `loadWallet()` unless `refreshWalletOnFilled: false` is passed. Subscribers may briefly observe `trade:orderFilled`, but the stable post-poll state is usually `wallet:ready`.
+- **Place order is deliberately single-shot**: `placeTradeOrder()` sends one backend Place Order request and stores the returned order id/txid. Poll the returned order id instead of calling place again during UI refreshes.

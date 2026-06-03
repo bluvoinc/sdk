@@ -273,17 +273,183 @@ export function handleWalletStates(
       }
 
     case 'wallet:ready':
-      if (action.type === 'REQUEST_QUOTE') {
-        return createTransition('quote:requesting', state.context, {
-          lastQuoteRequest: {
-            asset: action.asset,
-            amount: action.amount,
-            destinationAddress: action.destinationAddress,
-            network: action.network
-          }
-        });
+      switch (action.type) {
+        case 'REQUEST_QUOTE':
+          return createTransition('quote:requesting', state.context, {
+            lastQuoteRequest: {
+              asset: action.asset,
+              amount: action.amount,
+              destinationAddress: action.destinationAddress,
+              network: action.network
+            }
+          });
+
+        case 'LOAD_TRADABLE_ASSETS':
+          return createTransition('trade:assetsLoading', state.context);
+
+        case 'PLACE_TRADE_ORDER':
+          return createTransition('trade:orderPlacing', state.context, {
+            lastTradeRequest: action.request,
+            tradeOrder: undefined,
+            lastTradeOrderStatus: undefined
+          });
+
+        case 'POLL_TRADE_ORDER':
+          return createTransition('trade:orderPolling', state.context);
+
+        default:
+          return null;
+      }
+
+    default:
+      return null;
+  }
+}
+
+function createQuoteRequestTransition(
+  state: FlowState,
+  action: Extract<FlowActionType, { type: 'REQUEST_QUOTE' }>
+): FlowState {
+  return createTransition('quote:requesting', state.context, {
+    lastQuoteRequest: {
+      asset: action.asset,
+      amount: action.amount,
+      destinationAddress: action.destinationAddress,
+      network: action.network
+    }
+  });
+}
+
+/**
+ * Handle transitions for trading-related states
+ */
+export function handleTradingStates(
+  state: FlowState,
+  action: FlowActionType
+): FlowState | null {
+  switch (state.type) {
+    case 'trade:assetsLoading':
+      switch (action.type) {
+        case 'TRADABLE_ASSETS_LOADED':
+          return createTransition('trade:assetsReady', state.context, {
+            tradableAssets: action.tradableAssets
+          });
+
+        case 'TRADABLE_ASSETS_FAILED':
+          return createErrorTransition('trade:assetsError', state.context, action.error);
+
+        default:
+          return null;
+      }
+
+    case 'trade:assetsReady':
+      switch (action.type) {
+        case 'LOAD_TRADABLE_ASSETS':
+          return createTransition('trade:assetsLoading', state.context);
+
+        case 'PLACE_TRADE_ORDER':
+          return createTransition('trade:orderPlacing', state.context, {
+            lastTradeRequest: action.request,
+            tradeOrder: undefined,
+            lastTradeOrderStatus: undefined
+          });
+
+        case 'POLL_TRADE_ORDER':
+          return createTransition('trade:orderPolling', state.context);
+
+        case 'REQUEST_QUOTE':
+          return createQuoteRequestTransition(state, action);
+
+        default:
+          return null;
+      }
+
+    case 'trade:assetsError':
+      if (action.type === 'LOAD_TRADABLE_ASSETS') {
+        return createTransition('trade:assetsLoading', state.context);
       }
       return null;
+
+    case 'trade:orderPlacing':
+      switch (action.type) {
+        case 'TRADE_ORDER_PLACED':
+          return createTransition('trade:orderPlaced', state.context, {
+            tradeOrder: action.order
+          });
+
+        case 'TRADE_ORDER_FAILED':
+          return createErrorTransition('trade:orderError', state.context, action.error, {
+            lastTradeOrderStatus: action.orderStatus
+          });
+
+        default:
+          return null;
+      }
+
+    case 'trade:orderPlaced':
+      switch (action.type) {
+        case 'POLL_TRADE_ORDER':
+          return createTransition('trade:orderPolling', state.context);
+
+        case 'PLACE_TRADE_ORDER':
+          return createTransition('trade:orderPlacing', state.context, {
+            lastTradeRequest: action.request,
+            tradeOrder: undefined,
+            lastTradeOrderStatus: undefined
+          });
+
+        default:
+          return null;
+      }
+
+    case 'trade:orderPolling':
+      switch (action.type) {
+        case 'TRADE_ORDER_STATUS_RECEIVED':
+          return createTransition('trade:orderPolling', state.context, {
+            lastTradeOrderStatus: action.orderStatus
+          });
+
+        case 'TRADE_ORDER_FILLED':
+          return createTransition('trade:orderFilled', state.context, {
+            lastTradeOrderStatus: action.orderStatus
+          });
+
+        case 'TRADE_ORDER_FAILED':
+          return createErrorTransition('trade:orderError', state.context, action.error, {
+            lastTradeOrderStatus: action.orderStatus
+          });
+
+        default:
+          return null;
+      }
+
+    case 'trade:orderFilled':
+      switch (action.type) {
+        case 'LOAD_WALLET':
+          return createTransition('wallet:loading', state.context);
+
+        case 'REQUEST_QUOTE':
+          return createQuoteRequestTransition(state, action);
+
+        default:
+          return null;
+      }
+
+    case 'trade:orderError':
+      switch (action.type) {
+        case 'PLACE_TRADE_ORDER':
+          return createTransition('trade:orderPlacing', state.context, {
+            lastTradeRequest: action.request,
+            tradeOrder: undefined,
+            lastTradeOrderStatus: undefined
+          });
+
+        case 'POLL_TRADE_ORDER':
+          return createTransition('trade:orderPolling', state.context);
+
+        default:
+          return null;
+      }
 
     default:
       return null;

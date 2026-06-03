@@ -5,4 +5,11 @@ export { createWithdrawalMachine } from './withdrawalMachine';
 export { BluvoFlowClient } from './BluvoFlowClient';
 
 // Type exports
-export type { BluvoFlowClientOptions, WithdrawalFlowOptions, ResumeWithdrawalFlowOptions, QuoteRequestOptions } from './BluvoFlowClient';
+export type {
+	BluvoFlowClientOptions,
+	WithdrawalFlowOptions,
+	ResumeWithdrawalFlowOptions,
+	QuoteRequestOptions,
+	PlaceTradeOrderOptions,
+	PollTradeOrderOptions,
+} from './BluvoFlowClient';

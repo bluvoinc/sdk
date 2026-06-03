@@ -33,6 +33,15 @@ import type {
   WalletpingpingData,
   WalletpingpingErrors,
   WalletpingpingResponses,
+  WallettradeorderorderidgetorderData,
+  WallettradeorderorderidgetorderErrors,
+  WallettradeorderorderidgetorderResponses,
+  WallettradeorderplaceorderData,
+  WallettradeorderplaceorderErrors,
+  WallettradeorderplaceorderResponses,
+  WallettradetradableassetstradableassetsData,
+  WallettradetradableassetstradableassetsErrors,
+  WallettradetradableassetstradableassetsResponses,
   WallettransactionslisttransactionsData,
   WallettransactionslisttransactionsErrors,
   WallettransactionslisttransactionsResponses,
@@ -528,6 +537,130 @@ export const walletwithdrawquoteidexecutewithdraw = <
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+};
+
+/**
+ * Tradable Assets
+ *
+ * List the tradable assets and trading routes available for the connected wallet exchange. The response is read from refreshed exchange metadata in R2 and can be used to choose a route for order placement.
+ *
+ * **Required API Key Scopes:** `read`
+ */
+export const wallettradetradableassetstradableassets = <
+  ThrowOnError extends boolean = false,
+>(
+  options?: Options<WallettradetradableassetstradableassetsData, ThrowOnError>,
+) => {
+  return (options?.client ?? client).get<
+    WallettradetradableassetstradableassetsResponses,
+    WallettradetradableassetstradableassetsErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "x-bluvo-api-key",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-org-id",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-project-id",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-wallet-id",
+        type: "apiKey",
+      },
+    ],
+    url: "/v0/wallet/trade/tradable-assets",
+    ...options,
+  });
+};
+
+/**
+ * Place Order
+ *
+ * Place a spot order on the connected exchange using a route from the tradable assets endpoint. Kraken is supported first; the API calls the wallet client's modular trading method so additional exchanges can implement the same contract later.
+ *
+ * **Required API Key Scopes:** `trade`
+ */
+export const wallettradeorderplaceorder = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<WallettradeorderplaceorderData, ThrowOnError>,
+) => {
+  return (options.client ?? client).post<
+    WallettradeorderplaceorderResponses,
+    WallettradeorderplaceorderErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "x-bluvo-api-key",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-org-id",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-project-id",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-wallet-id",
+        type: "apiKey",
+      },
+    ],
+    url: "/v0/wallet/trade/order",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Get Order
+ *
+ * Get the latest status for an exchange order. Clients can poll this endpoint until the normalized status is filled, canceled, or expired.
+ *
+ * **Required API Key Scopes:** `trade`
+ */
+export const wallettradeorderorderidgetorder = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<WallettradeorderorderidgetorderData, ThrowOnError>,
+) => {
+  return (options.client ?? client).get<
+    WallettradeorderorderidgetorderResponses,
+    WallettradeorderorderidgetorderErrors,
+    ThrowOnError
+  >({
+    security: [
+      {
+        name: "x-bluvo-api-key",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-org-id",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-project-id",
+        type: "apiKey",
+      },
+      {
+        name: "x-bluvo-wallet-id",
+        type: "apiKey",
+      },
+    ],
+    url: "/v0/wallet/trade/order/{orderId}",
+    ...options,
   });
 };
 

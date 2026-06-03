@@ -14,6 +14,8 @@ export type {
   ResumeWithdrawalFlowOptions,
   SilentResumeWithdrawalFlowOptions,
   QuoteRequestOptions,
+  PlaceTradeOrderOptions,
+  PollTradeOrderOptions,
   FlowState,
   FlowActionType,
   WithdrawalState,

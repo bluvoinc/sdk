@@ -10,10 +10,10 @@ export type ClientOptions = {
 export const SchemaEnum = {
   COINBASE: "coinbase",
   KRAKEN: "kraken",
+  KUCOIN: "kucoin",
   LOCAL_CEX: "local-cex",
   BINANCE_WEB: "binance-web",
   BYBIT_WEB: "bybit-web",
-  KUCOIN: "kucoin",
 } as const;
 
 export type SchemaEnum = (typeof SchemaEnum)[keyof typeof SchemaEnum];
@@ -368,6 +368,13 @@ export const TypeEnum3 = {
   DEPOSIT_EXCHANGE_NOT_SUPPORTED: "DEPOSIT_EXCHANGE_NOT_SUPPORTED",
   DEPOSIT_METHOD_NOT_RESOLVED: "DEPOSIT_METHOD_NOT_RESOLVED",
   WITHDRAWAL_DRY_RUN_COMPLETE: "WITHDRAWAL_DRY_RUN_COMPLETE",
+  TRADING_DATA_UNAVAILABLE: "TRADING_DATA_UNAVAILABLE",
+  TRADING_EXCHANGE_NOT_SUPPORTED: "TRADING_EXCHANGE_NOT_SUPPORTED",
+  TRADING_ROUTE_NOT_FOUND: "TRADING_ROUTE_NOT_FOUND",
+  TRADING_ROUTE_UNAVAILABLE: "TRADING_ROUTE_UNAVAILABLE",
+  TRADING_ORDER_TYPE_NOT_SUPPORTED: "TRADING_ORDER_TYPE_NOT_SUPPORTED",
+  TRADING_ORDER_NOT_FOUND: "TRADING_ORDER_NOT_FOUND",
+  TRADING_PROVIDER_ERROR: "TRADING_PROVIDER_ERROR",
   INFO_ASSET_REQUIRED: "INFO_ASSET_REQUIRED",
   INFO_FEE_EXCHANGE_NOT_SUPPORTED: "INFO_FEE_EXCHANGE_NOT_SUPPORTED",
   ENRICHMENT_NETWORK_NOT_SUPPORTED: "ENRICHMENT_NETWORK_NOT_SUPPORTED",
@@ -402,6 +409,69 @@ export const RelationEnum = {
 
 export type RelationEnum = (typeof RelationEnum)[keyof typeof RelationEnum];
 
+export const MarketTypeEnum = {
+  SPOT: "spot",
+  MARGIN: "margin",
+  FUTURES: "futures",
+  PERPETUAL: "perpetual",
+  UNKNOWN: "unknown",
+} as const;
+
+export type MarketTypeEnum =
+  (typeof MarketTypeEnum)[keyof typeof MarketTypeEnum];
+
+export const StatusEnum5 = {
+  ONLINE: "online",
+  OFFLINE: "offline",
+  TRADING: "trading",
+  HALTED: "halted",
+  CANCEL_ONLY: "cancel_only",
+  POST_ONLY: "post_only",
+  LIMIT_ONLY: "limit_only",
+  AUCTION: "auction",
+  UNKNOWN: "unknown",
+} as const;
+
+export type StatusEnum5 = (typeof StatusEnum5)[keyof typeof StatusEnum5];
+
+export const ItemsEnum = {
+  MARKET: "market",
+  LIMIT: "limit",
+  LIMIT_MAKER: "limit_maker",
+  STOP_LOSS: "stop_loss",
+  STOP_LOSS_LIMIT: "stop_loss_limit",
+  TAKE_PROFIT: "take_profit",
+  TAKE_PROFIT_LIMIT: "take_profit_limit",
+  TRAILING_STOP: "trailing_stop",
+  UNKNOWN: "unknown",
+} as const;
+
+export type ItemsEnum = (typeof ItemsEnum)[keyof typeof ItemsEnum];
+
+export const SideEnum = {
+  BUY: "buy",
+  SELL: "sell",
+} as const;
+
+export type SideEnum = (typeof SideEnum)[keyof typeof SideEnum];
+
+export const TypeEnum5 = {
+  MARKET: "market",
+  LIMIT: "limit",
+} as const;
+
+export type TypeEnum5 = (typeof TypeEnum5)[keyof typeof TypeEnum5];
+
+export const StatusEnum6 = {
+  OPEN: "open",
+  FILLED: "filled",
+  CANCELED: "canceled",
+  EXPIRED: "expired",
+  UNKNOWN: "unknown",
+} as const;
+
+export type StatusEnum6 = (typeof StatusEnum6)[keyof typeof StatusEnum6];
+
 export const TagTypeEnum = {
   MEMO: "memo",
   DESTINATION_TAG: "destinationTag",
@@ -411,21 +481,21 @@ export const TagTypeEnum = {
 
 export type TagTypeEnum = (typeof TagTypeEnum)[keyof typeof TagTypeEnum];
 
-export const TypeEnum5 = {
+export const TypeEnum6 = {
   DEPOSIT_ASSET_REQUIRED: "DEPOSIT_ASSET_REQUIRED",
   DEPOSIT_NETWORK_REQUIRED: "DEPOSIT_NETWORK_REQUIRED",
   DEPOSIT_EXCHANGE_NOT_SUPPORTED: "DEPOSIT_EXCHANGE_NOT_SUPPORTED",
   DEPOSIT_METHOD_NOT_RESOLVED: "DEPOSIT_METHOD_NOT_RESOLVED",
 } as const;
 
-export type TypeEnum5 = (typeof TypeEnum5)[keyof typeof TypeEnum5];
+export type TypeEnum6 = (typeof TypeEnum6)[keyof typeof TypeEnum6];
 
-export const TypeEnum6 = {
+export const TypeEnum7 = {
   WALLET_NOT_FOUND: "WALLET_NOT_FOUND",
   DEPOSIT_ADDRESS_UNAVAILABLE: "DEPOSIT_ADDRESS_UNAVAILABLE",
 } as const;
 
-export type TypeEnum6 = (typeof TypeEnum6)[keyof typeof TypeEnum6];
+export type TypeEnum7 = (typeof TypeEnum7)[keyof typeof TypeEnum7];
 
 export const SchemaEnum4 = {
   REUSE_OR_CREATE: "reuse_or_create",
@@ -435,13 +505,13 @@ export const SchemaEnum4 = {
 
 export type SchemaEnum4 = (typeof SchemaEnum4)[keyof typeof SchemaEnum4];
 
-export const TypeEnum7 = {
+export const TypeEnum8 = {
   INFO_ASSET_REQUIRED: "INFO_ASSET_REQUIRED",
   INFO_FEE_EXCHANGE_NOT_SUPPORTED: "INFO_FEE_EXCHANGE_NOT_SUPPORTED",
   WITHDRAWAL_ASSET_NOT_SUPPORTED: "WITHDRAWAL_ASSET_NOT_SUPPORTED",
 } as const;
 
-export type TypeEnum7 = (typeof TypeEnum7)[keyof typeof TypeEnum7];
+export type TypeEnum8 = (typeof TypeEnum8)[keyof typeof TypeEnum8];
 
 export type Oauth2ExchangeurlgeturlData = {
   body?: never;
@@ -2195,6 +2265,263 @@ export type WalletwithdrawquoteidexecutewithdrawResponses = {
 export type WalletwithdrawquoteidexecutewithdrawResponse =
   WalletwithdrawquoteidexecutewithdrawResponses[keyof WalletwithdrawquoteidexecutewithdrawResponses];
 
+export type WallettradetradableassetstradableassetsData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/v0/wallet/trade/tradable-assets";
+};
+
+export type WallettradetradableassetstradableassetsErrors = {
+  /**
+   * Bad Request
+   */
+  400: {
+    error: string;
+    type: TypeEnum3;
+    result?: unknown;
+  };
+  /**
+   * Forbidden - Insufficient API key permissions
+   */
+  403: {
+    error: string;
+    type: "APIKEY_INSUFFICIENT_PERMISSIONS";
+    missing: Array<string>;
+  };
+  /**
+   * Not Found
+   */
+  404: {
+    error: string;
+    type: "WALLET_NOT_FOUND";
+    result?: unknown;
+  };
+};
+
+export type WallettradetradableassetstradableassetsError =
+  WallettradetradableassetstradableassetsErrors[keyof WallettradetradableassetstradableassetsErrors];
+
+export type WallettradetradableassetstradableassetsResponses = {
+  /**
+   * Successful response
+   */
+  200: {
+    schemaVersion: 1;
+    exchange: string;
+    generatedAt: string;
+    source: {
+      api: string;
+      fetchedAt: string;
+    };
+    assets: Array<{
+      assetId: string;
+      symbol: string;
+      name?: string;
+      assetType?: string;
+      exchangeSymbols: Array<string>;
+    }>;
+    routes: Array<{
+      routeId: string;
+      exchange: string;
+      marketType: MarketTypeEnum;
+      baseAsset: string;
+      quoteAsset: string;
+      displaySymbol: string;
+      exchangeSymbol?: string;
+      status: StatusEnum5;
+      isTradingEnabled: boolean;
+      margin: {
+        isMarginEnabled: boolean;
+        maxLongLeverage?: number;
+        maxShortLeverage?: number;
+      };
+      orderTypes: Array<ItemsEnum>;
+      tradingRules?: {
+        price?: {
+          tickSize?: string;
+          priceDecimals?: number;
+          minPrice?: string;
+          maxPrice?: string;
+        };
+        quantity?: {
+          minBaseQty?: string;
+          maxBaseQty?: string;
+          stepSize?: string;
+          quantityDecimals?: number;
+        };
+        notional?: {
+          minNotional?: string;
+          maxNotional?: string;
+          applyMinToMarket?: boolean;
+        };
+        marketQuantity?: {
+          minQty?: string;
+          maxQty?: string;
+          stepSize?: string;
+        };
+        orderLimits?: {
+          maxNumOrders?: number;
+          maxNumAlgoOrders?: number;
+          maxNumIcebergParts?: number;
+          maxNumOrderAmends?: number;
+        };
+      };
+      fees?: {
+        model: "maker_taker";
+        tiers: Array<{
+          volume: string;
+          maker: string;
+          taker: string;
+        }>;
+      };
+    }>;
+    rateLimits?: Array<{
+      type: string;
+      interval: string;
+      limit: number;
+    }>;
+    stats: {
+      totalAssets: number;
+      totalRoutes: number;
+      tradableRoutes: number;
+    };
+  };
+};
+
+export type WallettradetradableassetstradableassetsResponse =
+  WallettradetradableassetstradableassetsResponses[keyof WallettradetradableassetstradableassetsResponses];
+
+export type WallettradeorderplaceorderData = {
+  body: {
+    routeId: string;
+    side: SideEnum;
+    type: TypeEnum5;
+    volume: string;
+    price?: string;
+  };
+  path?: never;
+  query?: never;
+  url: "/v0/wallet/trade/order";
+};
+
+export type WallettradeorderplaceorderErrors = {
+  /**
+   * Bad Request
+   */
+  400: {
+    error: string;
+    type: TypeEnum3;
+    result?: unknown;
+  };
+  /**
+   * Forbidden - Insufficient API key permissions
+   */
+  403: {
+    error: string;
+    type: "APIKEY_INSUFFICIENT_PERMISSIONS";
+    missing: Array<string>;
+  };
+  /**
+   * Not Found
+   */
+  404: {
+    error: string;
+    type: "WALLET_NOT_FOUND";
+    result?: unknown;
+  };
+};
+
+export type WallettradeorderplaceorderError =
+  WallettradeorderplaceorderErrors[keyof WallettradeorderplaceorderErrors];
+
+export type WallettradeorderplaceorderResponses = {
+  /**
+   * Successful response
+   */
+  200: {
+    orderId: string;
+    txid: Array<string>;
+    exchange: string;
+    routeId: string;
+    description: string;
+    rawResponse?: unknown;
+  };
+};
+
+export type WallettradeorderplaceorderResponse =
+  WallettradeorderplaceorderResponses[keyof WallettradeorderplaceorderResponses];
+
+export type WallettradeorderorderidgetorderData = {
+  body?: never;
+  path: {
+    /**
+     * Order ID returned by Place Order
+     */
+    orderId: string;
+  };
+  query?: never;
+  url: "/v0/wallet/trade/order/{orderId}";
+};
+
+export type WallettradeorderorderidgetorderErrors = {
+  /**
+   * Bad Request
+   */
+  400: {
+    error: string;
+    type: TypeEnum3;
+    result?: unknown;
+  };
+  /**
+   * Forbidden - Insufficient API key permissions
+   */
+  403: {
+    error: string;
+    type: "APIKEY_INSUFFICIENT_PERMISSIONS";
+    missing: Array<string>;
+  };
+  /**
+   * Not Found
+   */
+  404: {
+    error: string;
+    type: TypeEnum3;
+    result?: unknown;
+  };
+};
+
+export type WallettradeorderorderidgetorderError =
+  WallettradeorderorderidgetorderErrors[keyof WallettradeorderorderidgetorderErrors];
+
+export type WallettradeorderorderidgetorderResponses = {
+  /**
+   * Successful response
+   */
+  200: {
+    orderId: string;
+    exchange: string;
+    status: StatusEnum6;
+    rawStatus: string;
+    volume?: string;
+    executedVolume?: string;
+    cost?: string;
+    averagePrice?: string;
+    fee?: string;
+    openedAt?: number;
+    closedAt?: number;
+    description?: {
+      pair?: string;
+      side?: string;
+      type?: string;
+    };
+    rawResponse?: unknown;
+  };
+};
+
+export type WallettradeorderorderidgetorderResponse =
+  WallettradeorderorderidgetorderResponses[keyof WallettradeorderorderidgetorderResponses];
+
 export type WalletdepositaddressdepositaddressData = {
   body?: never;
   path?: never;
@@ -2221,7 +2548,7 @@ export type WalletdepositaddressdepositaddressErrors = {
    */
   400: {
     error: string;
-    type: TypeEnum5;
+    type: TypeEnum6;
     candidates?: Array<{
       method: string;
       score: number;
@@ -2241,7 +2568,7 @@ export type WalletdepositaddressdepositaddressErrors = {
    */
   404: {
     error: string;
-    type: TypeEnum6;
+    type: TypeEnum7;
   };
 };
 
@@ -2297,7 +2624,7 @@ export type WalletinfofeewithdrawalfeeErrors = {
    */
   400: {
     error: string;
-    type: TypeEnum7;
+    type: TypeEnum8;
   };
   /**
    * Not Found

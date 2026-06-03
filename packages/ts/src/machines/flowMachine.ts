@@ -8,6 +8,7 @@ import {
   handleOAuthStates,
   handleQRCodeStates,
   handleWalletStates,
+  handleTradingStates,
   handleQuoteStates,
   handleWithdrawalStates,
   handleCancelFlow
@@ -47,6 +48,7 @@ function flowTransition(
     () => handleOAuthStates(state, action),
     () => handleQRCodeStates(state, action),
     () => handleWalletStates(state, action),
+    () => handleTradingStates(state, action),
     () => handleQuoteStates(state, action, instance),
     () => handleWithdrawalStates(state, action, instance)
   ];

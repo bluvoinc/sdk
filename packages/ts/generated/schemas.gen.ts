@@ -2,7 +2,14 @@
 
 export const SchemaEnumSchema = {
   type: "string",
-  enum: ["coinbase", "kraken", "local-cex", "binance-web", "bybit-web", "kucoin"],
+  enum: [
+    "coinbase",
+    "kraken",
+    "kucoin",
+    "local-cex",
+    "binance-web",
+    "bybit-web",
+  ],
 } as const;
 
 export const StatusEnumSchema = {
@@ -324,6 +331,13 @@ export const TypeEnum3Schema = {
     "DEPOSIT_EXCHANGE_NOT_SUPPORTED",
     "DEPOSIT_METHOD_NOT_RESOLVED",
     "WITHDRAWAL_DRY_RUN_COMPLETE",
+    "TRADING_DATA_UNAVAILABLE",
+    "TRADING_EXCHANGE_NOT_SUPPORTED",
+    "TRADING_ROUTE_NOT_FOUND",
+    "TRADING_ROUTE_UNAVAILABLE",
+    "TRADING_ORDER_TYPE_NOT_SUPPORTED",
+    "TRADING_ORDER_NOT_FOUND",
+    "TRADING_PROVIDER_ERROR",
     "INFO_ASSET_REQUIRED",
     "INFO_FEE_EXCHANGE_NOT_SUPPORTED",
     "ENRICHMENT_NETWORK_NOT_SUPPORTED",
@@ -347,12 +361,62 @@ export const RelationEnumSchema = {
   enum: ["AND", "OR"],
 } as const;
 
+export const MarketTypeEnumSchema = {
+  type: "string",
+  enum: ["spot", "margin", "futures", "perpetual", "unknown"],
+} as const;
+
+export const StatusEnum5Schema = {
+  type: "string",
+  enum: [
+    "online",
+    "offline",
+    "trading",
+    "halted",
+    "cancel_only",
+    "post_only",
+    "limit_only",
+    "auction",
+    "unknown",
+  ],
+} as const;
+
+export const ItemsEnumSchema = {
+  type: "string",
+  enum: [
+    "market",
+    "limit",
+    "limit_maker",
+    "stop_loss",
+    "stop_loss_limit",
+    "take_profit",
+    "take_profit_limit",
+    "trailing_stop",
+    "unknown",
+  ],
+} as const;
+
+export const SideEnumSchema = {
+  type: "string",
+  enum: ["buy", "sell"],
+} as const;
+
+export const TypeEnum5Schema = {
+  type: "string",
+  enum: ["market", "limit"],
+} as const;
+
+export const StatusEnum6Schema = {
+  type: "string",
+  enum: ["open", "filled", "canceled", "expired", "unknown"],
+} as const;
+
 export const TagTypeEnumSchema = {
   type: ["string", "null"],
   enum: ["memo", "destinationTag", "message", null],
 } as const;
 
-export const TypeEnum5Schema = {
+export const TypeEnum6Schema = {
   type: "string",
   enum: [
     "DEPOSIT_ASSET_REQUIRED",
@@ -362,7 +426,7 @@ export const TypeEnum5Schema = {
   ],
 } as const;
 
-export const TypeEnum6Schema = {
+export const TypeEnum7Schema = {
   type: "string",
   enum: ["WALLET_NOT_FOUND", "DEPOSIT_ADDRESS_UNAVAILABLE"],
 } as const;
@@ -372,7 +436,7 @@ export const SchemaEnum4Schema = {
   enum: ["reuse_or_create", "reuse_only", "create_new"],
 } as const;
 
-export const TypeEnum7Schema = {
+export const TypeEnum8Schema = {
   type: "string",
   enum: [
     "INFO_ASSET_REQUIRED",

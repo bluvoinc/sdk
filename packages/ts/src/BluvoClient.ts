@@ -10,6 +10,11 @@ import {
     walletpingping,
     wallettransactionslisttransactions,
     type WallettransactionslisttransactionsData,
+    wallettradeorderorderidgetorder,
+    type WallettradeorderorderidgetorderData,
+    wallettradeorderplaceorder,
+    type WallettradeorderplaceorderData,
+    wallettradetradableassetstradableassets,
     walletwithdrawbalancebalance,
     type WalletwithdrawbalancebalanceData,
     walletwithdrawquoteidexecutewithdraw,
@@ -363,6 +368,48 @@ export class BluvoClient {
 						page,
 						limit,
 						sinceDate,
+					},
+					headers: {
+						"x-bluvo-wallet-id": walletId,
+					},
+				});
+				return transformResponse(response);
+			},
+		},
+
+		trading: {
+			getTradableAssets: async (walletId: string) => {
+				const response = await wallettradetradableassetstradableassets({
+					client: this.client,
+					headers: {
+						"x-bluvo-wallet-id": walletId,
+					},
+				});
+				return transformResponse(response);
+			},
+
+			placeOrder: async (
+				walletId: string,
+				body: WallettradeorderplaceorderData["body"],
+			) => {
+				const response = await wallettradeorderplaceorder({
+					client: this.client,
+					headers: {
+						"x-bluvo-wallet-id": walletId,
+					},
+					body,
+				});
+				return transformResponse(response);
+			},
+
+			getOrder: async (
+				walletId: string,
+				orderId: WallettradeorderorderidgetorderData["path"]["orderId"],
+			) => {
+				const response = await wallettradeorderorderidgetorder({
+					client: this.client,
+					path: {
+						orderId,
 					},
 					headers: {
 						"x-bluvo-wallet-id": walletId,

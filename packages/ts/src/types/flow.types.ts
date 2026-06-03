@@ -1,4 +1,10 @@
-import type {WalletwithdrawbalancebalanceResponse} from "../../generated";
+import type {
+    WallettradeorderorderidgetorderResponse,
+    WallettradeorderplaceorderData,
+    WallettradeorderplaceorderResponse,
+    WallettradetradableassetstradableassetsResponse,
+    WalletwithdrawbalancebalanceResponse,
+} from "../../generated";
 import type {StateValue} from "./machine.types";
 import type {QRCodeStatus} from "../WorkflowTypes";
 
@@ -28,6 +34,14 @@ export type FlowStateType =
     | "wallet:loading"
     | "wallet:ready"
     | "wallet:error"
+    | "trade:assetsLoading"
+    | "trade:assetsReady"
+    | "trade:assetsError"
+    | "trade:orderPlacing"
+    | "trade:orderPlaced"
+    | "trade:orderPolling"
+    | "trade:orderFilled"
+    | "trade:orderError"
     | "quote:requesting"
     | "quote:ready"
     | "quote:expired"
@@ -84,6 +98,10 @@ export interface FlowContext {
             assetId?: string;
         };
     }>;
+    tradableAssets?: WallettradetradableassetstradableassetsResponse;
+    lastTradeRequest?: WallettradeorderplaceorderData["body"];
+    tradeOrder?: WallettradeorderplaceorderResponse;
+    lastTradeOrderStatus?: WallettradeorderorderidgetorderResponse;
     quote?: {
         id: string;
         asset: string;
@@ -207,6 +225,37 @@ export type FlowActionType =
     }>;
 }
     | { type: "WALLET_FAILED"; error: Error }
+    | { type: "LOAD_TRADABLE_ASSETS" }
+    | {
+    type: "TRADABLE_ASSETS_LOADED";
+    tradableAssets: WallettradetradableassetstradableassetsResponse;
+}
+    | { type: "TRADABLE_ASSETS_FAILED"; error: Error }
+    | {
+    type: "PLACE_TRADE_ORDER";
+    request: WallettradeorderplaceorderData["body"];
+}
+    | {
+    type: "TRADE_ORDER_PLACED";
+    order: WallettradeorderplaceorderResponse;
+}
+    | {
+    type: "POLL_TRADE_ORDER";
+    orderId: string;
+}
+    | {
+    type: "TRADE_ORDER_STATUS_RECEIVED";
+    orderStatus: WallettradeorderorderidgetorderResponse;
+}
+    | {
+    type: "TRADE_ORDER_FILLED";
+    orderStatus: WallettradeorderorderidgetorderResponse;
+}
+    | {
+    type: "TRADE_ORDER_FAILED";
+    error: Error;
+    orderStatus?: WallettradeorderorderidgetorderResponse;
+}
     | {
     type: "REQUEST_QUOTE";
     asset: string;

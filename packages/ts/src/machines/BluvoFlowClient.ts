@@ -1,5 +1,9 @@
 import type {
     Oauth2ExchangeslistexchangesResponses, TypeEnum2,
+	WallettradeorderorderidgetorderResponse,
+	WallettradeorderplaceorderData,
+	WallettradeorderplaceorderResponse,
+	WallettradetradableassetstradableassetsResponse,
 } from "../../generated";
 import type { BluvoClient } from "../BluvoClient";
 import { BluvoWebClient } from "../BluvoWebClient";
@@ -38,6 +42,9 @@ export interface BluvoFlowClientOptions {
 	fetchWithdrawableBalanceFn: BluvoClient["wallet"]["withdrawals"]["getWithdrawableBalance"];
 	requestQuotationFn: BluvoClient["wallet"]["withdrawals"]["requestQuotation"];
 	executeWithdrawalFn: BluvoClient["wallet"]["withdrawals"]["executeWithdrawal"];
+	getTradableAssetsFn?: BluvoClient["wallet"]["trading"]["getTradableAssets"];
+	placeOrderFn?: BluvoClient["wallet"]["trading"]["placeOrder"];
+	getOrderFn?: BluvoClient["wallet"]["trading"]["getOrder"];
 	getWalletByIdFn: BluvoClient["wallet"]["get"];
 	pingWalletByIdFn: BluvoClient["wallet"]["ping"];
 	mkUUIDFn?: () => string;
@@ -133,6 +140,14 @@ export interface QuoteRequestOptions {
 	network?: string;
 	tag?: string;
 	includeFee?: boolean;
+}
+
+export type PlaceTradeOrderOptions = WallettradeorderplaceorderData["body"];
+
+export interface PollTradeOrderOptions {
+	maxAttempts?: number;
+	intervalMs?: number;
+	refreshWalletOnFilled?: boolean;
 }
 
 export interface LoadExchangesResult {
@@ -1061,6 +1076,289 @@ export class BluvoFlowClient {
 			result: {
 				balances: transformedBalances,
 			},
+		};
+	}
+
+	async loadTradableAssets() {
+		if (!this.flowMachine) {
+			return {
+				success: false,
+				error: "Flow machine not initialized",
+			};
+		}
+
+		const state = this.flowMachine.getState();
+		if (!state.context.walletId) {
+			return {
+				success: false,
+				error: "Wallet ID not found in state",
+			};
+		}
+
+		this.flowMachine.send({ type: "LOAD_TRADABLE_ASSETS" });
+
+		if (!this.options.getTradableAssetsFn) {
+			const error = new Error("Trading API callbacks are not configured");
+			this.flowMachine.send({ type: "TRADABLE_ASSETS_FAILED", error });
+			return {
+				success: false,
+				error: error.message,
+			};
+		}
+
+		const { data, error, success } = await this.options.getTradableAssetsFn(
+			state.context.walletId,
+		);
+
+		if (!success) {
+			const errorInfo = extractErrorTypeInfo(error);
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: (error as any)?.error ||
+						(error as any)?.message ||
+						"Failed to load tradable assets";
+			const flowError = new Error(errorMessage);
+			this.flowMachine.send({
+				type: "TRADABLE_ASSETS_FAILED",
+				error: flowError,
+			});
+			return {
+				success: false,
+				error: errorMessage,
+				type: (errorInfo.rawType as TypeEnum2) || undefined,
+			};
+		}
+
+		if (!data) {
+			const errorMessage = "No tradable assets returned from backend";
+			const flowError = new Error(errorMessage);
+			this.flowMachine.send({
+				type: "TRADABLE_ASSETS_FAILED",
+				error: flowError,
+			});
+			return {
+				success: false,
+				error: errorMessage,
+			};
+		}
+
+		this.flowMachine.send({
+			type: "TRADABLE_ASSETS_LOADED",
+			tradableAssets: data as WallettradetradableassetstradableassetsResponse,
+		});
+
+		return {
+			success: true,
+			tradableAssets: data,
+			result: data as WallettradetradableassetstradableassetsResponse,
+		};
+	}
+
+	async placeTradeOrder(options: PlaceTradeOrderOptions) {
+		if (!this.flowMachine) {
+			return {
+				success: false,
+				error: "Flow machine not initialized",
+			};
+		}
+
+		const state = this.flowMachine.getState();
+		if (!state.context.walletId) {
+			return {
+				success: false,
+				error: "Wallet ID not found in state",
+			};
+		}
+
+		this.flowMachine.send({
+			type: "PLACE_TRADE_ORDER",
+			request: options,
+		});
+
+		if (!this.options.placeOrderFn) {
+			const error = new Error("Trading API callbacks are not configured");
+			this.flowMachine.send({ type: "TRADE_ORDER_FAILED", error });
+			return {
+				success: false,
+				error: error.message,
+			};
+		}
+
+		const { data, error, success } = await this.options.placeOrderFn(
+			state.context.walletId,
+			options,
+		);
+
+		if (!success) {
+			const errorInfo = extractErrorTypeInfo(error);
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: (error as any)?.error ||
+						(error as any)?.message ||
+						"Failed to place trade order";
+			const flowError = new Error(errorMessage);
+			this.flowMachine.send({
+				type: "TRADE_ORDER_FAILED",
+				error: flowError,
+			});
+			return {
+				success: false,
+				error: errorMessage,
+				type: (errorInfo.rawType as TypeEnum2) || undefined,
+			};
+		}
+
+		if (!data) {
+			const errorMessage = "No trade order returned from backend";
+			const flowError = new Error(errorMessage);
+			this.flowMachine.send({
+				type: "TRADE_ORDER_FAILED",
+				error: flowError,
+			});
+			return {
+				success: false,
+				error: errorMessage,
+			};
+		}
+
+		this.flowMachine.send({
+			type: "TRADE_ORDER_PLACED",
+			order: data as WallettradeorderplaceorderResponse,
+		});
+
+		return {
+			success: true,
+			order: data,
+			result: data as WallettradeorderplaceorderResponse,
+		};
+	}
+
+	async pollTradeOrder(orderId: string, options: PollTradeOrderOptions = {}) {
+		if (!this.flowMachine) {
+			return {
+				success: false,
+				error: "Flow machine not initialized",
+			};
+		}
+
+		const state = this.flowMachine.getState();
+		if (!state.context.walletId) {
+			return {
+				success: false,
+				error: "Wallet ID not found in state",
+			};
+		}
+
+		if (!this.options.getOrderFn) {
+			const error = new Error("Trading API callbacks are not configured");
+			this.flowMachine.send({ type: "TRADE_ORDER_FAILED", error });
+			return {
+				success: false,
+				error: error.message,
+			};
+		}
+
+		const maxAttempts = options.maxAttempts ?? 30;
+		const intervalMs = options.intervalMs ?? 1000;
+		const refreshWalletOnFilled = options.refreshWalletOnFilled ?? true;
+
+		this.flowMachine.send({ type: "POLL_TRADE_ORDER", orderId });
+
+		for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+			const { data, error, success } = await this.options.getOrderFn(
+				state.context.walletId,
+				orderId,
+			);
+
+			if (!success) {
+				const errorInfo = extractErrorTypeInfo(error);
+				const errorMessage =
+					error instanceof Error
+						? error.message
+						: (error as any)?.error ||
+							(error as any)?.message ||
+							"Failed to query trade order";
+				const flowError = new Error(errorMessage);
+				this.flowMachine.send({
+					type: "TRADE_ORDER_FAILED",
+					error: flowError,
+				});
+				return {
+					success: false,
+					error: errorMessage,
+					type: (errorInfo.rawType as TypeEnum2) || undefined,
+				};
+			}
+
+			if (!data) {
+				const errorMessage = "No trade order status returned from backend";
+				const flowError = new Error(errorMessage);
+				this.flowMachine.send({
+					type: "TRADE_ORDER_FAILED",
+					error: flowError,
+				});
+				return {
+					success: false,
+					error: errorMessage,
+				};
+			}
+
+			const orderStatus = data as WallettradeorderorderidgetorderResponse;
+
+			if (orderStatus.status === "filled") {
+				this.flowMachine.send({
+					type: "TRADE_ORDER_FILLED",
+					orderStatus,
+				});
+
+				if (refreshWalletOnFilled) {
+					await this.loadWallet(state.context.walletId);
+				}
+
+				return {
+					success: true,
+					orderStatus,
+					result: orderStatus,
+				};
+			}
+
+			if (orderStatus.status === "canceled" || orderStatus.status === "expired") {
+				const errorMessage = `Trade order ${orderStatus.status}`;
+				const flowError = new Error(errorMessage);
+				this.flowMachine.send({
+					type: "TRADE_ORDER_FAILED",
+					error: flowError,
+					orderStatus,
+				});
+				return {
+					success: false,
+					error: errorMessage,
+					result: orderStatus,
+				};
+			}
+
+			this.flowMachine.send({
+				type: "TRADE_ORDER_STATUS_RECEIVED",
+				orderStatus,
+			});
+
+			if (attempt < maxAttempts && intervalMs > 0) {
+				await new Promise((resolve) => setTimeout(resolve, intervalMs));
+			}
+		}
+
+		const errorMessage = `Trade order was not filled after ${maxAttempts} polling attempts`;
+		const flowError = new Error(errorMessage);
+		this.flowMachine.send({
+			type: "TRADE_ORDER_FAILED",
+			error: flowError,
+		});
+
+		return {
+			success: false,
+			error: errorMessage,
 		};
 	}
 

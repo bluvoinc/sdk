@@ -5,6 +5,8 @@ import type {
 	FlowActionType,
 	FlowState,
 	Machine,
+	PlaceTradeOrderOptions,
+	PollTradeOrderOptions,
 	QuoteRequestOptions,
 	ResumeWithdrawalFlowOptions,
 	SilentResumeWithdrawalFlowOptions,
@@ -75,6 +77,24 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 	const requestQuote = useCallback(
 		async (options: QuoteRequestOptions) => {
 			return await flowClient.requestQuote(options);
+		},
+		[flowClient],
+	);
+
+	const loadTradableAssets = useCallback(async () => {
+		return await flowClient.loadTradableAssets();
+	}, [flowClient]);
+
+	const placeTradeOrder = useCallback(
+		async (options: PlaceTradeOrderOptions) => {
+			return await flowClient.placeTradeOrder(options);
+		},
+		[flowClient],
+	);
+
+	const pollTradeOrder = useCallback(
+		async (orderId: string, options?: PollTradeOrderOptions) => {
+			return await flowClient.pollTradeOrder(orderId, options);
 		},
 		[flowClient],
 	);
@@ -193,6 +213,9 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		startWithdrawalFlow,
 		resumeWithdrawalFlow,
 		silentResumeWithdrawalFlow, // NEW - backwards compatible
+		loadTradableAssets,
+		placeTradeOrder,
+		pollTradeOrder,
 		requestQuote,
 		executeWithdrawal,
 		submit2FA,
@@ -253,6 +276,20 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		isWalletLoading: flow.state?.type === "wallet:loading",
 		isWalletError: flow.state?.type === "wallet:error",
 		isWalletReady: flow.state?.type === "wallet:ready",
+
+		// === Trading State ===
+		isTradableAssetsLoading: flow.state?.type === "trade:assetsLoading",
+		isTradableAssetsReady: flow.state?.type === "trade:assetsReady",
+		isTradableAssetsError: flow.state?.type === "trade:assetsError",
+		isTradeOrderPlacing: flow.state?.type === "trade:orderPlacing",
+		isTradeOrderPlaced: flow.state?.type === "trade:orderPlaced",
+		isTradeOrderPolling: flow.state?.type === "trade:orderPolling",
+		isTradeOrderFilled: flow.state?.type === "trade:orderFilled",
+		isTradeOrderError: flow.state?.type === "trade:orderError",
+		isTrading:
+			(flow.state?.type?.startsWith("trade:") &&
+				!["trade:assetsReady", "trade:assetsError", "trade:orderFilled", "trade:orderError"].includes(flow.state?.type || "")) ||
+			false,
 
 		// === Quote State ===
 		isQuoteLoading: flow.state?.type === "quote:requesting",
@@ -328,6 +365,10 @@ export function useBluvoFlow(options: UseBluvoFlowOptions) {
 		// Data
 		exchanges: flow.context?.exchanges || exchanges,
 		walletBalances: flow.context?.walletBalances || [],
+		tradableAssets: flow.context?.tradableAssets,
+		tradeOrder: flow.context?.tradeOrder,
+		lastTradeOrderStatus: flow.context?.lastTradeOrderStatus,
+		lastTradeRequest: flow.context?.lastTradeRequest,
 		quote: flow.context?.quote,
 		withdrawal: flow.context?.withdrawal,
 		valid2FAMethods: flow.context?.errorDetails?.valid2FAMethods,

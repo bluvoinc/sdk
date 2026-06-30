@@ -74,7 +74,18 @@ export interface WithdrawalFlowOptions {
 		height?: number;
 		left?: number;
 		top?: number;
+		/** Inject the built-in spinner while fetching the URL. Default true. Set
+		 * false when the caller renders its own loader into preOpenedWindow. */
+		showLoadingScreen?: boolean;
 	};
+	/**
+	 * A popup the caller already opened synchronously inside the user gesture.
+	 * Safari/iOS block window.open() once the gesture's activation is gone (i.e.
+	 * after the awaits this method runs before opening), so a browser caller
+	 * should open about:blank on click and pass it here; the SDK navigates it
+	 * instead of opening its own. Only needed for the OAuth (fresh-connect) path.
+	 */
+	preOpenedWindow?: Window;
 }
 
 export interface ResumeWithdrawalFlowOptions {
@@ -279,11 +290,23 @@ export class BluvoFlowClient {
 	}
 
 	async startWithdrawalFlow(flowOptions: WithdrawalFlowOptions) {
+		// A caller-opened popup (preOpenedWindow) is only for the OAuth path. On
+		// the resume / QR paths below we don't use it, so close it to avoid a
+		// stray blank window.
+		const closePreOpenedWindow = () => {
+			try {
+				flowOptions.preOpenedWindow?.close();
+			} catch {
+				// Suppress close errors
+			}
+		};
+
 		// Check if wallet already exists
 		const { data, error, success } = await this.options.getWalletByIdFn(flowOptions.walletId);
 
 		if (success && data?.exchange) {
 			// Wallet exists, redirect to resumeWithdrawalFlow
+			closePreOpenedWindow();
 			return this.resumeWithdrawalFlow({
 				exchange: data.exchange,
 				walletId: flowOptions.walletId,
@@ -296,6 +319,7 @@ export class BluvoFlowClient {
 
 		// Check if this exchange uses QR code authentication
 		if (QR_CODE_EXCHANGES.includes(flowOptions.exchange.toLowerCase())) {
+			closePreOpenedWindow();
 			return this.startQRCodeFlow(flowOptions);
 		}
 
@@ -401,6 +425,8 @@ export class BluvoFlowClient {
 				},
 			},
 			flowOptions.popupOptions,
+			undefined,
+			flowOptions.preOpenedWindow,
 		);
 
 		this.flowMachine.send({ type: "OAUTH_WINDOW_OPENED" });

@@ -199,6 +199,42 @@ describe('startWithdrawalFlow - Browser Tests', () => {
             }
         });
 
+        it('navigates a caller-supplied preOpenedWindow without opening its own, and suppresses the built-in loader when showLoadingScreen is false', async () => {
+            const preOpened = {
+                closed: false,
+                close: vi.fn(),
+                focus: vi.fn(),
+                location: { href: '' } as Location,
+                document: { open: vi.fn(), write: vi.fn(), close: vi.fn() },
+            } as unknown as Window;
+
+            const client = new BluvoFlowClient({
+                pingWalletByIdFn: vi.fn(),
+                orgId: 'test-org',
+                projectId: 'test-project',
+                listExchangesFn: vi.fn().mockResolvedValue([]),
+                getWalletByIdFn: vi.fn().mockResolvedValue({ data: null, error: null, success: false }),
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
+                executeWithdrawalFn: vi.fn().mockResolvedValue({id: 'withdrawal-123'}),
+                mkUUIDFn: () => 'test-uuid-123'
+            });
+
+            await client.startWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-abc',
+                preOpenedWindow: preOpened,
+                popupOptions: { showLoadingScreen: false },
+            });
+
+            // The SDK used the caller's window — it never opened its own.
+            expect(mockWindowOpen).not.toHaveBeenCalled();
+            // It navigated that window to the real OAuth URL.
+            expect((preOpened as Window).location.href).toContain('/oauth2/authorize');
+            // The built-in loader was suppressed (caller renders its own).
+            expect(preOpened.document.write).not.toHaveBeenCalled();
+        });
+
         it('should transition to oauth:waiting state when window opens', async () => {
             const client = new BluvoFlowClient({
                 pingWalletByIdFn(walletId: string): Promise<any> {

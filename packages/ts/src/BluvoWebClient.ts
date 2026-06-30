@@ -168,12 +168,16 @@ export class BluvoWebClient {
 				height?: number;
 				left?: number;
 				top?: number;
+				/** Inject the built-in spinner while fetching the URL. Default true.
+				 * Set false when the caller renders its own loader (e.g. into a
+				 * preOpenedWindow) so the SDK doesn't overwrite it. */
+				showLoadingScreen?: boolean;
 			},
 			windowRef?: Window | undefined,
+			preOpenedWindow?: Window | undefined,
 		) {
-
-
-			// Now fetch the OAuth URL asynchronously
+			// Fetch the OAuth URL first (original ordering — identical behavior
+			// for callers that don't supply a preOpenedWindow).
 			const {
 				url,
 				data,
@@ -184,11 +188,15 @@ export class BluvoWebClient {
 				idem: options.idem,
 			});
 
-			if(data?.isQRCode) {
-				// WE DONT NEED TO OPEN A WINDOW, WE JUST NEED TO FETCH GET THE URL AND LISTEN FOR QRCODE flow via websocket
+			if (data?.isQRCode) {
+				// QR flow needs no popup. Close a caller-supplied one if present.
+				try {
+					preOpenedWindow?.close();
+				} catch {
+					// Suppress close errors
+				}
 				return () => {};
 			}
-
 
 			if (typeof windowRef === "undefined") {
 				if (typeof window === "undefined") {
@@ -257,10 +265,12 @@ export class BluvoWebClient {
 </body>
 </html>`;
 
-			// Open window immediately with about:blank to prevent popup blocking
-			// Using about:blank is more reliable than data URLs across different browsers
+			// Prefer a window the caller opened synchronously in its click gesture.
+			// Our own window.open() below runs after async work (the getURL above
+			// and the caller's awaits), which Safari/iOS block once the gesture's
+			// activation is gone. about:blank is reliable across browsers.
 			const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},status=yes,scrollbars=yes,resizable=yes`;
-			const newWindow = windowRef.open('about:blank', windowTitle, windowFeatures);
+			const newWindow = preOpenedWindow ?? windowRef.open('about:blank', windowTitle, windowFeatures);
 
 			if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
 				console.error(
@@ -269,19 +279,23 @@ export class BluvoWebClient {
 				return () => {}; // Return empty cleanup function
 			}
 
-			// Write loading HTML immediately
-			try {
-				newWindow.document.open();
-				newWindow.document.write(loadingHTML);
-				newWindow.document.close();
-			} catch (e) {
-				console.error("Failed to write loading HTML to popup:", e);
+			// Inject the built-in spinner unless the caller opts out (e.g. it
+			// rendered its own loader into a preOpenedWindow and doesn't want it
+			// overwritten). Defaults on, so existing callers are unaffected.
+			if (popupOptions?.showLoadingScreen !== false) {
 				try {
-					newWindow.close();
-				} catch (closeError) {
-					// Suppress close errors
+					newWindow.document.open();
+					newWindow.document.write(loadingHTML);
+					newWindow.document.close();
+				} catch (e) {
+					console.error("Failed to write loading HTML to popup:", e);
+					try {
+						newWindow.close();
+					} catch (closeError) {
+						// Suppress close errors
+					}
+					return () => {};
 				}
-				return () => {};
 			}
 
 			newWindow.focus();

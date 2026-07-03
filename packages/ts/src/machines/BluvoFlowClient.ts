@@ -74,8 +74,9 @@ export interface WithdrawalFlowOptions {
 		height?: number;
 		left?: number;
 		top?: number;
-		/** Inject the built-in spinner while fetching the URL. Default true. Set
-		 * false when the caller renders its own loader into preOpenedWindow. */
+		/** Inject the built-in spinner while fetching the URL. Defaults to true,
+		 * or to false when preOpenedWindow is supplied — the caller usually
+		 * renders its own loader there and the SDK must not overwrite it. */
 		showLoadingScreen?: boolean;
 	};
 	/**
@@ -290,23 +291,34 @@ export class BluvoFlowClient {
 	}
 
 	async startWithdrawalFlow(flowOptions: WithdrawalFlowOptions) {
-		// A caller-opened popup (preOpenedWindow) is only for the OAuth path. On
-		// the resume / QR paths below we don't use it, so close it to avoid a
-		// stray blank window.
-		const closePreOpenedWindow = () => {
-			try {
-				flowOptions.preOpenedWindow?.close();
-			} catch {
-				// Suppress close errors
-			}
-		};
+		try {
+			return await this.startWithdrawalFlowInner(flowOptions);
+		} catch (e) {
+			// A throw anywhere below (e.g. getWalletByIdFn or listen rejecting)
+			// happens before openWindow takes ownership of a caller-supplied
+			// popup — close it so it doesn't linger as a stray blank window.
+			this.closePreOpenedWindow(flowOptions.preOpenedWindow);
+			throw e;
+		}
+	}
 
+	/** Close a caller-opened popup (preOpenedWindow) on paths that won't use
+	 * it — resume, QR, or errors — to avoid a stray blank window. */
+	private closePreOpenedWindow(win?: Window) {
+		try {
+			win?.close();
+		} catch {
+			// Suppress close errors
+		}
+	}
+
+	private async startWithdrawalFlowInner(flowOptions: WithdrawalFlowOptions) {
 		// Check if wallet already exists
 		const { data, error, success } = await this.options.getWalletByIdFn(flowOptions.walletId);
 
 		if (success && data?.exchange) {
 			// Wallet exists, redirect to resumeWithdrawalFlow
-			closePreOpenedWindow();
+			this.closePreOpenedWindow(flowOptions.preOpenedWindow);
 			return this.resumeWithdrawalFlow({
 				exchange: data.exchange,
 				walletId: flowOptions.walletId,
@@ -319,7 +331,7 @@ export class BluvoFlowClient {
 
 		// Check if this exchange uses QR code authentication
 		if (QR_CODE_EXCHANGES.includes(flowOptions.exchange.toLowerCase())) {
-			closePreOpenedWindow();
+			this.closePreOpenedWindow(flowOptions.preOpenedWindow);
 			return this.startQRCodeFlow(flowOptions);
 		}
 

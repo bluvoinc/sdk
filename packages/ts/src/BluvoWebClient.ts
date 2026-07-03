@@ -168,16 +168,19 @@ export class BluvoWebClient {
 				height?: number;
 				left?: number;
 				top?: number;
-				/** Inject the built-in spinner while fetching the URL. Default true.
-				 * Set false when the caller renders its own loader (e.g. into a
-				 * preOpenedWindow) so the SDK doesn't overwrite it. */
+				/** Inject the built-in spinner (and, on URL-fetch failure, the
+				 * built-in error page) into the popup. Defaults to true, or to
+				 * false when a preOpenedWindow is supplied — the caller usually
+				 * rendered its own loader there and the SDK must not overwrite it. */
 				showLoadingScreen?: boolean;
 			},
 			windowRef?: Window | undefined,
 			preOpenedWindow?: Window | undefined,
 		) {
 			// Fetch the OAuth URL first (original ordering — identical behavior
-			// for callers that don't supply a preOpenedWindow).
+			// for callers that don't supply a preOpenedWindow). Once passed in,
+			// a preOpenedWindow is owned by this method: close it if the fetch
+			// throws so the caller isn't left with a stray popup.
 			const {
 				url,
 				data,
@@ -186,6 +189,13 @@ export class BluvoWebClient {
 			} = await this.getURL(exchange, {
 				walletId: options.walletId,
 				idem: options.idem,
+			}).catch((e) => {
+				try {
+					preOpenedWindow?.close();
+				} catch {
+					// Suppress close errors
+				}
+				throw e;
 			});
 
 			if (data?.isQRCode) {
@@ -279,10 +289,12 @@ export class BluvoWebClient {
 				return () => {}; // Return empty cleanup function
 			}
 
-			// Inject the built-in spinner unless the caller opts out (e.g. it
-			// rendered its own loader into a preOpenedWindow and doesn't want it
-			// overwritten). Defaults on, so existing callers are unaffected.
-			if (popupOptions?.showLoadingScreen !== false) {
+			// Inject the built-in spinner unless the caller opts out. Defaults to
+			// on for SDK-opened popups (existing behavior) and off when the caller
+			// supplied a preOpenedWindow — it usually rendered its own loader
+			// there, which document.write would wipe.
+			const showLoadingScreen = popupOptions?.showLoadingScreen ?? !preOpenedWindow;
+			if (showLoadingScreen) {
 				try {
 					newWindow.document.open();
 					newWindow.document.write(loadingHTML);
@@ -385,13 +397,24 @@ export class BluvoWebClient {
 </body>
 </html>`;
 
-				try {
-					newWindow.document.open();
-					newWindow.document.write(errorHTML);
-					newWindow.document.close();
-				} catch (e) {
-					// If we can't write to the document (cross-origin issues), just close it
-					console.warn("Could not display error in popup window:", e);
+				if (showLoadingScreen) {
+					try {
+						newWindow.document.open();
+						newWindow.document.write(errorHTML);
+						newWindow.document.close();
+					} catch (e) {
+						// If we can't write to the document (cross-origin issues), just close it
+						console.warn("Could not display error in popup window:", e);
+						try {
+							newWindow.close();
+						} catch (closeError) {
+							// Suppress close errors
+						}
+					}
+				} else {
+					// The caller owns this window's UI: don't overwrite it with the
+					// SDK error page — close the popup so the failure doesn't leave
+					// the caller's loader spinning forever.
 					try {
 						newWindow.close();
 					} catch (closeError) {

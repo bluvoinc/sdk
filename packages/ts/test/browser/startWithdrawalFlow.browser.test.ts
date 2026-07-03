@@ -235,6 +235,70 @@ describe('startWithdrawalFlow - Browser Tests', () => {
             expect(preOpened.document.write).not.toHaveBeenCalled();
         });
 
+        it('suppresses the built-in loader by default when a preOpenedWindow is supplied (no explicit showLoadingScreen)', async () => {
+            const preOpened = {
+                closed: false,
+                close: vi.fn(),
+                focus: vi.fn(),
+                location: { href: '' } as Location,
+                document: { open: vi.fn(), write: vi.fn(), close: vi.fn() },
+            } as unknown as Window;
+
+            const client = new BluvoFlowClient({
+                pingWalletByIdFn: vi.fn(),
+                orgId: 'test-org',
+                projectId: 'test-project',
+                listExchangesFn: vi.fn().mockResolvedValue([]),
+                getWalletByIdFn: vi.fn().mockResolvedValue({ data: null, error: null, success: false }),
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
+                executeWithdrawalFn: vi.fn().mockResolvedValue({id: 'withdrawal-123'}),
+                mkUUIDFn: () => 'test-uuid-123'
+            });
+
+            await client.startWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-abc',
+                preOpenedWindow: preOpened,
+            });
+
+            // The caller's window was navigated, and its content (usually a
+            // caller-rendered loader) was not overwritten by the SDK spinner.
+            expect((preOpened as Window).location.href).toContain('/oauth2/authorize');
+            expect(preOpened.document.write).not.toHaveBeenCalled();
+        });
+
+        it('closes a caller-supplied preOpenedWindow when the flow throws before the popup is used', async () => {
+            const preOpened = {
+                closed: false,
+                close: vi.fn(),
+                focus: vi.fn(),
+                location: { href: '' } as Location,
+                document: { open: vi.fn(), write: vi.fn(), close: vi.fn() },
+            } as unknown as Window;
+
+            const client = new BluvoFlowClient({
+                pingWalletByIdFn: vi.fn(),
+                orgId: 'test-org',
+                projectId: 'test-project',
+                listExchangesFn: vi.fn().mockResolvedValue([]),
+                getWalletByIdFn: vi.fn().mockRejectedValue(new Error('network down')),
+                fetchWithdrawableBalanceFn: vi.fn().mockResolvedValue(mockBalanceResponse),
+                requestQuotationFn: vi.fn().mockResolvedValue(mockQuoteResponse),
+                executeWithdrawalFn: vi.fn().mockResolvedValue({id: 'withdrawal-123'}),
+                mkUUIDFn: () => 'test-uuid-123'
+            });
+
+            await expect(client.startWithdrawalFlow({
+                exchange: 'coinbase',
+                walletId: 'wallet-abc',
+                preOpenedWindow: preOpened,
+            })).rejects.toThrow('network down');
+
+            // The error propagates, but the caller's popup is not stranded.
+            expect(preOpened.close).toHaveBeenCalled();
+        });
+
         it('should transition to oauth:waiting state when window opens', async () => {
             const client = new BluvoFlowClient({
                 pingWalletByIdFn(walletId: string): Promise<any> {

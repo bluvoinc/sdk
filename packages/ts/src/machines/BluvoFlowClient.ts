@@ -2,7 +2,7 @@ import type {
     Oauth2ExchangeslistexchangesResponses, TypeEnum2,
 } from "../../generated";
 import type { BluvoClient } from "../BluvoClient";
-import { BluvoWebClient } from "../BluvoWebClient";
+import { BluvoWebClient, type PopupOptions } from "../BluvoWebClient";
 import {
 	type BluvoError,
 	ERROR_CODES,
@@ -68,17 +68,7 @@ export interface BluvoFlowClientOptions {
 export interface WithdrawalFlowOptions {
 	exchange: string;
 	walletId: string;
-	popupOptions?: {
-		title?: string;
-		width?: number;
-		height?: number;
-		left?: number;
-		top?: number;
-		/** Inject the built-in spinner while fetching the URL. Defaults to true,
-		 * or to false when preOpenedWindow is supplied — the caller usually
-		 * renders its own loader there and the SDK must not overwrite it. */
-		showLoadingScreen?: boolean;
-	};
+	popupOptions?: PopupOptions;
 	/**
 	 * A popup the caller already opened synchronously inside the user gesture.
 	 * Safari/iOS block window.open() once the gesture's activation is gone (i.e.
@@ -436,9 +426,10 @@ export class BluvoFlowClient {
 					// }
 				},
 			},
-			flowOptions.popupOptions,
-			undefined,
-			flowOptions.preOpenedWindow,
+			{
+				...flowOptions.popupOptions,
+				preOpenedWindow: flowOptions.preOpenedWindow,
+			},
 		);
 
 		this.flowMachine.send({ type: "OAUTH_WINDOW_OPENED" });

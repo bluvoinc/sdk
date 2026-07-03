@@ -32,6 +32,19 @@ export type QRCodeOptions = {
 	onQRCodeError?: (error: Error) => void;
 };
 
+export type PopupOptions = {
+	title?: string;
+	width?: number;
+	height?: number;
+	left?: number;
+	top?: number;
+	/** Inject the built-in spinner (and, on URL-fetch failure, the
+	 * built-in error page) into the popup. Defaults to true, or to
+	 * false when a preOpenedWindow is supplied — the caller usually
+	 * rendered its own loader there and the SDK must not overwrite it. */
+	showLoadingScreen?: boolean;
+};
+
 /**
  * A web-specific client for Bluvo SDK that provides browser-oriented functionality
  * for cryptocurrency exchange integrations and OAuth2 authentication flows.
@@ -162,21 +175,20 @@ export class BluvoWebClient {
 				// onComplete?: (walletId: string) => void;
 				// onError?: (error: any) => void;
 			},
-			popupOptions?: {
-				title?: string;
-				width?: number;
-				height?: number;
-				left?: number;
-				top?: number;
-				/** Inject the built-in spinner (and, on URL-fetch failure, the
-				 * built-in error page) into the popup. Defaults to true, or to
-				 * false when a preOpenedWindow is supplied — the caller usually
-				 * rendered its own loader there and the SDK must not overwrite it. */
-				showLoadingScreen?: boolean;
+			popupOptions?: PopupOptions & {
+				/**
+				 * A popup the caller already opened synchronously inside the user
+				 * gesture. Safari/iOS block window.open() once the gesture's
+				 * activation is gone (i.e. after any await), so a browser caller
+				 * should open about:blank on click and pass it here; the SDK
+				 * navigates it instead of opening its own.
+				 */
+				preOpenedWindow?: Window;
 			},
 			windowRef?: Window | undefined,
-			preOpenedWindow?: Window | undefined,
 		) {
+			const preOpenedWindow = popupOptions?.preOpenedWindow;
+
 			// Fetch the OAuth URL first (original ordering — identical behavior
 			// for callers that don't supply a preOpenedWindow). Once passed in,
 			// a preOpenedWindow is owned by this method: close it if the fetch
@@ -242,8 +254,27 @@ export class BluvoWebClient {
 				top = screenTop + (screenHeight - windowHeight) / 2;
 			}
 
-			// Create loading HTML to show while fetching OAuth URL
-			const loadingHTML = `<!DOCTYPE html>
+			// Prefer a window the caller opened synchronously in its click gesture.
+			// Our own window.open() below runs after async work (the getURL above
+			// and the caller's awaits), which Safari/iOS block once the gesture's
+			// activation is gone. about:blank is reliable across browsers.
+			const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},status=yes,scrollbars=yes,resizable=yes`;
+			const newWindow = preOpenedWindow ?? windowRef.open('about:blank', windowTitle, windowFeatures);
+
+			if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
+				console.error(
+					"Failed to open OAuth2 window. Please allow pop-ups for this site.",
+				);
+				return () => {}; // Return empty cleanup function
+			}
+
+			// Inject the built-in spinner unless the caller opts out. Defaults to
+			// on for SDK-opened popups (existing behavior) and off when the caller
+			// supplied a preOpenedWindow — it usually rendered its own loader
+			// there, which document.write would wipe.
+			const showLoadingScreen = popupOptions?.showLoadingScreen ?? !preOpenedWindow;
+			if (showLoadingScreen) {
+				const loadingHTML = `<!DOCTYPE html>
 <html>
 <head>
     <title>${windowTitle}</title>
@@ -275,26 +306,6 @@ export class BluvoWebClient {
 </body>
 </html>`;
 
-			// Prefer a window the caller opened synchronously in its click gesture.
-			// Our own window.open() below runs after async work (the getURL above
-			// and the caller's awaits), which Safari/iOS block once the gesture's
-			// activation is gone. about:blank is reliable across browsers.
-			const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},status=yes,scrollbars=yes,resizable=yes`;
-			const newWindow = preOpenedWindow ?? windowRef.open('about:blank', windowTitle, windowFeatures);
-
-			if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
-				console.error(
-					"Failed to open OAuth2 window. Please allow pop-ups for this site.",
-				);
-				return () => {}; // Return empty cleanup function
-			}
-
-			// Inject the built-in spinner unless the caller opts out. Defaults to
-			// on for SDK-opened popups (existing behavior) and off when the caller
-			// supplied a preOpenedWindow — it usually rendered its own loader
-			// there, which document.write would wipe.
-			const showLoadingScreen = popupOptions?.showLoadingScreen ?? !preOpenedWindow;
-			if (showLoadingScreen) {
 				try {
 					newWindow.document.open();
 					newWindow.document.write(loadingHTML);
@@ -321,8 +332,9 @@ export class BluvoWebClient {
 			if (!success || !url) {
 				console.error("Failed to generate OAuth2 URL:", error);
 
-				// Show error state in the popup window
-				const errorHTML = `<!DOCTYPE html>
+				if (showLoadingScreen) {
+					// Show error state in the popup window
+					const errorHTML = `<!DOCTYPE html>
 <html>
 <head>
     <title>${windowTitle} - Error</title>
@@ -397,7 +409,6 @@ export class BluvoWebClient {
 </body>
 </html>`;
 
-				if (showLoadingScreen) {
 					try {
 						newWindow.document.open();
 						newWindow.document.write(errorHTML);

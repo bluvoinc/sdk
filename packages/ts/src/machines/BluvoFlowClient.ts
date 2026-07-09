@@ -32,6 +32,36 @@ import type { QRCodeAuthWorkflowMessageBody } from "../WorkflowTypes";
 // Exchanges that use QR code authentication instead of OAuth popup
 const QR_CODE_EXCHANGES = ['binance-web', 'bybit-web'];
 
+// Exchanges whose withdrawal API validates all 2FA factors in a single call
+// (no incremental per-factor verification). For these, every required code
+// must be collected client-side before re-executing the withdrawal.
+const BATCH_2FA_VALIDATION_EXCHANGES = new Set(['kucoin']);
+
+const CODE_STEP_TO_KEY = {
+	GOOGLE: 'twofa',
+	EMAIL: 'emailCode',
+	SMS: 'smsCode',
+} as const;
+
+type CodeStepType = keyof typeof CODE_STEP_TO_KEY;
+
+/**
+ * Required code-based steps (GOOGLE/EMAIL/SMS) that are neither verified via
+ * mfa nor covered by a collected code yet. FACE/ROAMING_FIDO are excluded:
+ * they are verified by polling, not by submitting a code.
+ */
+function getMissingCodeSteps(
+	multiStep2FA: NonNullable<FlowState['context']['multiStep2FA']>,
+	collectedCodes: { twofa?: string; emailCode?: string; smsCode?: string },
+): CodeStepType[] {
+	return multiStep2FA.steps
+		.filter((step): step is typeof step & { type: CodeStepType } =>
+			step.required && step.type in CODE_STEP_TO_KEY)
+		.filter((step) => multiStep2FA.mfa?.verified?.[step.type] !== true)
+		.filter((step) => !collectedCodes[CODE_STEP_TO_KEY[step.type]])
+		.map((step) => step.type);
+}
+
 // Default QR code timeout in milliseconds (5 minutes)
 const DEFAULT_QRCODE_TIMEOUT_MS = 5 * 60 * 1000;
 
@@ -1990,13 +2020,6 @@ export class BluvoFlowClient {
 			};
 		}
 
-		// Send action to store the code and transition to processing
-		this.flowMachine.send({
-			type: "SUBMIT_2FA_MULTI_STEP",
-			stepType,
-			code,
-		});
-
 		// Build the params with all collected codes plus the new one
 		const multiStep2FA = state.context.multiStep2FA;
 		const collectedCodes = { ...multiStep2FA.collectedCodes };
@@ -2005,6 +2028,31 @@ export class BluvoFlowClient {
 		if (stepType === 'GOOGLE') collectedCodes.twofa = code;
 		else if (stepType === 'EMAIL') collectedCodes.emailCode = code;
 		else if (stepType === 'SMS') collectedCodes.smsCode = code;
+
+		// Batch-validation exchanges (KuCoin) verify ALL factors in a single
+		// call: re-executing with a partial set kills the challenge server-side.
+		// Collect the code and wait until every required code step has one.
+		if (BATCH_2FA_VALIDATION_EXCHANGES.has(state.context.exchange ?? '') && multiStep2FA.relation === 'AND') {
+			const missingSteps = getMissingCodeSteps(multiStep2FA, collectedCodes);
+			if (missingSteps.length > 0) {
+				this.flowMachine.send({
+					type: "COLLECT_2FA_MULTI_STEP",
+					stepType,
+					code,
+				});
+				return {
+					success: true,
+					result: { collected: true, awaitingSteps: missingSteps },
+				};
+			}
+		}
+
+		// Send action to store the code and transition to processing
+		this.flowMachine.send({
+			type: "SUBMIT_2FA_MULTI_STEP",
+			stepType,
+			code,
+		});
 
 		// Re-execute withdrawal with bizNo + all collected codes
 		const quote = state.context.quote;

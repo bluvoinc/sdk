@@ -358,6 +358,11 @@ export type FlowActionType =
     stepType: 'GOOGLE' | 'EMAIL' | 'SMS';
     code: string;
 }
+    | {
+    type: "COLLECT_2FA_MULTI_STEP";
+    stepType: 'GOOGLE' | 'EMAIL' | 'SMS';
+    code: string;
+}
     | { type: "POLL_FACE_VERIFICATION" }
     | { type: "POLL_ROAMING_FIDO_VERIFICATION" }
     | {

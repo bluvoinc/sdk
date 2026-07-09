@@ -778,6 +778,29 @@ function handleWithdrawalActions(
       }
       break;
 
+    case 'COLLECT_2FA_MULTI_STEP':
+      // Store the code WITHOUT re-executing (batch-validation exchanges like
+      // KuCoin need every factor in a single call). Mark the step as done so
+      // the UI advances to the next one.
+      if (state.type === 'withdraw:error2FAMultiStep' && state.context.multiStep2FA) {
+        const codeKey = action.stepType === 'GOOGLE' ? 'twofa'
+          : action.stepType === 'EMAIL' ? 'emailCode'
+          : 'smsCode';
+        return createTransition('withdraw:error2FAMultiStep', state.context, {
+          multiStep2FA: {
+            ...state.context.multiStep2FA,
+            collectedCodes: {
+              ...state.context.multiStep2FA.collectedCodes,
+              [codeKey]: action.code,
+            },
+            steps: state.context.multiStep2FA.steps.map((step) =>
+              step.type === action.stepType ? { ...step, status: 'success' as const } : step,
+            ),
+          },
+        });
+      }
+      break;
+
     case 'POLL_FACE_VERIFICATION':
       // Transition to processing for re-invocation (server checks FACE completion)
       if (state.type === 'withdraw:error2FAMultiStep') {

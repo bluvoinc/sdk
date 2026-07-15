@@ -1,5 +1,47 @@
 # @bluvo/sdk-ts
 
+## 5.1.0-beta.0
+
+### Minor Changes
+
+- 3452b96: Add beta support for Kraken-backed convert/trade flows before withdrawal.
+
+  This release exposes the new Trading API surface through the TypeScript SDK, the flow client state machine, and the React hook wrapper. Integrators can now build an auto-swap step that converts an available wallet asset into the asset they intend to withdraw, then continue through the existing quote and withdrawal flow once the order is filled.
+
+  The flow is:
+
+  1. Load wallet balances with the existing withdrawal balance flow.
+  2. Call `loadTradableAssets()` to invoke `GET /v0/wallet/trade/tradable-assets` for the active wallet. The response includes normalized assets, tradable routes, order types, status, and trading rules from refreshed exchange metadata.
+  3. Pick a route such as `kraken:spot:DOGE/USDC` and call `placeTradeOrder()` to invoke `POST /v0/wallet/trade/order`. The order request includes `routeId`, `side`, `type`, `volume`, and optional `price`. The API places one exchange order and returns the normalized `orderId` plus Kraken `txid`.
+  4. Call `pollTradeOrder(orderId)` to invoke `GET /v0/wallet/trade/order/{orderId}` until the normalized status becomes `filled`, `canceled`, or `expired`.
+  5. When the order is filled, the flow client refreshes the wallet balances by default, so the newly acquired asset is available for the normal `requestQuote()` and `executeWithdrawal()` steps.
+
+  The state machine now tracks dedicated trading states: `trade:assetsLoading`, `trade:assetsReady`, `trade:orderPlacing`, `trade:orderPlaced`, `trade:orderPolling`, `trade:orderFilled`, and `trade:orderError`. It also stores `tradableAssets`, the placed `tradeOrder`, the latest polled order status, and the last trade request in context.
+
+  React consumers using `useBluvoFlow()` get the same methods plus convenience flags such as `isTradableAssetsReady`, `isTradeOrderPlacing`, `isTradeOrderPolling`, `isTradeOrderFilled`, `isTradeOrderError`, and `isTrading`.
+
+- 3555d6c: Document the KuCoin integration in the agent skill docs (`packages/ts/skill/` and `packages/react/skill/`), with a focus on the withdrawal step.
+
+  KuCoin's broker withdrawal API validates every 2FA factor in a single call — there is no incremental per-factor verification. Re-executing the withdrawal with a partial factor set (e.g. only the Google code when EMAIL + GOOGLE are required with relation `AND`) makes KuCoin answer `200000` with no ids and the challenge dies server-side. The SDK therefore batch-collects codes for exchanges in `BATCH_2FA_VALIDATION_EXCHANGES` (currently `['kucoin']`), and the skill docs previously did not explain this: an agent reading only the docs would conclude that every `submit2FAMultiStep()` call triggers an immediate dry-run round-trip, which is exactly backwards for KuCoin.
+
+  What the docs now cover:
+
+  - **`@bluvo/sdk-ts` skill** (`skill/SKILL.md`): the `submit2FAMultiStep()` action doc now distinguishes incremental exchanges (binance-web, bybit-web) from batch-validation exchanges (KuCoin), and a new Gotcha explains the `COLLECT_2FA_MULTI_STEP` action — codes are stored locally (`GOOGLE` → `twofa`, `EMAIL` → `emailCode`, `SMS` → `smsCode`), the step is marked `success` locally so the UI advances, and the withdrawal endpoint is called exactly once with `bizNo` + all collected codes after the last required code arrives. Steps already `mfa.verified` count as satisfied; FACE/ROAMING_FIDO are excluded (poll-verified); relation `OR` keeps immediate re-execution.
+  - **`@bluvo/sdk-ts` skill reference** (`skill/references/state-transitions.md`): new `COLLECT_2FA_MULTI_STEP` transition-table row and a dedicated "Multi-step 2FA (KuCoin — batch factor validation)" sequence diagram showing the single `executeWithdrawal` call.
+  - **`@bluvo/react` skill** (`skill/SKILL.md`): new Gotcha with the UI implications — do not render a locally-collected KuCoin step as "backend verified" (an invalid code only surfaces after the final batch call as `WITHDRAWAL_2FA_INVALID`), and do not expect `isWithdrawProcessing`/`mfaVerified` updates between KuCoin code submissions.
+  - **`@bluvo/react` skill reference** (`skill/references/multistep-2fa.md`): new "Exchange Verification Models" section with an incremental-vs-batch comparison table, a KuCoin-specific state machine lifecycle diagram, the `{ collected: true, awaitingSteps }` return shape, and a UI labeling caveat ("Code entered" vs "Verified"). The existing lifecycle and dryRun sections are now explicitly scoped to incremental exchanges.
+  - **`AGENTS.md`**: new "Exchange-Specific Behavior" architecture section covering `QR_CODE_EXCHANGES` and `BATCH_2FA_VALIDATION_EXCHANGES`, pointing at the spec test (`packages/ts/test/machines/BluvoFlowClient.submit2FAMultiStep.test.ts`) and requiring skill docs to be kept in sync with exchange-specific behavior changes.
+
+  No runtime code changes — documentation only.
+
+### Patch Changes
+
+- 0b4203e: Collect all required 2FA codes before re-executing KuCoin withdrawals.
+
+  KuCoin's broker withdrawal API validates every 2FA factor in a single call: re-executing with a partial factor set (e.g. only the Google code when email + Google are both required with relation AND) makes KuCoin answer `200000` with no ids and the challenge dies, which previously surfaced as a fatal `KuCoin withdrawal failed: unexpected response shape` error.
+
+  `submit2FAMultiStep` now stores each code locally (new `COLLECT_2FA_MULTI_STEP` action, which marks the step done so the UI advances) and only calls the withdrawal endpoint once every required code-based step has a collected code. Exchanges with incremental server-side verification (binance-web, bybit-web) keep the existing per-step re-execution behavior.
+
 ## 5.0.0
 
 ### Minor Changes

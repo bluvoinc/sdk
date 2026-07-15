@@ -1,6 +1,6 @@
 ---
 name: bluvo-sdk-ts
-description: "Use when implementing cryptocurrency exchange withdrawal flows in TypeScript without React, including optional exchange auto-swap before withdrawal. Provides a state machine that orchestrates OAuth/QR-code wallet connection, balance loading, tradable asset discovery, trade order placement and polling, quote generation, withdrawal execution with 2FA/SMS/KYC challenges, and real-time WebSocket updates. Choose this over the React skill when building server-side integrations, non-React frontends, or custom UI frameworks."
+description: "Use when implementing cryptocurrency exchange withdrawal flows in TypeScript without React, including optional exchange auto-swap before withdrawal. Provides a state machine that orchestrates OAuth/QR-code wallet connection, balance loading, tradable asset discovery, trade order placement and polling, quote generation, withdrawal execution with 2FA/SMS/KYC challenges (including exchange-specific multi-step 2FA for Binance, KuCoin, Coinbase, Kraken), and real-time WebSocket updates. Choose this over the React skill when building server-side integrations, non-React frontends, or custom UI frameworks."
 license: MIT
 compatibility: "TypeScript 4.7+. Node.js 18+ for server-side use. Browser for client-side OAuth/WebSocket flows."
 metadata:
@@ -198,7 +198,7 @@ Use this sequence when the wallet has a source asset but the withdrawal needs a 
 **Valid from**: `withdraw:error2FA`. Re-executes withdrawal with TOTP code.
 
 ### submit2FAMultiStep(stepType, code)
-**Valid from**: `withdraw:error2FAMultiStep`. Submits code for one step ('GOOGLE', 'EMAIL', or 'SMS'). Re-invokes withdrawal with all collected codes.
+**Valid from**: `withdraw:error2FAMultiStep`. Submits code for one step ('GOOGLE', 'EMAIL', or 'SMS'). For incremental-verification exchanges (binance-web, bybit-web) it re-invokes the withdrawal immediately with all collected codes. For **batch-validation exchanges (KuCoin)** with `relation: 'AND'`, it only *collects* the code (via the `COLLECT_2FA_MULTI_STEP` action — no API call, state stays `withdraw:error2FAMultiStep`, returns `{ success: true, result: { collected: true, awaitingSteps } }`) until every required code-based step has a code; the final code triggers exactly one withdrawal execution with `bizNo` + all collected codes. See Gotcha 13.
 
 ### pollFaceVerification()
 **Valid from**: `withdraw:error2FAMultiStep`. Transitions to processing to check FACE step completion.
@@ -283,6 +283,8 @@ if (code === ERROR_CODES.WITHDRAWAL_2FA_REQUIRED_TOTP) {
 11. **`placeTradeOrder()` is a one-shot action.** It calls the backend Place Order API once and returns the exchange order id/txid. Persist or hold that id in UI state before polling so refreshes do not accidentally place a second order.
 
 12. **Filled trade polling refreshes balances by default.** `pollTradeOrder()` calls `loadWallet()` after a filled order unless `refreshWalletOnFilled: false` is passed. Because of that, the visible final state is normally `wallet:ready`, with `lastTradeOrderStatus.status === "filled"` still available in context.
+
+13. **KuCoin validates all 2FA factors in ONE call (batch validation).** KuCoin's broker withdrawal API has no incremental per-factor verification — re-executing with a partial factor set (e.g. only the Google code when EMAIL + GOOGLE are required with `relation: 'AND'`) makes KuCoin answer `200000` with no ids and the challenge dies server-side (historically a fatal `KuCoin withdrawal failed: unexpected response shape`). The SDK therefore treats exchanges in `BATCH_2FA_VALIDATION_EXCHANGES` (currently `['kucoin']`) specially when `relation === 'AND'`: each `submit2FAMultiStep()` call stores the code in `collectedCodes` (`GOOGLE` → `twofa`, `EMAIL` → `emailCode`, `SMS` → `smsCode`) and marks that step `status: 'success'` **locally** so the UI advances — the withdrawal endpoint is NOT called and codes are NOT validated yet. Only the final missing code triggers a single execution with `bizNo` + all collected codes. Steps already `mfa.verified === true` count as satisfied; FACE/ROAMING_FIDO are excluded (poll-verified). Consequences: (a) for KuCoin a locally-`success` step does not mean the backend verified that code — an invalid code only surfaces after the final batch call; (b) with `relation: 'OR'` KuCoin behaves like other exchanges (one code → immediate re-execution).
 
 ## References
 

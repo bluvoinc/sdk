@@ -149,6 +149,17 @@ The SDK uses a nested state machine architecture for managing withdrawal flows:
 
 See `packages/ts/FLOW_MACHINE_README.md` for detailed documentation on extending the state machines.
 
+### Exchange-Specific Behavior
+
+Most exchange differences are handled by the backend, but two client-side lists in `packages/ts/src/machines/BluvoFlowClient.ts` change how the flow machine behaves per exchange:
+
+- **`QR_CODE_EXCHANGES = ['binance-web', 'bybit-web']`** — these exchanges authenticate via QR code instead of an OAuth popup. `startWithdrawalFlow()` auto-detects them and routes to the QR code flow.
+- **`BATCH_2FA_VALIDATION_EXCHANGES = new Set(['kucoin'])`** — KuCoin's broker withdrawal API validates **all** 2FA factors in a single call; there is no incremental per-factor verification. Re-executing the withdrawal with a partial factor set (e.g. only the Google code when EMAIL + GOOGLE are both required with relation `AND`) makes KuCoin answer `200000` with no ids, which kills the challenge server-side (historically surfaced as a fatal `KuCoin withdrawal failed: unexpected response shape`).
+
+**KuCoin multi-step 2FA (withdrawal step):** when the exchange is in `BATCH_2FA_VALIDATION_EXCHANGES` and `multiStep2FA.relation === 'AND'`, `submit2FAMultiStep(stepType, code)` does NOT re-execute the withdrawal per code. Instead it dispatches the `COLLECT_2FA_MULTI_STEP` action (see `flowStateHandlers.ts`), which stores the code in `multiStep2FA.collectedCodes` (`GOOGLE` → `twofa`, `EMAIL` → `emailCode`, `SMS` → `smsCode`), marks that step's `status` as `'success'` locally so the UI advances, and stays in `withdraw:error2FAMultiStep`. Only when every required code-based step has a collected code (steps already `mfa.verified` count as satisfied; FACE/ROAMING_FIDO are excluded — they verify via polling) does the client call `executeWithdrawalFn` exactly once with `bizNo` + all collected codes. With relation `'OR'`, or for incremental-verification exchanges (binance-web, bybit-web), each submitted code still triggers an immediate re-execution. Behavior is specified in `packages/ts/test/machines/BluvoFlowClient.submit2FAMultiStep.test.ts`.
+
+When changing exchange-specific behavior, keep the published skill docs in sync: `packages/ts/skill/` (SKILL.md + references) and `packages/react/skill/` (SKILL.md + `references/multistep-2fa.md`).
+
 ### React Integration
 
 The `@bluvo/react` package provides three hooks:

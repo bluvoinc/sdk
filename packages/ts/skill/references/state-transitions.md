@@ -178,6 +178,7 @@ Active withdrawal states: `withdraw:processing`, `withdraw:error2FA`, `withdraw:
 | any withdrawal | `WITHDRAWAL_REQUIRES_KYC` | `withdraw:errorKYC` | Via withdrawal machine |
 | any withdrawal | `WITHDRAWAL_REQUIRES_2FA_MULTI_STEPS` | `withdraw:error2FAMultiStep` | Sets `multiStep2FA` context |
 | `withdraw:error2FAMultiStep` | `SUBMIT_2FA_MULTI_STEP` | `withdraw:processing` | Stores code in `collectedCodes` |
+| `withdraw:error2FAMultiStep` | `COLLECT_2FA_MULTI_STEP` | `withdraw:error2FAMultiStep` | Batch-validation exchanges (KuCoin, relation `AND`): stores code in `collectedCodes` and marks the step `status: 'success'` locally WITHOUT calling the withdrawal endpoint |
 | `withdraw:error2FAMultiStep` | `POLL_FACE_VERIFICATION` | `withdraw:processing` | — |
 | `withdraw:error2FAMultiStep` | `POLL_ROAMING_FIDO_VERIFICATION` | `withdraw:processing` | — |
 | any withdrawal | `WITHDRAWAL_2FA_INCOMPLETE` | `withdraw:error2FAMultiStep` | Updates steps and MFA verified state |
@@ -326,6 +327,32 @@ withdraw:processing
   ▼
 withdraw:completed
 ```
+
+### Multi-step 2FA (KuCoin — batch factor validation)
+
+KuCoin is in `BATCH_2FA_VALIDATION_EXCHANGES`: its withdrawal API validates ALL factors in one call, so with `relation: 'AND'` the client collects every required code before re-executing. Note there is only ONE withdrawal API call for all codes — a partial re-execution would kill the challenge server-side.
+
+```
+withdraw:processing
+  │ WITHDRAWAL_2FA_REQUIRED_MULTI_STEPS (e.g. EMAIL + GOOGLE, relation AND)
+  ▼
+withdraw:error2FAMultiStep
+  │ submit2FAMultiStep('EMAIL', code)
+  │ → COLLECT_2FA_MULTI_STEP (code stored, step marked success locally,
+  │   NO API call; returns { collected: true, awaitingSteps: ['GOOGLE'] })
+  ▼
+withdraw:error2FAMultiStep  (still — UI shows next step)
+  │ submit2FAMultiStep('GOOGLE', code)  ← last missing code
+  │ → SUBMIT_2FA_MULTI_STEP
+  ▼
+withdraw:processing
+  │ single executeWithdrawal call: { bizNo, emailCode, twofa }
+  │ WITHDRAWAL_SUCCESS + WITHDRAWAL_COMPLETED (via WebSocket)
+  ▼
+withdraw:completed
+```
+
+Steps already verified via `mfa.verified[type] === true` count as satisfied and are skipped. FACE / ROAMING_FIDO steps are excluded from code collection (they verify via polling). With `relation: 'OR'`, one code triggers immediate re-execution (same as incremental exchanges).
 
 ### Error Recovery
 

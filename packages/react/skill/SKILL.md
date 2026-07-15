@@ -1,6 +1,6 @@
 ---
 name: bluvo-react
-description: "Use when building cryptocurrency exchange withdrawal UIs in React or Next.js, including optional auto-swap before withdrawal. Provides hooks (useBluvoFlow, useFlowMachine, useWithdrawMachine, useWalletPreviews) that wrap the @bluvo/sdk-ts state machine. No context providers needed — just call the hook. Works with Next.js App Router (requires 'use client'). Choose this over the TS skill when building React applications."
+description: "Use when building cryptocurrency exchange withdrawal UIs in React or Next.js (Binance, Coinbase, Kraken, KuCoin), including optional auto-swap before withdrawal and multi-step 2FA challenge handling. Provides hooks (useBluvoFlow, useFlowMachine, useWithdrawMachine, useWalletPreviews) that wrap the @bluvo/sdk-ts state machine. No context providers needed — just call the hook. Works with Next.js App Router (requires 'use client'). Choose this over the TS skill when building React applications."
 license: MIT
 compatibility: "React 16.8+. Next.js 13+ App Router supported. Requires a @bluvo/sdk-ts version compatible with the installed @bluvo/react version."
 metadata:
@@ -126,6 +126,8 @@ if (flow.requires2FA) await flow.submit2FA(userCode);
 if (flow.requires2FAMultiStep) {
   await flow.submit2FAMultiStep('GOOGLE', userCode);  // code-based steps
   // FACE and ROAMING_FIDO steps are polled automatically by the component
+  // NOTE: on KuCoin with relation 'AND', each call only COLLECTS the code
+  // (no API call) until the last required code is submitted — see Gotcha 13
 }
 if (flow.isReadyToConfirm) await flow.confirmWithdrawal();
 
@@ -148,7 +150,7 @@ if (flow.isWithdrawalComplete) showSuccess(flow.withdrawal);
 
 ### Challenge States
 - `flow.requires2FA` — TOTP 2FA code needed
-- `flow.requires2FAMultiStep` — Multi-step 2FA needed (Binance Web)
+- `flow.requires2FAMultiStep` — Multi-step 2FA needed (Binance Web, KuCoin)
 - `flow.requiresSMS` — SMS code needed
 - `flow.requiresKYC` — KYC verification needed
 - `flow.isReadyToConfirm` — All 2FA steps verified, ready for final confirmation
@@ -224,6 +226,8 @@ Hooks are browser-only. They use `useState`, `useEffect`, WebSocket subscription
 
 12. **A filled trade refreshes wallet balances by default.** After `pollTradeOrder()` succeeds, read `flow.walletBalances` for the destination asset and `flow.lastTradeOrderStatus` for execution details.
 
+13. **KuCoin multi-step 2FA collects ALL codes before ONE execution.** KuCoin's withdrawal API validates every 2FA factor in a single call (no incremental verification). When the exchange is `kucoin` and `flow.multiStep2FARelation === 'AND'`, each `flow.submit2FAMultiStep(stepType, code)` call stores the code locally and marks that step `status: 'success'` so your step UI advances — but NO API call happens and the code is NOT yet validated (it returns `{ success: true, result: { collected: true, awaitingSteps } }`). The withdrawal endpoint is called exactly once, automatically, when the last required code-based step (GOOGLE/EMAIL/SMS) gets its code; steps with `mfaVerified[type] === true` count as already satisfied. UI implications: (a) do not render a locally-`success` KuCoin step as "backend verified" — an invalid code only surfaces after the final code is submitted (as `WITHDRAWAL_2FA_INVALID`); (b) do not expect `isWithdrawProcessing` or `mfaVerified` updates between KuCoin code submissions; (c) with relation `'OR'` and on incremental exchanges (binance-web, bybit-web), every submission re-executes immediately as usual. See `references/multistep-2fa.md` for the full exchange verification model.
+
 ## References
 
 - Read `references/hooks-complete.md` for the full signature of every exported hook including all ~80+ return fields from `useBluvoFlow`.
@@ -231,4 +235,4 @@ Hooks are browser-only. They use `useState`, `useEffect`, WebSocket subscription
 - Read `references/components.md` if you're looking for exported React components.
 - Read `../ts/skill/SKILL.md` if you need to understand the underlying state machine or need TypeScript-only (non-React) patterns.
 - Read `references/qrcode-binance-web.md` for QR code authentication flow implementation — state machine states, QRCodeStatus lifecycle, caching, component rendering patterns, and refresh handling for `binance-web` exchange.
-- Read `references/multistep-2fa.md` for multi-step 2FA implementation — handling GOOGLE, EMAIL, FACE, SMS, ROAMING_FIDO verification steps, mfa.verified as primary truth, FACE polling, ROAMING_FIDO polling, dryRun pattern, and confirmation flow.
+- Read `references/multistep-2fa.md` for multi-step 2FA implementation — handling GOOGLE, EMAIL, FACE, SMS, ROAMING_FIDO verification steps, mfa.verified as primary truth, FACE polling, ROAMING_FIDO polling, dryRun pattern, confirmation flow, and exchange verification models (incremental like binance-web vs batch like KuCoin).

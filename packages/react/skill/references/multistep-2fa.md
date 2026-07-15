@@ -1,12 +1,12 @@
 # Multi-Step 2FA Handling
 
-> Deep-dive reference for AI agents building multi-step 2FA verification UIs for exchanges like Binance.
+> Deep-dive reference for AI agents building multi-step 2FA verification UIs for exchanges like Binance and KuCoin.
 
 ---
 
 ## 1. Overview
 
-Exchanges like Binance require multiple verification factors before allowing a withdrawal. The SDK manages this as a multi-step 2FA flow with 5 possible step types.
+Exchanges like Binance and KuCoin require multiple verification factors before allowing a withdrawal. The SDK manages this as a multi-step 2FA flow with 5 possible step types.
 
 ### Step Types
 
@@ -20,17 +20,39 @@ Exchanges like Binance require multiple verification factors before allowing a w
 
 ### Key Principles
 
-1. **`mfa.verified` is the PRIMARY source of truth** — not `step.status`
+1. **`mfa.verified` is the PRIMARY source of truth** — not `step.status` (exception: KuCoin batch collection marks steps `success` locally, see below)
 2. **`relation`** determines logic: `'AND'` = all required steps, `'OR'` = any one step
-3. **`dryRun` pattern**: intermediate submissions validate codes without executing the withdrawal; only `confirmWithdrawal()` executes for real
+3. **`dryRun` pattern**: intermediate submissions validate codes without executing the withdrawal; only `confirmWithdrawal()` executes for real (incremental-verification exchanges only — KuCoin has NO intermediate submissions, see Exchange Verification Models)
 4. **`bizNo`** must be preserved across ALL multi-step 2FA API calls in the same flow
 5. **`WITHDRAWAL_DRY_RUN_COMPLETE`** is NOT an error — it's a success signal meaning all steps are verified
+6. **The verification model is exchange-specific**: incremental (binance-web, bybit-web — each code triggers a server round-trip) vs batch (KuCoin — all codes collected client-side, ONE server call at the end)
+
+### Exchange Verification Models
+
+The SDK distinguishes two server-side verification models (see `BATCH_2FA_VALIDATION_EXCHANGES` in `BluvoFlowClient.ts`, currently `['kucoin']`):
+
+| | Incremental (binance-web, bybit-web, default) | Batch (KuCoin, relation `'AND'`) |
+|---|---|---|
+| `submit2FAMultiStep()` per code | Re-executes withdrawal immediately (dry-run validation round-trip) | Collects code locally — **NO API call** |
+| State after submitting a non-final code | `withdraw:processing` → back to `withdraw:error2FAMultiStep` via `WITHDRAWAL_2FA_INCOMPLETE` | Stays `withdraw:error2FAMultiStep` (never leaves it) |
+| Return value for a non-final code | `{ success, result }` from the API | `{ success: true, result: { collected: true, awaitingSteps: [...] } }` |
+| Step marked verified by | Backend (`mfa.verified` updated per round-trip) | Client only (`step.status: 'success'` set locally; `mfa.verified` NOT updated) |
+| Withdrawal endpoint called | After every code | Exactly ONCE, automatically, when the last required code-based step gets its code |
+| Wrong code detected | Immediately after that code's submission | Only after the final batch call (`WITHDRAWAL_2FA_INVALID`) |
+
+**Why KuCoin is batch**: KuCoin's broker withdrawal API validates every factor in a single call. Re-executing with a partial factor set (e.g. only the Google code when EMAIL + GOOGLE are required with relation `AND`) makes KuCoin answer `200000` with no ids and the challenge dies server-side — historically surfacing as a fatal `KuCoin withdrawal failed: unexpected response shape`.
+
+**Mechanics (KuCoin, relation `'AND'`)**: each `submit2FAMultiStep(stepType, code)` dispatches `COLLECT_2FA_MULTI_STEP`, storing the code in `collectedCodes` (`GOOGLE` → `twofa`, `EMAIL` → `emailCode`, `SMS` → `smsCode`) and marking the step `status: 'success'` so the UI advances to the next step. Steps already verified via `mfa.verified[type] === true` count as satisfied and are skipped. FACE and ROAMING_FIDO steps are excluded from code collection (they verify via polling). Once no required code-based step is missing, the SDK sends `SUBMIT_2FA_MULTI_STEP` (→ `withdraw:processing`) and calls the withdrawal endpoint once with `bizNo` + all collected codes.
+
+**KuCoin with relation `'OR'`** behaves like the incremental model: a single submitted code triggers an immediate re-execution.
 
 ---
 
 ## 2. State Machine Flow
 
-### Complete Lifecycle
+### Complete Lifecycle (incremental exchanges — binance-web, bybit-web)
+
+> For KuCoin with relation `'AND'`, the "re-invoke per code" loop below does NOT happen — codes are collected locally and one execution fires at the end. See the KuCoin lifecycle further down.
 
 ```
 withdraw:processing (executeWithdrawal called)
@@ -66,11 +88,37 @@ withdraw:processing (re-invoke with bizNo + collected codes)│
             → mfaVerified[stepType] === false
 ```
 
+### KuCoin Lifecycle (batch factor validation, relation `'AND'`)
+
+```
+withdraw:processing (executeWithdrawal called)
+    │
+    ├─ WITHDRAWAL_2FA_REQUIRED_MULTI_STEPS (e.g. EMAIL + GOOGLE, relation AND)
+    ▼
+withdraw:error2FAMultiStep
+    │
+    ├─ submit2FAMultiStep('EMAIL', code)
+    │     → COLLECT_2FA_MULTI_STEP: code stored, EMAIL step status → 'success'
+    │       (local only), NO API call, state UNCHANGED
+    │       returns { collected: true, awaitingSteps: ['GOOGLE'] }
+    │
+    ├─ submit2FAMultiStep('GOOGLE', code)   ← last missing required code
+    │     → SUBMIT_2FA_MULTI_STEP
+    ▼
+withdraw:processing
+    │  ONE executeWithdrawal call: { bizNo, emailCode, twofa }
+    │
+    ├─ Success → withdraw:completed (via WebSocket)
+    ├─ WITHDRAWAL_2FA_INVALID (one of the codes was wrong)
+    │       → back to withdraw:error2FAMultiStep
+    └─ Error → withdraw:fatal
+```
+
 ### State Reference
 
 | State | Meaning | Trigger |
 |-------|---------|---------|
-| `withdraw:error2FAMultiStep` | Multi-step 2FA required, show verification UI | `WITHDRAWAL_2FA_REQUIRED_MULTI_STEPS` or `WITHDRAWAL_2FA_INCOMPLETE` |
+| `withdraw:error2FAMultiStep` | Multi-step 2FA required, show verification UI | `WITHDRAWAL_2FA_REQUIRED_MULTI_STEPS` or `WITHDRAWAL_2FA_INCOMPLETE` (also remains current state after a KuCoin `COLLECT_2FA_MULTI_STEP` code collection) |
 | `withdraw:processing` | Code submission or confirmation in progress | `submit2FAMultiStep()` or `confirmWithdrawal()` |
 | `withdraw:readyToConfirm` | All steps verified, awaiting final confirmation | `WITHDRAWAL_DRY_RUN_COMPLETE` |
 | `withdraw:completed` | Withdrawal successful | Successful `confirmWithdrawal()` |
@@ -315,6 +363,7 @@ When `isStepVerified(step, mfaVerified)` returns `true`:
 
 - Hide the code input
 - Show green checkmark + "Verified" text
+- **KuCoin caveat**: during batch collection (relation `'AND'`), a step with `status: 'success'` was marked locally — the code has NOT been validated by the backend yet. Prefer wording like "✓ Code entered" over "✓ Verified" for KuCoin steps until the final execution succeeds, since an invalid code will only surface then (as `WITHDRAWAL_2FA_INVALID`).
 
 ### Failed State
 
@@ -429,6 +478,8 @@ const shouldPollRoamingFido = !isRoamingFidoVerified && !!roamingFidoStepPending
 ---
 
 ## 7. The dryRun Pattern Explained
+
+> This section describes **incremental-verification exchanges** (binance-web, bybit-web). For KuCoin with relation `'AND'` there are no intermediate validation round-trips: codes are collected locally and a single non-dryRun execution fires once all required codes are present (see Exchange Verification Models in section 1).
 
 ### How It Works
 

@@ -32,6 +32,19 @@ export type QRCodeOptions = {
 	onQRCodeError?: (error: Error) => void;
 };
 
+export type PopupOptions = {
+	title?: string;
+	width?: number;
+	height?: number;
+	left?: number;
+	top?: number;
+	/** Inject the built-in spinner (and, on URL-fetch failure, the
+	 * built-in error page) into the popup. Defaults to true, or to
+	 * false when a preOpenedWindow is supplied — the caller usually
+	 * rendered its own loader there and the SDK must not overwrite it. */
+	showLoadingScreen?: boolean;
+};
+
 /**
  * A web-specific client for Bluvo SDK that provides browser-oriented functionality
  * for cryptocurrency exchange integrations and OAuth2 authentication flows.
@@ -162,18 +175,24 @@ export class BluvoWebClient {
 				// onComplete?: (walletId: string) => void;
 				// onError?: (error: any) => void;
 			},
-			popupOptions?: {
-				title?: string;
-				width?: number;
-				height?: number;
-				left?: number;
-				top?: number;
+			popupOptions?: PopupOptions & {
+				/**
+				 * A popup the caller already opened synchronously inside the user
+				 * gesture. Safari/iOS block window.open() once the gesture's
+				 * activation is gone (i.e. after any await), so a browser caller
+				 * should open about:blank on click and pass it here; the SDK
+				 * navigates it instead of opening its own.
+				 */
+				preOpenedWindow?: Window;
 			},
 			windowRef?: Window | undefined,
 		) {
+			const preOpenedWindow = popupOptions?.preOpenedWindow;
 
-
-			// Now fetch the OAuth URL asynchronously
+			// Fetch the OAuth URL first (original ordering — identical behavior
+			// for callers that don't supply a preOpenedWindow). Once passed in,
+			// a preOpenedWindow is owned by this method: close it if the fetch
+			// throws so the caller isn't left with a stray popup.
 			const {
 				url,
 				data,
@@ -182,13 +201,24 @@ export class BluvoWebClient {
 			} = await this.getURL(exchange, {
 				walletId: options.walletId,
 				idem: options.idem,
+			}).catch((e) => {
+				try {
+					preOpenedWindow?.close();
+				} catch {
+					// Suppress close errors
+				}
+				throw e;
 			});
 
-			if(data?.isQRCode) {
-				// WE DONT NEED TO OPEN A WINDOW, WE JUST NEED TO FETCH GET THE URL AND LISTEN FOR QRCODE flow via websocket
+			if (data?.isQRCode) {
+				// QR flow needs no popup. Close a caller-supplied one if present.
+				try {
+					preOpenedWindow?.close();
+				} catch {
+					// Suppress close errors
+				}
 				return () => {};
 			}
-
 
 			if (typeof windowRef === "undefined") {
 				if (typeof window === "undefined") {
@@ -224,8 +254,27 @@ export class BluvoWebClient {
 				top = screenTop + (screenHeight - windowHeight) / 2;
 			}
 
-			// Create loading HTML to show while fetching OAuth URL
-			const loadingHTML = `<!DOCTYPE html>
+			// Prefer a window the caller opened synchronously in its click gesture.
+			// Our own window.open() below runs after async work (the getURL above
+			// and the caller's awaits), which Safari/iOS block once the gesture's
+			// activation is gone. about:blank is reliable across browsers.
+			const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},status=yes,scrollbars=yes,resizable=yes`;
+			const newWindow = preOpenedWindow ?? windowRef.open('about:blank', windowTitle, windowFeatures);
+
+			if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
+				console.error(
+					"Failed to open OAuth2 window. Please allow pop-ups for this site.",
+				);
+				return () => {}; // Return empty cleanup function
+			}
+
+			// Inject the built-in spinner unless the caller opts out. Defaults to
+			// on for SDK-opened popups (existing behavior) and off when the caller
+			// supplied a preOpenedWindow — it usually rendered its own loader
+			// there, which document.write would wipe.
+			const showLoadingScreen = popupOptions?.showLoadingScreen ?? !preOpenedWindow;
+			if (showLoadingScreen) {
+				const loadingHTML = `<!DOCTYPE html>
 <html>
 <head>
     <title>${windowTitle}</title>
@@ -257,31 +306,19 @@ export class BluvoWebClient {
 </body>
 </html>`;
 
-			// Open window immediately with about:blank to prevent popup blocking
-			// Using about:blank is more reliable than data URLs across different browsers
-			const windowFeatures = `width=${windowWidth},height=${windowHeight},left=${left},top=${top},status=yes,scrollbars=yes,resizable=yes`;
-			const newWindow = windowRef.open('about:blank', windowTitle, windowFeatures);
-
-			if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
-				console.error(
-					"Failed to open OAuth2 window. Please allow pop-ups for this site.",
-				);
-				return () => {}; // Return empty cleanup function
-			}
-
-			// Write loading HTML immediately
-			try {
-				newWindow.document.open();
-				newWindow.document.write(loadingHTML);
-				newWindow.document.close();
-			} catch (e) {
-				console.error("Failed to write loading HTML to popup:", e);
 				try {
-					newWindow.close();
-				} catch (closeError) {
-					// Suppress close errors
+					newWindow.document.open();
+					newWindow.document.write(loadingHTML);
+					newWindow.document.close();
+				} catch (e) {
+					console.error("Failed to write loading HTML to popup:", e);
+					try {
+						newWindow.close();
+					} catch (closeError) {
+						// Suppress close errors
+					}
+					return () => {};
 				}
-				return () => {};
 			}
 
 			newWindow.focus();
@@ -295,8 +332,9 @@ export class BluvoWebClient {
 			if (!success || !url) {
 				console.error("Failed to generate OAuth2 URL:", error);
 
-				// Show error state in the popup window
-				const errorHTML = `<!DOCTYPE html>
+				if (showLoadingScreen) {
+					// Show error state in the popup window
+					const errorHTML = `<!DOCTYPE html>
 <html>
 <head>
     <title>${windowTitle} - Error</title>
@@ -371,13 +409,23 @@ export class BluvoWebClient {
 </body>
 </html>`;
 
-				try {
-					newWindow.document.open();
-					newWindow.document.write(errorHTML);
-					newWindow.document.close();
-				} catch (e) {
-					// If we can't write to the document (cross-origin issues), just close it
-					console.warn("Could not display error in popup window:", e);
+					try {
+						newWindow.document.open();
+						newWindow.document.write(errorHTML);
+						newWindow.document.close();
+					} catch (e) {
+						// If we can't write to the document (cross-origin issues), just close it
+						console.warn("Could not display error in popup window:", e);
+						try {
+							newWindow.close();
+						} catch (closeError) {
+							// Suppress close errors
+						}
+					}
+				} else {
+					// The caller owns this window's UI: don't overwrite it with the
+					// SDK error page — close the popup so the failure doesn't leave
+					// the caller's loader spinning forever.
 					try {
 						newWindow.close();
 					} catch (closeError) {

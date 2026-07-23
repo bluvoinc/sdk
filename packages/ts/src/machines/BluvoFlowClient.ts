@@ -6,7 +6,7 @@ import type {
 	WallettradetradableassetstradableassetsResponse,
 } from "../../generated";
 import type { BluvoClient } from "../BluvoClient";
-import { BluvoWebClient } from "../BluvoWebClient";
+import { BluvoWebClient, type PopupOptions } from "../BluvoWebClient";
 import {
 	type BluvoError,
 	ERROR_CODES,
@@ -105,13 +105,15 @@ export interface BluvoFlowClientOptions {
 export interface WithdrawalFlowOptions {
 	exchange: string;
 	walletId: string;
-	popupOptions?: {
-		title?: string;
-		width?: number;
-		height?: number;
-		left?: number;
-		top?: number;
-	};
+	popupOptions?: PopupOptions;
+	/**
+	 * A popup the caller already opened synchronously inside the user gesture.
+	 * Safari/iOS block window.open() once the gesture's activation is gone (i.e.
+	 * after the awaits this method runs before opening), so a browser caller
+	 * should open about:blank on click and pass it here; the SDK navigates it
+	 * instead of opening its own. Only needed for the OAuth (fresh-connect) path.
+	 */
+	preOpenedWindow?: Window;
 }
 
 export interface ResumeWithdrawalFlowOptions {
@@ -324,11 +326,34 @@ export class BluvoFlowClient {
 	}
 
 	async startWithdrawalFlow(flowOptions: WithdrawalFlowOptions) {
+		try {
+			return await this.startWithdrawalFlowInner(flowOptions);
+		} catch (e) {
+			// A throw anywhere below (e.g. getWalletByIdFn or listen rejecting)
+			// happens before openWindow takes ownership of a caller-supplied
+			// popup — close it so it doesn't linger as a stray blank window.
+			this.closePreOpenedWindow(flowOptions.preOpenedWindow);
+			throw e;
+		}
+	}
+
+	/** Close a caller-opened popup (preOpenedWindow) on paths that won't use
+	 * it — resume, QR, or errors — to avoid a stray blank window. */
+	private closePreOpenedWindow(win?: Window) {
+		try {
+			win?.close();
+		} catch {
+			// Suppress close errors
+		}
+	}
+
+	private async startWithdrawalFlowInner(flowOptions: WithdrawalFlowOptions) {
 		// Check if wallet already exists
 		const { data, error, success } = await this.options.getWalletByIdFn(flowOptions.walletId);
 
 		if (success && data?.exchange) {
 			// Wallet exists, redirect to resumeWithdrawalFlow
+			this.closePreOpenedWindow(flowOptions.preOpenedWindow);
 			return this.resumeWithdrawalFlow({
 				exchange: data.exchange,
 				walletId: flowOptions.walletId,
@@ -341,6 +366,7 @@ export class BluvoFlowClient {
 
 		// Check if this exchange uses QR code authentication
 		if (QR_CODE_EXCHANGES.includes(flowOptions.exchange.toLowerCase())) {
+			this.closePreOpenedWindow(flowOptions.preOpenedWindow);
 			return this.startQRCodeFlow(flowOptions);
 		}
 
@@ -445,7 +471,10 @@ export class BluvoFlowClient {
 					// }
 				},
 			},
-			flowOptions.popupOptions,
+			{
+				...flowOptions.popupOptions,
+				preOpenedWindow: flowOptions.preOpenedWindow,
+			},
 		);
 
 		this.flowMachine.send({ type: "OAUTH_WINDOW_OPENED" });

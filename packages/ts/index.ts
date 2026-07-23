@@ -3,7 +3,7 @@ import { BluvoWebClient } from "./src/BluvoWebClient";
 
 export * from "./generated";
 export { BluvoClient } from "./src/BluvoClient";
-export { BluvoWebClient, type QRCodeOptions } from "./src/BluvoWebClient";
+export { BluvoWebClient, type QRCodeOptions, type PopupOptions } from "./src/BluvoWebClient";
 // Workflow Types
 export {
 	WorkflowTypes,
